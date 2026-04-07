@@ -1,20 +1,17 @@
 @import "tailwindcss";
 
 :root {
-  --background: #FFFFFF;
-  --foreground: #333333;
-  --accent-gold: #d4af37;
-}
-
-.dark {
-  --background: #000000;
-  --foreground: #FFFFFF;
+  --background: #0B2F2A;
+  --foreground: #BF9B63;
+  --accent-gold: #BF9B63;
+  --primary-green: #0B2F2A;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-accent-gold: var(--accent-gold);
+  --color-primary-green: var(--primary-green);
   --font-serif: var(--font-playfair);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
@@ -31,13 +28,13 @@ html, body {
 
 /* More intricate Tilet Pattern Border */
 .tilet-border {
-  border-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23d4af37' stroke-width='2'%3E%3Cpath d='M30 0 L60 30 L30 60 L0 30 Z'/%3E%3Cpath d='M30 10 L50 30 L30 50 L10 30 Z'/%3E%3Crect x='25' y='25' width='10' height='10'/%3E%3C/g%3E%3C/svg%3E") 30 repeat;
+  border-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' stroke='%23BF9B63' stroke-width='2'%3E%3Cpath d='M30 0 L60 30 L30 60 L0 30 Z'/%3E%3Cpath d='M30 10 L50 30 L30 50 L10 30 Z'/%3E%3Crect x='25' y='25' width='10' height='10'/%3E%3C/g%3E%3C/svg%3E") 30 repeat;
   border-width: 6px;
   border-style: solid;
 }
 
 .tilet-pattern {
-  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 0 L45 35 L80 40 L45 45 L40 80 L35 45 L0 40 L35 35 Z' fill='%23d4af37' fill-opacity='0.03'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 0 L45 35 L80 40 L45 45 L40 80 L35 45 L0 40 L35 35 Z' fill='%23BF9B63' fill-opacity='0.03'/%3E%3C/svg%3E");
 }
 
 /* Entrance Animations */
@@ -142,7 +139,7 @@ html, body {
   appearance: none;
   height: 4px;
   border-radius: 2px;
-  background: linear-gradient(to right, #D4AF37, #D4AF37 var(--progress, 30%), rgba(212, 175, 55, 0.15) var(--progress, 30%));
+  background: linear-gradient(to right, #BF9B63, #BF9B63 var(--progress, 30%), rgba(191, 155, 99, 0.15) var(--progress, 30%));
   outline: none;
   cursor: pointer;
 }
@@ -150,49 +147,46 @@ html, body {
 .price-range-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
-  width: 20px;
-  height: 20px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background: #D4AF37;
-  border: 3px solid #000;
+  background: #BF9B63;
+  border: 2px solid var(--background);
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4), 0 0 0 4px rgba(212, 175, 55, 0.1);
+  box-shadow: 0 0 10px rgba(191, 155, 99, 0.4);
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 .price-range-slider::-webkit-slider-thumb:hover {
   transform: scale(1.15);
-  box-shadow: 0 2px 12px rgba(212, 175, 55, 0.6), 0 0 0 6px rgba(212, 175, 55, 0.15);
+  box-shadow: 0 2px 12px rgba(191, 155, 99, 0.6), 0 0 0 6px rgba(191, 155, 99, 0.15);
 }
 
-.price-range-slider::-webkit-slider-thumb:active {
-  transform: scale(1.05);
+.price-range-slider:active::-webkit-slider-thumb {
+  transform: scale(1.2);
+  background: rgba(191, 155, 99, 0.15);
 }
 
 .price-range-slider::-moz-range-thumb {
-  width: 20px;
-  height: 20px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  background: #D4AF37;
-  border: 3px solid #000;
+  background: #BF9B63;
+  border: 2px solid var(--background);
   cursor: pointer;
-  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.4);
+  box-shadow: 0 0 10px rgba(191, 155, 99, 0.4);
 }
 
 .price-range-slider::-moz-range-track {
   height: 4px;
   border-radius: 2px;
-  background: rgba(212, 175, 55, 0.15);
+  background: rgba(191, 155, 99, 0.15);
 }
 
-/* Light mode slider thumb border */
-.light .price-range-slider::-webkit-slider-thumb {
-  border-color: #fff;
-  box-shadow: 0 2px 8px rgba(212, 175, 55, 0.3), 0 1px 4px rgba(0, 0, 0, 0.1);
-}
-
-.light .price-range-slider::-moz-range-thumb {
-  border-color: #fff;
+/* Tooltip style for Category List */
+.category-tooltip {
+  background: #BF9B63;
+  box-shadow: 0 2px 8px rgba(191, 155, 99, 0.3), 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Category Scroll List - smooth touch scrolling */

@@ -113,7 +113,7 @@ const SafeImage = ({ src, alt, fill, ...props }: any) => {
     setImgSrc(src);
   }, [src]);
 
-  if (!imgSrc) return <div className="w-full h-full bg-[#D4AF37]/5 animate-pulse" />;
+  if (!imgSrc) return <div className="w-full h-full bg-[#BF9B63]/5 animate-pulse" />;
 
   return (
     <img 
@@ -218,83 +218,45 @@ export default function Home() {
 
   const t = translations[lang];
 
-  // Theme variables derived logically
-  const tm = isLightMode ? {
-    bgApp: "bg-[#F9F9F9]",
-    textApp: "text-[#1A1A1A]",
-    bgHeader: "bg-white/90",
-    borderMain: "border-[#D4AF37]/30",
-    textAcc: "text-[#D4AF37]",
-    textMuted: "text-[#4A4A4A]/60",
-    searchBg: "bg-white",
-    searchIcon: "text-[#D4AF37]",
-    switchBtn: "bg-white border-[#D4AF37]/20 text-[#D4AF37]",
-    heroGradient: "from-white to-[#F9F9F9]",
-    catBgActive: "bg-[#D4AF37] text-white shadow-md",
-    catBgInactive: "bg-white text-gray-400 border-gray-200 hover:border-[#D4AF37]",
-    watermark: "text-[#D4AF37]/10",
-    cardBg: "bg-white border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] hover:border-[#D4AF37]/40",
-    cartModalTotal: "text-[#D4AF37]",
-    // Light mode food card specifics
-    cardFrameBg: "bg-white",
-    cardFrameBorder: "border-[#D4AF37]/15",
-    cardFrameShadow: "shadow-[0_4px_24px_rgba(0,0,0,0.06),0_1px_4px_rgba(212,175,55,0.08)]",
-    cardFrameHoverBorder: "hover:border-[#D4AF37]/40",
-    cardFrameHoverShadow: "hover:shadow-[0_12px_40px_rgba(212,175,55,0.12),0_4px_12px_rgba(0,0,0,0.06)]",
-    cardTitleColor: "text-[#1A1A1A]",
-    cardDescColor: "text-[#4A4A4A]",
-    cardPriceColor: "text-[#D4AF37]",
-    cardDivider: "border-[#D4AF37]/10",
-    cardTitleSecondary: "text-[#1A1A1A] group-hover:text-[#D4AF37] font-bold",
-    cardDesc: "text-[#4A4A4A]",
-    textDesc: "text-[#4A4A4A]",
-    cardTitle: "text-[#1A1A1A]",
-    borderCard: "border-gray-100 hover:border-[#D4AF37]/30",
-    smallBtnBg: "bg-gray-50 border-gray-100 text-[#D4AF37] hover:bg-gray-100",
-    addBtnActive: "border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-white active:scale-95 shadow-sm",
-    addBtnDisabled: "border border-gray-200 text-gray-300 bg-gray-50 cursor-not-allowed",
-    modalOverlay: "bg-black/60",
-    modalBg: "bg-white border border-[#D4AF37]/30 shadow-2xl",
-    modalText: "text-[#1A1A1A]",
-    footerBg: "bg-[#F5F5F5]"
-  } : {
-    bgApp: "bg-[#1A1A1A]",
-    textApp: "text-white",
-    bgHeader: "bg-[#1A1A1A]/95",
-    borderMain: "border-[#D4AF37]/30",
-    textAcc: "text-[#D4AF37]",
-    textMuted: "text-white/40",
-    searchBg: "bg-black",
-    searchIcon: "text-[#D4AF37]/80 group-focus-within:text-[#D4AF37]",
-    switchBtn: "bg-[#0A0A0A] border-[#D4AF37]/30 text-[#D4AF37]",
-    heroGradient: "from-[#0A0A0A] to-[#0A0A0A]",
-    catBgActive: "bg-[#D4AF37] text-black shadow-none",
-    catBgInactive: "bg-[#0A0A0A] text-[#D4AF37]/70 border-[#D4AF37]/20 hover:border-[#D4AF37]",
-    watermark: "text-[#D4AF37]/5",
-    cardBg: "bg-[#0A0A0A] bg-none border-[#D4AF37]/20 shadow-none hover:border-[#D4AF37]/60",
-    cardTitle: "text-[#D4AF37]",
-    cardTitleSecondary: "text-white group-hover:text-[#D4AF37]",
-    cardDesc: "text-white/70",
-    textDesc: "text-white/70",
-    borderCard: "border-[#D4AF37]/20 hover:border-[#D4AF37]",
-    smallBtnBg: "bg-[#000000] border-[#D4AF37]/20 text-[#D4AF37] hover:bg-black/80",
-    addBtnActive: "border border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black active:scale-95 shadow-none",
-    addBtnDisabled: "border border-white/10 text-white/20 bg-black/40 cursor-not-allowed",
-    modalOverlay: "bg-black/98",
-    modalBg: "bg-[#000000] border border-[#D4AF37]/30 shadow-none",
-    modalText: "text-white",
-    footerBg: "bg-[#1A1A1A]",
-    cartModalTotal: "text-[#D4AF37]",
-    // Dark mode food card specifics
-    cardFrameBg: "bg-[#1A1A1A]",
-    cardFrameBorder: "border-[#D4AF37]/20",
-    cardFrameShadow: "shadow-[0_25px_60px_rgba(0,0,0,1)]",
-    cardFrameHoverBorder: "hover:border-[#D4AF37]/40",
-    cardFrameHoverShadow: "",
-    cardTitleColor: "text-[#D4AF37]",
-    cardDescColor: "text-white/60",
-    cardPriceColor: "text-[#D4AF37]",
-    cardDivider: "border-[#D4AF37]/10"
+  // Theme variables derived logically - Strict Two-Color Glassmorphism
+  const tm = {
+    bgApp: "bg-[#0B2F2A]",
+    textApp: "text-[#BF9B63]",
+    bgHeader: "bg-[#0B2F2A]/90",
+    borderMain: "border-white/10",
+    textAcc: "text-[#BF9B63]",
+    textMuted: "text-[#BF9B63]/60",
+    searchBg: "bg-[#0B2F2A]/80",
+    searchIcon: "text-[#BF9B63]",
+    switchBtn: "bg-[#0B2F2A] border-white/10 text-[#BF9B63]",
+    heroGradient: "from-[#0B2F2A] to-[#0B2F2A]",
+    catBgActive: "bg-[#BF9B63] text-[#0B2F2A] shadow-lg",
+    catBgInactive: "bg-[#0B2F2A]/80 text-[#BF9B63]/70 border-white/10 hover:border-[#BF9B63]/40",
+    watermark: "text-[#BF9B63]/5",
+    cardBg: "bg-[#0B2F2A]/80 backdrop-blur-md border-white/10 shadow-xl hover:border-white/20",
+    cardTitle: "text-[#BF9B63]",
+    cardTitleSecondary: "text-[#BF9B63] group-hover:opacity-80",
+    cardDesc: "text-[#BF9B63]/70",
+    textDesc: "text-[#BF9B63]/70",
+    borderCard: "border-white/10 hover:border-white/20",
+    smallBtnBg: "bg-[#0B2F2A] border-white/10 text-[#BF9B63] hover:bg-[#0B2F2A]/60",
+    addBtnActive: "border border-[#BF9B63] text-[#BF9B63] hover:bg-[#BF9B63] hover:text-[#0B2F2A] active:scale-95 shadow-lg",
+    addBtnDisabled: "border border-white/5 text-[#BF9B63]/20 bg-[#0B2F2A]/40 cursor-not-allowed",
+    modalOverlay: "bg-[#0B2F2A]/95 backdrop-blur-sm",
+    modalBg: "bg-[#0B2F2A]/90 backdrop-blur-md border border-white/10 shadow-2xl",
+    modalText: "text-[#BF9B63]",
+    footerBg: "bg-[#0B2F2A]",
+    cartModalTotal: "text-[#BF9B63]",
+    // Food card specifics
+    cardFrameBg: "bg-[#0B2F2A]/85 backdrop-blur-md",
+    cardFrameBorder: "border-white/10",
+    cardFrameShadow: "shadow-[0_20px_50px_rgba(0,0,0,0.5)]",
+    cardFrameHoverBorder: "hover:border-white/20",
+    cardFrameHoverShadow: "hover:shadow-[0_25px_60px_rgba(0,0,0,0.6)]",
+    cardTitleColor: "text-[#BF9B63]",
+    cardDescColor: "text-[#BF9B63]/70",
+    cardPriceColor: "text-[#BF9B63]",
+    cardDivider: "border-white/10"
   };
 
   const addToCart = (id: number, e?: React.MouseEvent) => {
@@ -454,20 +416,20 @@ export default function Home() {
 
       {/* Layer 1: Main Header (70px) */}
       <header 
-        className={`!sticky !top-0 !z-[1000] ${tm.bgHeader} ${isLightMode ? 'backdrop-blur-xl' : ''} border-b ${tm.borderMain} px-2 md:px-12 w-full !h-[70px] flex items-center transition-colors duration-500`}
+        className={`!sticky !top-0 !z-[1000] ${tm.bgHeader} backdrop-blur-md border-b ${tm.borderMain} px-2 md:px-12 w-full !h-[70px] flex items-center transition-colors duration-500`}
         style={{ position: 'sticky', top: '0px', zIndex: 1000, height: '70px' }}
       >
         <div className="max-w-7xl mx-auto flex flex-row items-center justify-between gap-3 md:gap-8 w-full py-2">
           {/* Logo and Title Group */}
           <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
             <div 
-              className="w-9 h-9 md:w-16 md:h-16 relative flex-shrink-0 border border-[#D4AF37]/30 rounded-lg overflow-hidden bg-black shadow-lg cursor-pointer"
+              className="w-9 h-9 md:w-16 md:h-16 relative flex-shrink-0 border border-[#BF9B63]/30 rounded-lg overflow-hidden bg-black shadow-lg cursor-pointer"
               onClick={handleLogoClick}
             >
               <img src={siteContent.logo || "/logo.png"} alt="Logo" className="w-full h-full object-cover pointer-events-none select-none" />
             </div>
             <div className="flex flex-col justify-center">
-              <h1 className="text-[10px] md:text-3xl font-serif text-[#D4AF37] tracking-tighter leading-none font-bold uppercase">{siteContent.hotelName}</h1>
+              <h1 className="text-[10px] md:text-3xl font-serif text-[#BF9B63] tracking-tighter leading-none font-bold uppercase">{siteContent.hotelName}</h1>
               <p className={`text-[5px] md:text-[10px] ${tm.textMuted} uppercase tracking-[0.2em] mt-0.5 whitespace-nowrap font-medium`}>{siteContent.hotelSlogan}</p>
             </div>
           </div>
@@ -480,7 +442,7 @@ export default function Home() {
                 placeholder={t.search} 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full ${tm.searchBg} border ${tm.borderMain} rounded-full compact-input text-[10px] md:text-base py-1 px-6 md:py-2.5 md:px-10 focus:outline-none focus:border-[#D4AF37] transition-all`}
+                className={`w-full ${tm.searchBg} border ${tm.borderMain} rounded-full compact-input text-[10px] md:text-base py-1 px-6 md:py-2.5 md:px-10 focus:outline-none focus:border-[#BF9B63] transition-all`}
               />
               <svg className={`absolute left-2 md:left-3.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 md:w-4 md:h-4 ${tm.searchIcon} transition-colors`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -489,7 +451,7 @@ export default function Home() {
             
             {/* Price Filter - Desktop: inline slider, Mobile: gold icon + dropdown */}
             <div className={`hidden lg:flex items-center gap-2 ${tm.searchBg} border ${tm.borderMain} rounded-full px-3 py-1 flex-shrink-0 h-9 transition-colors`}>
-              <span className="text-[10px] text-[#D4AF37] font-black">{priceLimit} ETB</span>
+              <span className="text-[10px] text-[#BF9B63] font-black">{priceLimit} ETB</span>
               <input 
                 type="range" 
                 min={Number(minPrice) || 0} 
@@ -507,7 +469,7 @@ export default function Home() {
                 onClick={() => setShowPriceFilter(!showPriceFilter)}
                 className={`px-3 md:px-4 h-7 md:h-9 rounded-full border flex items-center justify-center transition-all active:scale-95 flex-shrink-0 ${
                   showPriceFilter
-                    ? 'bg-[#D4AF37] border-[#D4AF37] text-black shadow-[0_0_16px_rgba(212,175,55,0.5)]'
+                    ? 'bg-[#BF9B63] border-[#BF9B63] text-[#0B2F2A] shadow-[0_0_16px_rgba(191,155,99,0.5)]'
                     : `${tm.switchBtn} ${tm.borderMain}`
                 }`}
                 aria-label="Price filter"
@@ -523,20 +485,18 @@ export default function Home() {
                     className="fixed inset-0 z-[1050] bg-transparent" 
                     onClick={() => setShowPriceFilter(false)} 
                   />
-                  <div className={`fixed left-1/2 -translate-x-1/2 top-[85px] z-[1060] w-[92%] max-w-md rounded-3xl border border-[#D4AF37]/40 ${
-                    isLightMode 
-                      ? 'bg-white shadow-[0_20px_50px_rgba(0,0,0,0.15)]' 
-                      : 'bg-[#0A0A0A] shadow-[0_20px_60px_rgba(0,0,0,0.9)]'
+                  <div className={`fixed left-1/2 -translate-x-1/2 top-[85px] z-[1060] w-[92%] max-w-md rounded-3xl border border-[#BF9B63]/40 ${
+                    tm.modalBg
                   } p-6 md:p-8 animate-price-filter-in`}>
                     {/* Centered Gold notch arrow */}
-                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rotate-45 border-l border-t border-[#D4AF37]/40" style={{ background: isLightMode ? '#FFFFFF' : '#0A0A0A' }} />
+                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rotate-45 border-l border-t border-[#BF9B63]/40 bg-[#0B2F2A]" />
                     
                     <div className="flex items-center justify-between mb-6">
                       <div className="flex flex-col">
-                        <span className={`text-[10px] uppercase tracking-[0.4em] font-black ${isLightMode ? 'text-gray-400' : 'text-white/40'}`}>Price Range</span>
-                        <span className={`text-[8px] uppercase tracking-[0.2em] font-serif italic ${isLightMode ? 'text-gray-300' : 'text-white/20'}`}>Live Filtering</span>
+                        <span className={`text-[10px] uppercase tracking-[0.4em] font-black text-[#BF9B63]/40`}>Price Range</span>
+                        <span className={`text-[8px] uppercase tracking-[0.2em] font-serif italic text-[#BF9B63]/20`}>Live Filtering</span>
                       </div>
-                      <span className="text-2xl font-black text-[#D4AF37] font-serif">{priceLimit} <small className="text-[10px] tracking-widest">ETB</small></span>
+                      <span className="text-2xl font-black text-[#BF9B63] font-serif">{priceLimit} <small className="text-[10px] tracking-widest">ETB</small></span>
                     </div>
                     
                     {/* Sleek Range Slider */}
@@ -551,8 +511,8 @@ export default function Home() {
                         style={{ '--progress': `${(Number(maxPrice) || 1000) > (Number(minPrice) || 0) ? ((Number(priceLimit) || 0) - (Number(minPrice) || 0)) / ((Number(maxPrice) || 1000) - (Number(minPrice) || 0)) * 100 : 0}%` } as React.CSSProperties}
                       />
                       <div className="flex justify-between mt-4">
-                        <span className={`text-[10px] font-bold tracking-tighter ${isLightMode ? 'text-gray-400' : 'text-white/30'}`}>{minPrice} ETB</span>
-                        <span className={`text-[10px] font-bold tracking-tighter ${isLightMode ? 'text-gray-400' : 'text-white/30'}`}>{maxPrice} ETB</span>
+                        <span className={`text-[10px] font-bold tracking-tighter text-[#BF9B63]/30`}>{minPrice} ETB</span>
+                        <span className={`text-[10px] font-bold tracking-tighter text-[#BF9B63]/30`}>{maxPrice} ETB</span>
                       </div>
                     </div>
                   </div>
@@ -564,14 +524,14 @@ export default function Home() {
             <div className="flex items-center gap-1.5 md:gap-4 flex-shrink-0">
               <button 
                 onClick={() => setLang(lang === 'en' ? 'am' : 'en')}
-                className={`w-7 h-7 md:w-11 md:h-11 rounded-full border ${tm.borderMain} flex items-center justify-center text-[8px] md:text-xs font-bold transition-all hover:bg-[#D4AF37] hover:text-white active:scale-95 ${tm.switchBtn}`}
+                className={`w-7 h-7 md:w-11 md:h-11 rounded-full border ${tm.borderMain} flex items-center justify-center text-[8px] md:text-xs font-bold transition-all hover:bg-[#BF9B63] hover:text-[#0B2F2A] active:scale-95 ${tm.switchBtn}`}
               >
                 {lang === 'en' ? 'አማ' : 'EN'}
               </button>
               
               <button 
                 onClick={() => setIsLightMode(!isLightMode)}
-                className={`w-7 h-7 md:w-11 md:h-11 rounded-full border ${tm.borderMain} flex items-center justify-center transition-all hover:bg-[#D4AF37] hover:text-white active:scale-95 ${tm.switchBtn}`}
+                className={`w-7 h-7 md:w-11 md:h-11 rounded-full border ${tm.borderMain} flex items-center justify-center transition-all hover:bg-[#BF9B63] hover:text-[#0B2F2A] active:scale-95 ${tm.switchBtn}`}
               >
                 {isLightMode ? <Moon className="w-3.5 h-3.5 md:w-5 md:h-5" /> : <Sun className="w-3.5 h-3.5 md:w-5 md:h-5" />}
               </button>
@@ -585,8 +545,8 @@ export default function Home() {
         className={`${tm.bgHeader} backdrop-blur-md border-b ${tm.borderMain} overflow-hidden w-full !h-[180px] relative transition-colors duration-500 specials-scroll-container`}
         style={{ height: '180px' }}
       >
-        <div className={`absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-background/80 ${isLightMode ? 'backdrop-blur-sm' : ''} px-4 py-2 rounded-r-xl border-y border-r border-[#D4AF37]/30 ${isLightMode ? 'shadow-2xl' : 'shadow-none'} hidden md:block`}>
-          <span className="text-[10px] md:text-xs font-serif text-[#D4AF37] uppercase tracking-[0.4em] whitespace-nowrap">{t.specials}</span>
+        <div className={`absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-[#0B2F2A]/80 backdrop-blur-sm px-4 py-2 rounded-r-xl border-y border-r border-[#BF9B63]/30 shadow-none hidden md:block`}>
+          <span className="text-[10px] md:text-xs font-serif text-[#BF9B63] uppercase tracking-[0.4em] whitespace-nowrap">{t.specials}</span>
         </div>
         <div 
           className="animate-infinite-scroll flex h-full gap-4 px-4 py-4 items-center relative z-10 pointer-events-auto"
@@ -597,7 +557,7 @@ export default function Home() {
           {[...specials, ...specials, ...specials].map((item, idx) => (
             <div 
               key={`${item.id}-${idx}`} 
-              className="relative h-[148px] w-[195px] md:w-[325px] flex-shrink-0 group overflow-hidden rounded-xl border border-[#D4AF37]/10"
+              className="relative h-[148px] w-[195px] md:w-[325px] flex-shrink-0 group overflow-hidden rounded-xl border border-[#BF9B63]/10"
             >
               {item.image ? (
                 <SafeImage 
@@ -607,28 +567,28 @@ export default function Home() {
                   className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" 
                 />
               ) : (
-                <div className={`absolute inset-0 w-full h-full ${isLightMode ? 'bg-gradient-to-br from-[#FFFBEB] to-[#F9F9F9]' : 'bg-[#000000]'} flex items-center justify-center`}>
+                <div className={`absolute inset-0 w-full h-full bg-[#0B2F2A] flex items-center justify-center`}>
                   <span className={`${tm.textAcc} font-serif text-4xl opacity-40`}>{(lang === 'en' ? item.name_en : item.name_am).charAt(0)}</span>
                 </div>
               )}
               {/* No darkening overlay for 100% clarity */}
               <div className="absolute bottom-2 left-4 z-10">
-                <h3 className={`font-serif text-sm md:text-xl tracking-wide leading-tight transition-colors text-[#D4AF37] drop-shadow-md`}>{lang === 'en' ? item.name_en : item.name_am}</h3>
+                <h3 className={`font-serif text-sm md:text-xl tracking-wide leading-tight transition-colors text-[#BF9B63] drop-shadow-md`}>{lang === 'en' ? item.name_en : item.name_am}</h3>
                 <div className="flex items-center gap-4 mt-1">
-                  <span className="text-[#D4AF37] font-black text-xs md:text-lg">{item.price} ETB</span>
+                  <span className="text-[#BF9B63] font-black text-xs md:text-lg">{item.price} ETB</span>
                   <div className="flex items-center gap-2">
                     {cart[item.id] > 0 ? (
-                      <div className={`flex items-center gap-2 ${isLightMode ? 'bg-zinc-950/80 backdrop-blur-md' : 'bg-[#000000]'} rounded-full px-1.5 py-0.5 border border-[#D4AF37]/30`}>
+                      <div className={`flex items-center gap-2 bg-[#0B2F2A]/80 backdrop-blur-md rounded-full px-1.5 py-0.5 border border-[#BF9B63]/30`}>
                         <button 
                           onClick={(e) => { e.stopPropagation(); removeFromCart(item.id); }}
-                          className={`w-5 h-5 md:w-6 md:h-6 flex items-center justify-center ${isLightMode ? 'bg-zinc-800 text-[#D4AF37]' : 'bg-black text-[#D4AF37] border border-[#D4AF37]/20'} rounded-full text-xs hover:bg-[#D4AF37]/20 transition-all`}
+                          className={`w-5 h-5 md:w-6 md:h-6 flex items-center justify-center bg-[#0B2F2A] text-[#BF9B63] border border-[#BF9B63]/20 rounded-full text-xs hover:bg-[#BF9B63]/20 transition-all`}
                         >
                           -
                         </button>
-                        <span className="text-[10px] md:text-xs font-black text-[#D4AF37] px-1">{cart[item.id]}</span>
+                        <span className="text-[10px] md:text-xs font-black text-[#BF9B63] px-1">{cart[item.id]}</span>
                         <button 
                           onClick={(e) => { e.stopPropagation(); addToCart(item.id); }}
-                          className={`w-5 h-5 md:w-6 md:h-6 flex items-center justify-center bg-[#D4AF37] ${isLightMode ? 'text-zinc-950' : 'text-black'} rounded-full text-xs font-black hover:scale-110 transition-transform shadow-none border border-[#D4AF37]`}
+                          className={`w-5 h-5 md:w-6 md:h-6 flex items-center justify-center bg-[#BF9B63] text-[#0B2F2A] rounded-full text-xs font-black hover:scale-110 transition-transform shadow-none border border-[#BF9B63]`}
                         >
                           +
                         </button>
@@ -636,7 +596,7 @@ export default function Home() {
                     ) : (
                       <button 
                         onClick={(e) => { e.stopPropagation(); addToCart(item.id); }}
-                        className={`w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center text-xs font-black hover:scale-110 transition-transform ${isLightMode ? 'shadow-[0_0_15px_rgba(212,175,55,0.5)]' : 'shadow-none'} border border-[#D4AF37] ${isLightMode ? 'bg-[#D4AF37] text-white' : 'bg-[#D4AF37] text-black'}`}
+                        className={`w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center text-xs font-black hover:scale-110 transition-transform shadow-none border border-[#BF9B63] bg-[#BF9B63] text-[#0B2F2A]`}
                       >
                         +
                       </button>
@@ -651,7 +611,7 @@ export default function Home() {
 
       {/* Layer 3: Category List Section (60px) */}
       <div 
-        className={`!sticky !top-[70px] !z-[998] ${tm.bgHeader} ${isLightMode ? 'backdrop-blur-xl' : ''} border-b ${tm.borderMain} px-4 md:px-12 w-full !h-[60px] flex items-center transition-colors duration-500`}
+        className={`!sticky !top-[70px] !z-[998] ${tm.bgHeader} backdrop-blur-md border-b ${tm.borderMain} px-4 md:px-12 w-full !h-[60px] flex items-center transition-colors duration-500`}
         style={{ position: 'sticky', top: '70px', zIndex: 998, height: '60px' }}
       >
         <div className="max-w-7xl mx-auto flex flex-nowrap justify-start gap-2 md:gap-4 overflow-x-auto no-scrollbar py-2 w-full category-scroll-list">
@@ -666,7 +626,7 @@ export default function Home() {
               }`}
             >
               <CategoryIcon name={cat} className={`w-3.5 h-3.5 md:w-4 md:h-4 transition-colors ${
-                activeCategory === cat ? '' : isLightMode ? 'text-gray-400' : 'text-[#D4AF37]/50'
+                activeCategory === cat ? '' : 'text-[#BF9B63]/50'
               }`} />
               {t.categories[cat as keyof typeof t.categories] || cat}
             </button>
@@ -681,7 +641,7 @@ export default function Home() {
             <h2 className={`text-2xl md:text-4xl font-black ${tm.textAcc} select-none tracking-[0.4em] m-0 leading-none transition-colors duration-500 uppercase pb-1`}>
               {t.menu}
             </h2>
-            <div className={`h-1 w-20 bg-[#D4AF37]/20 mx-auto mt-2 rounded-full ${isLightMode ? 'shadow-sm' : ''}`}></div>
+            <div className={`h-1 w-20 bg-[#BF9B63]/20 mx-auto mt-2 rounded-full shadow-none`}></div>
           </div>
         </section>
 
@@ -707,7 +667,7 @@ export default function Home() {
                   >
                     {/* Floating Circular Image Layer (Offset Left) */}
                     <div className="absolute -left-4 md:-left-8 w-44 h-44 md:w-60 md:h-60 flex-shrink-0 z-30 transition-transform duration-500 group-hover:scale-105">
-                      <div className={`relative w-full h-full rounded-full overflow-hidden border-2 border-[#D4AF37] ${isLightMode ? 'shadow-[0_12px_40px_rgba(0,0,0,0.15)]' : 'shadow-[0_20px_50px_rgba(0,0,0,0.8)]'} bg-[#000000]`}>
+                      <div className={`relative w-full h-full rounded-full overflow-hidden border-2 border-[#BF9B63] shadow-[0_20px_50px_rgba(0,0,0,0.8)] bg-[#0B2F2A]`}>
                       {item.image ? (
                         <SafeImage 
                           src={item.image} 
@@ -716,7 +676,7 @@ export default function Home() {
                           className="w-full h-full object-cover" 
                         />
                       ) : (
-                        <div className={`w-full h-full flex items-center justify-center bg-[#1A1A1A]`}>
+                        <div className={`w-full h-full flex items-center justify-center bg-[#0B2F2A]`}>
                           <span className={`${tm.textAcc} font-serif text-5xl opacity-40`}>{(lang === 'en' ? item.name_en : item.name_am).charAt(0)}</span>
                         </div>
                       )}
@@ -725,7 +685,7 @@ export default function Home() {
                       {/* Tags inside floating circle */}
                       <div className="absolute top-6 left-6 flex flex-col gap-1 z-40">
                           {item.isSpecial && (
-                            <div className={`px-2 py-0.5 rounded text-[8px] md:text-[10px] font-black uppercase tracking-widest bg-[#D4AF37] text-[#000000] border border-[#000000]/10 w-fit shadow-md`}>
+                            <div className={`px-2 py-0.5 rounded text-[8px] md:text-[10px] font-black uppercase tracking-widest bg-[#BF9B63] text-[#0B2F2A] border border-[#0B2F2A]/10 w-fit shadow-md`}>
                               {t.special}
                             </div>
                           )}
@@ -758,17 +718,17 @@ export default function Home() {
                       <div className={`flex-shrink-0 flex items-center justify-center pt-2 border-t ${tm.cardDivider} w-full max-w-[200px] md:max-w-[300px]`}>
                         <div className="flex items-center gap-2">
                           {cart[item.id] > 0 && !item.isSoldOut && (
-                            <div className={`flex items-center gap-2 border ${isLightMode ? 'border-[#D4AF37]/20 bg-gray-50' : 'border-[#D4AF37]/30 bg-black/20'} rounded-full px-1.5 py-1 shadow-md`}>
+                            <div className={`flex items-center gap-2 border border-[#BF9B63]/30 bg-[#0B2F2A]/20 rounded-full px-1.5 py-1 shadow-md`}>
                               <button 
                                 onClick={() => removeFromCart(item.id)}
-                                className={`w-6 h-6 flex items-center justify-center rounded-full text-xs transition-colors bg-[#D4AF37]/10 text-[#D4AF37] hover:bg-[#D4AF37] ${isLightMode ? 'hover:text-white' : 'hover:text-black'}`}
+                                className={`w-6 h-6 flex items-center justify-center rounded-full text-xs transition-colors bg-[#BF9B63]/10 text-[#BF9B63] hover:bg-[#BF9B63] hover:text-[#0B2F2A]`}
                               >
                                 -
                               </button>
-                              <span className={`text-[11px] font-black px-1 ${isLightMode ? 'text-[#1A1A1A]' : 'text-[#D4AF37]'}`}>{cart[item.id]}</span>
+                              <span className={`text-[11px] font-black px-1 text-[#BF9B63]`}>{cart[item.id]}</span>
                               <button 
                                 onClick={(e) => addToCart(item.id, e)}
-                                className={`px-3 h-6 flex items-center justify-center rounded-md text-[10px] font-black border border-[#D4AF37] bg-[#D4AF37] text-black hover:scale-110 transition-transform uppercase tracking-tighter`}
+                                className={`px-3 h-6 flex items-center justify-center rounded-md text-[10px] font-black border border-[#BF9B63] bg-[#BF9B63] text-[#0B2F2A] hover:scale-110 transition-transform uppercase tracking-tighter`}
                               >
                                 ADD
                               </button>
@@ -779,7 +739,7 @@ export default function Home() {
                               disabled={item.isSoldOut}
                               onClick={(e) => addToCart(item.id, e)}
                               className={`flex items-center justify-center gap-2 px-5 py-1.5 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all ${
-                                item.isSoldOut ? 'bg-zinc-800 text-zinc-500 cursor-not-allowed' : 'bg-[#D4AF37] text-black hover:scale-105 active:scale-95 shadow-lg shadow-[#D4AF37]/20'
+                                item.isSoldOut ? 'bg-[#0B2F2A]/80 text-[#BF9B63]/20 cursor-not-allowed' : 'bg-[#BF9B63] text-[#0B2F2A] hover:scale-105 active:scale-95 shadow-lg shadow-[#BF9B63]/20'
                               }`}
                             >
                               <svg className="w-3 h-3 md:w-3.5 md:h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
@@ -802,7 +762,7 @@ export default function Home() {
         {flyingItems.map((f) => (
           <div
             key={f.id}
-            className="absolute rounded-full overflow-hidden border-2 border-[#D4AF37] bg-black shadow-xl"
+            className="absolute rounded-full overflow-hidden border-2 border-[#BF9B63] bg-[#0B2F2A] shadow-xl"
             style={{
               width: '80px',
               height: '80px',
@@ -830,18 +790,18 @@ export default function Home() {
           <div className="fixed inset-0 z-[1200] flex items-center justify-center px-4" onClick={() => setExpandedDesc(null)}>
             <div className={`absolute inset-0 ${tm.modalOverlay} backdrop-blur-sm`} />
             <div
-              className={`relative z-10 ${tm.modalBg} border border-[#D4AF37]/30 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-fade-in-up`}
+              className={`relative z-10 ${tm.modalBg} border border-[#BF9B63]/30 rounded-2xl p-6 max-w-sm w-full shadow-2xl animate-fade-in-up`}
               onClick={(e) => e.stopPropagation()}
             >
               <button
                 onClick={() => setExpandedDesc(null)}
-                className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-[#D4AF37] hover:bg-[#D4AF37]/20 transition-colors"
+                className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-[#BF9B63] hover:bg-[#BF9B63]/20 transition-colors"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
               <h3 className={`text-xl font-serif font-black ${tm.cardTitleColor} mb-1`}>{lang === 'en' ? found.name_en : found.name_am}</h3>
               <span className={`${tm.cardPriceColor} font-black text-lg`}>{found.price} ETB</span>
-              <div className={`mt-3 pt-3 border-t border-[#D4AF37]/10`}>
+              <div className={`mt-3 pt-3 border-t border-[#BF9B63]/10`}>
                 <p className={`${tm.cardDescColor} text-sm italic font-light leading-relaxed`}>{lang === 'en' ? found.description_en : found.description_am}</p>
               </div>
             </div>
@@ -854,7 +814,7 @@ export default function Home() {
         <button 
           id="cart-btn"
           onClick={() => setShowModal("cart")}
-          className={`mx-auto bg-[#D4AF37] text-black px-8 py-4 rounded-full font-black uppercase tracking-[0.2em] text-sm shadow-[0_12px_40px_rgba(0,0,0,0.8)] border-2 border-[#D4AF37] hover:scale-105 active:scale-95 flex items-center justify-center gap-3 pointer-events-auto w-full max-w-md md:w-auto relative overflow-hidden group ${cartPulse ? 'scale-110 shadow-[0_0_40px_rgba(212,175,55,0.8)]' : 'transition-all'}`}
+          className={`mx-auto bg-[#BF9B63] text-[#0B2F2A] px-8 py-4 rounded-full font-black uppercase tracking-[0.2em] text-sm shadow-[0_12px_40px_rgba(0,0,0,0.8)] border-2 border-[#BF9B63] hover:scale-105 active:scale-95 flex items-center justify-center gap-3 pointer-events-auto w-full max-w-md md:w-auto relative overflow-hidden group ${cartPulse ? 'scale-110 shadow-[0_0_40px_rgba(191,155,99,0.8)]' : 'transition-all'}`}
         >
           <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
           <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -872,21 +832,21 @@ export default function Home() {
           <div className={`
             ${tm.modalBg} relative z-10 w-full lg:max-w-xl transition-all duration-500
             ${showModal === "cart" 
-              ? "h-[65vh] lg:h-auto lg:max-h-[85vh] rounded-t-[32px] lg:rounded-2xl border-t-2 border-[#D4AF37] lg:border-2" 
+              ? "h-[65vh] lg:h-auto lg:max-h-[85vh] rounded-t-[32px] lg:rounded-2xl border-t-2 border-[#BF9B63] lg:border-2" 
               : "p-8 max-h-[90vh] rounded-t-[32px] lg:rounded-2xl lg:m-4"
             }
             flex flex-col overflow-hidden animate-slide-up lg:animate-fade-in-up
           `}>
             {/* Top Indicator for Bottom Sheet */}
             <div className="lg:hidden w-full flex justify-center pt-3 pb-1" onClick={() => setShowModal(null)}>
-              <div className="w-12 h-1.5 bg-[#D4AF37]/40 rounded-full" />
+              <div className="w-12 h-1.5 bg-[#BF9B63]/40 rounded-full" />
             </div>
 
             {showModal === "cart" ? (
               <div className="flex flex-col h-full uppercase tracking-tight">
-                <div className="px-6 py-4 border-b border-[#D4AF37]/10 flex items-center justify-between">
-                  <h2 className={`text-xl font-serif text-[#D4AF37] font-black tracking-[0.2em]`}>My Order</h2>
-                  <button onClick={() => setShowModal(null)} className="h-10 w-10 flex items-center justify-center rounded-full bg-white/5 text-[#D4AF37]">
+                <div className="px-6 py-4 border-b border-[#BF9B63]/10 flex items-center justify-between">
+                  <h2 className={`text-xl font-serif text-[#BF9B63] font-black tracking-[0.2em]`}>My Order</h2>
+                  <button onClick={() => setShowModal(null)} className="h-10 w-10 flex items-center justify-center rounded-full bg-[#BF9B63]/10 text-[#BF9B63]">
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
                   </button>
                 </div>
@@ -894,32 +854,32 @@ export default function Home() {
                 <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
                   {cartItemsData.map((item) => (
                     <div key={item.id} className="flex items-center gap-4 group">
-                      <div className="w-16 h-16 relative flex-shrink-0 rounded-xl overflow-hidden border border-[#D4AF37]/20 bg-black">
-                        {item.image ? <Image src={item.image} alt={lang === 'en' ? item.name_en : item.name_am} fill className="object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[#D4AF37] font-serif text-2xl">{(lang === 'en' ? item.name_en : item.name_am)[0]}</div>}
+                      <div className="w-16 h-16 relative flex-shrink-0 rounded-xl overflow-hidden border border-[#BF9B63]/20 bg-[#0B2F2A]">
+                        {item.image ? <Image src={item.image} alt={lang === 'en' ? item.name_en : item.name_am} fill className="object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[#BF9B63] font-serif text-2xl">{(lang === 'en' ? item.name_en : item.name_am)[0]}</div>}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start">
-                          <h4 className="font-serif text-[#D4AF37] font-bold text-lg truncate pr-2">{lang === 'en' ? item.name_en : item.name_am}</h4>
-                          <span className="font-black text-[#D4AF37] whitespace-nowrap">{item.price} ETB</span>
+                          <h4 className="font-serif text-[#BF9B63] font-bold text-lg truncate pr-2">{lang === 'en' ? item.name_en : item.name_am}</h4>
+                          <span className="font-black text-[#BF9B63] whitespace-nowrap">{item.price} ETB</span>
                         </div>
                         <div className="flex items-center justify-between mt-2">
                            <div className="flex items-center gap-1">
                               <button 
                                 onClick={() => removeFromCart(item.id)}
-                                className="w-10 h-10 flex items-center justify-center rounded-xl border border-[#D4AF37]/40 text-[#D4AF37] bg-white/5 active:scale-90 transition-transform"
+                                className="w-10 h-10 flex items-center justify-center rounded-xl border border-[#BF9B63]/40 text-[#BF9B63] bg-[#BF9B63]/5 active:scale-90 transition-transform"
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M20 12H4" /></svg>
                               </button>
-                              <span className={`w-10 text-center font-black ${isLightMode ? 'text-black' : 'text-white'} text-lg`}>{item.quantity}</span>
+                              <span className={`w-10 text-center font-black text-[#BF9B63] text-lg`}>{item.quantity}</span>
                               <button 
                                 onClick={() => addToCart(item.id)}
-                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#D4AF37] text-black active:scale-90 transition-transform"
+                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#BF9B63] text-[#0B2F2A] active:scale-90 transition-transform"
                                 style={{ minHeight: '44px' }}
                               >
                                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" /></svg>
                               </button>
                            </div>
-                           <span className="text-[10px] text-zinc-500 font-bold tracking-widest uppercase">Subtotal: {(item.price * item.quantity).toFixed(0)}</span>
+                           <span className="text-[10px] text-[#BF9B63]/50 font-bold tracking-widest uppercase">Subtotal: {(item.price * item.quantity).toFixed(0)}</span>
                         </div>
                       </div>
                     </div>
@@ -932,46 +892,46 @@ export default function Home() {
                   )}
                 </div>
 
-                <div className="p-6 bg-black border-t border-[#D4AF37]/20">
+                <div className="p-6 bg-[#0B2F2A] border-t border-[#BF9B63]/20">
                   <div className="flex justify-between items-center mb-6">
-                    <span className="text-zinc-500 text-xs uppercase tracking-[0.4em] font-black">Grand Total</span>
-                    <span className="text-4xl font-serif font-black text-[#D4AF37]">{cartTotal.toFixed(2)} <small className="text-xs">ETB</small></span>
+                    <span className="text-[#BF9B63]/50 text-xs uppercase tracking-[0.4em] font-black">Grand Total</span>
+                    <span className="text-4xl font-serif font-black text-[#BF9B63]">{cartTotal.toFixed(2)} <small className="text-xs">ETB</small></span>
                   </div>
                   <button 
                     onClick={() => setShowModal(null)}
-                    className="w-full bg-[#D4AF37] text-black py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-sm shadow-xl active:scale-95 transition-all"
+                    className="w-full bg-[#BF9B63] text-[#0B2F2A] py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-sm shadow-xl active:scale-95 transition-all"
                   >
                     Close & Browse
                   </button>
                 </div>
               </div>
             ) : showModal === "story" ? (
-              <div className="p-8 text-center bg-[#000000]">
-                <h2 className="text-3xl font-serif text-[#D4AF37] uppercase tracking-widest mb-6">{t.ourStory}</h2>
-                <div className="w-12 h-[1px] border-b border-[#D4AF37]/50 mx-auto mb-6" />
-                <h3 className="text-lg text-white mb-4 italic leading-tight">{siteContent.storyTitle}</h3>
-                <p className="text-zinc-400 text-sm leading-relaxed mb-8 whitespace-pre-wrap">{siteContent.storyText}</p>
-                <button onClick={() => setShowModal(null)} className="w-full py-4 border border-[#D4AF37]/30 text-[#D4AF37] rounded-full uppercase tracking-widest font-black text-xs hover:bg-[#D4AF37] hover:text-black transition-all">Close</button>
+              <div className="p-8 text-center bg-[#0B2F2A]">
+                <h2 className="text-3xl font-serif text-[#BF9B63] uppercase tracking-widest mb-6">{t.ourStory}</h2>
+                <div className="w-12 h-[1px] border-b border-[#BF9B63]/50 mx-auto mb-6" />
+                <h3 className="text-lg text-[#BF9B63] mb-4 italic leading-tight">{siteContent.storyTitle}</h3>
+                <p className="text-[#BF9B63]/70 text-sm leading-relaxed mb-8 whitespace-pre-wrap">{siteContent.storyText}</p>
+                <button onClick={() => setShowModal(null)} className="w-full py-4 border border-[#BF9B63]/30 text-[#BF9B63] rounded-full uppercase tracking-widest font-black text-xs hover:bg-[#BF9B63] hover:text-[#0B2F2A] transition-all">Close</button>
               </div>
             ) : (
-              <div className="p-8 text-center bg-[#000000]">
-                <h2 className="text-3xl font-serif text-[#D4AF37] uppercase tracking-widest mb-6">{t.contactInfo}</h2>
-                <div className="w-12 h-[1px] border-b border-[#D4AF37]/50 mx-auto mb-6" />
-                <div className="space-y-8 mb-8 text-white">
+              <div className="p-8 text-center bg-[#0B2F2A]">
+                <h2 className="text-3xl font-serif text-[#BF9B63] uppercase tracking-widest mb-6">{t.contactInfo}</h2>
+                <div className="w-12 h-[1px] border-b border-[#BF9B63]/50 mx-auto mb-6" />
+                <div className="space-y-8 mb-8 text-[#BF9B63]">
                   <div>
-                    <p className="text-[10px] uppercase tracking-[0.4em] text-zinc-500 font-black mb-2">{t.address}</p>
+                    <p className="text-[10px] uppercase tracking-[0.4em] text-[#BF9B63]/50 font-black mb-2">{t.address}</p>
                     <p className="text-sm font-medium">{siteContent.address}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] uppercase tracking-[0.4em] text-zinc-500 font-black mb-2">{t.phone}</p>
-                    <p className="text-2xl font-serif font-bold text-[#D4AF37]">{siteContent.phone}</p>
+                    <p className="text-[10px] uppercase tracking-[0.4em] text-[#BF9B63]/50 font-black mb-2">{t.phone}</p>
+                    <p className="text-2xl font-serif font-bold text-[#BF9B63]">{siteContent.phone}</p>
                   </div>
                   <div>
-                    <p className="text-[10px] uppercase tracking-[0.4em] text-zinc-500 font-black mb-2">Email</p>
+                    <p className="text-[10px] uppercase tracking-[0.4em] text-[#BF9B63]/50 font-black mb-2">Email</p>
                     <p className="text-sm font-medium font-mono">{siteContent.email}</p>
                   </div>
                 </div>
-                <button onClick={() => setShowModal(null)} className="w-full py-4 border border-[#D4AF37]/30 text-[#D4AF37] rounded-full uppercase tracking-widest font-black text-xs hover:bg-[#D4AF37] hover:text-black transition-all">Close</button>
+                <button onClick={() => setShowModal(null)} className="w-full py-4 border border-[#BF9B63]/30 text-[#BF9B63] rounded-full uppercase tracking-widest font-black text-xs hover:bg-[#BF9B63] hover:text-[#0B2F2A] transition-all">Close</button>
               </div>
             )}
           </div>
@@ -989,11 +949,11 @@ export default function Home() {
             {siteContent.hotelName}
           </h2>
           <div className={`flex justify-center gap-6 ${tm.textMuted} text-[9px] tracking-[0.3em] uppercase font-black`}>
-            <button onClick={() => setShowModal("story")} className={`hover:${tm.textAcc} transition-all`}>Our Story</button>
-            <button onClick={() => setShowModal("contact")} className={`hover:${tm.textAcc} transition-all`}>Contact</button>
+            <button onClick={() => setShowModal("story")} className={`hover:opacity-80 transition-all`}>Our Story</button>
+            <button onClick={() => setShowModal("contact")} className={`hover:opacity-80 transition-all`}>Contact</button>
           </div>
         </div>
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none tilet-pattern" />
+        <div className="absolute inset-0 opacity-[0.05] pointer-events-none tilet-pattern" />
       </footer>
     </div>
   );
