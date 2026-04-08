@@ -8,16 +8,18 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useMenu } from "@/context/MenuContext";
-import { Sun, Moon, SlidersHorizontal, X } from "lucide-react";
+import { Sun, Moon, MapPin, Clock, Phone, ChefHat, Info, Search, SlidersHorizontal, Menu, X, Globe } from "lucide-react";
 
 const translations = {
   en: {
-    title: "ADDIS CULINARY",
-    subtitle: "The Essence of Ethiopia",
+    title: "MAS COFFEE",
+    subtitle: "Where Every Sip Tells a Story",
     search: "Search...",
-    specials: "Our Specials",
+    specials: "Chef's Recommendations",
     menu: "MENU",
-    experience: "Experience",
+    home: "Home",
+    ourStory: "Our Story",
+    contact: "Contact",
     checkout: "Checkout",
     cancel: "Cancel",
     total: "Total",
@@ -27,14 +29,16 @@ const translations = {
     special: "Special",
     clear: "Clear all filters",
     noMatch: "No dishes found matching your criteria.",
-    ourStory: "Our Story",
     contactInfo: "Contact Information",
     address: "Address",
     phone: "Phone",
-    addressVal: "123 Cultural Way, Addis Ababa, Ethiopia",
-    phoneVal: "+251 11 123 4567",
-    storyTitle: "The Essence of Addis",
-    storyText: "Established in 1998, Addis Culinary brings the rich heritage of Ethiopian hospitality to your table. Every dish is prepared with love and authentic spices imported directly from the highlands. Our mission is to share the vibrant flavors and communal dining traditions of our motherland with the world.",
+    hours: "Opening Hours",
+    hoursVal: "7 AM - 10 PM",
+    callToOrder: "Call to Order",
+    addressVal: "Mas Coffee Plaza, Addis Ababa, Ethiopia",
+    phoneVal: "+251 911 234 567",
+    storyTitle: "A Legacy of Flavor",
+    storyText: "At Mas Coffee, we believe that coffee is more than just a drink—it's a journey. Founded on the principles of quality, community, and heritage, we source the finest beans from the heart of Ethiopia. Our 'Midnight Forest' experience is designed to transport you to the lush highlands where every bean is nurtured with care.",
     close: "Close",
     categories: {
       All: "All",
@@ -48,12 +52,14 @@ const translations = {
     }
   },
   am: {
-    title: "አዲስ ኩሊናሪ",
-    subtitle: "የኢትዮጵያ ምርጥ ጣዕም",
+    title: "ማስ ኮፊ",
+    subtitle: "እያንዳንዱ ጠብታ ታሪክ አለው",
     search: "ፈልግ...",
-    specials: "የዛሬ ልዩ ምግቦች",
+    specials: "የሼፍ ምርጫዎች",
     menu: "ሜኑ",
-    experience: "ተመገቡ",
+    home: "መነሻ",
+    ourStory: "ታሪካችን",
+    contact: "አድራሻ",
     checkout: "ክፈል",
     cancel: "አጥፋ",
     total: "ጠቅላላ",
@@ -63,14 +69,16 @@ const translations = {
     special: "ልዩ",
     clear: "ሁሉንም አጥፋ",
     noMatch: "የፈለጉት ምግብ አልተገኘም።",
-    ourStory: "ታሪካችን",
     contactInfo: "የመገናኛ መረጃ",
     address: "አድራሻ",
     phone: "ስልክ",
-    addressVal: "123 የባህል መንገድ፣ አዲስ አበባ፣ ኢትዮጵያ",
-    phoneVal: "+251 11 123 4567",
-    storyTitle: "የአዲስ ኩሊናሪ ምንነት",
-    storyText: "በ1990 ዓ.ም የተመሰረተው አዲስ ኩሊናሪ የኢትዮጵያን የእንግዳ ተቀባይነት ባህል ወደ ገበታዎ ያቀርባል። እያንዳንዱ ምግብ በፍቅር እና በቀጥታ ከደጋማው አካባቢ በሚመጡ ኦሪጅናል ቅመሞች ይዘጋጃል። አላማችን የእናት ሀገራችንን ደማቅ ጣዕም እና የጋራ አመጋገብ ባህል ለአለም ማካፈል ነው።",
+    hours: "የስራ ሰዓት",
+    hoursVal: "ከጠዋቱ 1 ሰዓት - ከምሽቱ 4 ሰዓት",
+    callToOrder: "ለመዘዝ ይደውሉ",
+    addressVal: "ማስ ኮፊ ፕላዛ፣ አዲስ አበባ፣ ኢትዮጵያ",
+    phoneVal: "+251 911 234 567",
+    storyTitle: "የጣዕም ቅርስ",
+    storyText: "በማስ ኮፊ፣ ቡና ከመጠጥ በላይ መሆኑን እናምናለን—ጉዞ ነው። በጥራት፣ በማህበረሰብ እና በቅርስ መርሆዎች ላይ የተመሰረተ፣ ምርጥ የቡና ፍሬዎችን ከኢትዮጵያ እምብርት እናመጣለን። የእኛ 'ሚድናይት ፎረስት' ተሞክሮ እያንዳንዱ ፍሬ በጥንቃቄ ወደሚያድግበት ለምለም ደጋማ ቦታዎች እንዲወስድዎት ተደርጎ የተዘጋጀ ነው።",
     close: "ዝጋ",
     categories: {
       All: "ሁሉንም",
@@ -93,23 +101,15 @@ const CategoryIcon = ({ name, className = "w-4 h-4" }: { name: string, className
       return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" /></svg>;
     case "New":
       return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>;
-    case "Traditional Foods":
-      return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 15c0-4.418-4.03-8-9-8s-9 3.582-9 8h18zM12 7V4M8 7V5M16 7V5M3 15h18" /></svg>;
-    case "Specialty Drinks":
-      return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5V3m0 0H8m4 0h4m-4 5v13m0 0H8m4 0h4m-7-9l2 9h6l2-9H5z" /></svg>;
-    case "Side Dishes":
-      return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg>;
     default:
       return <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>;
   }
 };
 
-// Safe Image Component to handle Hydration and Remote URLs
 const SafeImage = ({ src, alt, fill, ...props }: any) => {
   const [imgSrc, setImgSrc] = useState<string | null>(null);
 
   useEffect(() => {
-    // Set src after mount to avoid hydration mismatch
     setImgSrc(src);
   }, [src]);
 
@@ -131,18 +131,19 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [priceLimit, setPriceLimit] = useState(30);
   const [showPriceFilter, setShowPriceFilter] = useState(false);
+  const [showSearchInput, setShowSearchInput] = useState(false);
   const [expandedDesc, setExpandedDesc] = useState<number | null>(null);
+  const [activeSection, setActiveSection] = useState<"home" | "menu" | "story" | "specials" | "contact">("home");
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // Animation State
   const [flyingItems, setFlyingItems] = useState<{ id: string, image: string, startX: number, startY: number, endX: number, endY: number, active: boolean }[]>([]);
   const [cartPulse, setCartPulse] = useState(false);
   
   const filterTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const longPressTimerRef = useRef<NodeJS.Timeout | null>(null);
   const logoClickTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [logoClicks, setLogoClicks] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
-  // Analytics: Record Page View on mount
   useEffect(() => {
     fetch('/api/analytics', {
       method: 'POST',
@@ -151,7 +152,6 @@ export default function Home() {
     }).catch(console.error);
   }, []);
 
-  // Auto-close filter after 5s of inactivity
   useEffect(() => {
     if (showPriceFilter) {
       if (filterTimeoutRef.current) clearTimeout(filterTimeoutRef.current);
@@ -165,17 +165,32 @@ export default function Home() {
   }, [showPriceFilter, priceLimit]);
 
   useEffect(() => {
-    // 3-second Fast Polling for Real-Time Updates
     const interval = setInterval(() => {
       refreshData();
     }, 3000);
     return () => clearInterval(interval);
   }, [refreshData]);
 
+  // Auto-scroll for specials carousel
+  useEffect(() => {
+    if (activeSection === 'menu' && carouselRef.current) {
+      const interval = setInterval(() => {
+        if (carouselRef.current) {
+          const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
+          if (scrollLeft + clientWidth >= scrollWidth - 5) {
+            carouselRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+          } else {
+            carouselRef.current.scrollBy({ left: 200, behavior: 'smooth' });
+          }
+        }
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [activeSection]);
+
   const [activeCategory, setActiveCategory] = useState("All");
   const [cart, setCart] = useState<{ [key: number]: number }>({});
-  const [showModal, setShowModal] = useState<"story" | "contact" | "cart" | null>(null);
-  const [isSpecialsHovered, setIsSpecialsHovered] = useState(false);
+  const [showModal, setShowModal] = useState<"cart" | null>(null);
 
   const { minPrice, maxPrice } = useMemo(() => {
     const allPrices = menuData.flatMap(cat => cat.items.map(item => item.price));
@@ -186,14 +201,12 @@ export default function Home() {
     };
   }, [menuData]);
 
-  // Update priceLimit when maxPrice changes, but only if it's currently at a default
   useEffect(() => {
     if (maxPrice > 0) {
       setPriceLimit(maxPrice);
     }
   }, [maxPrice]);
 
-  // Sync theme with localStorage
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
     if (savedTheme === "light") {
@@ -218,82 +231,48 @@ export default function Home() {
 
   const t = translations[lang];
 
-  // Theme variables derived logically - Midnight Forest & Champagne Luxury Aesthetic
+  // Theme variables - Midnight Forest Luxury Theme
   const tm = {
-    bgApp: "bg-[#08120F]",
-    textApp: "text-[#FDF8F0]",
-    bgHeader: "bg-white/5 backdrop-blur-[20px]",
-    borderMain: "border-white/15",
+    bgApp: isLightMode ? "bg-[#FDF8F0]" : "bg-[#08120F]",
+    textApp: isLightMode ? "text-[#08120F]" : "text-[#F3E5AB]",
+    bgHeader: isLightMode ? "bg-[#FDF8F0]/95" : "bg-[#08120F]/95",
+    borderMain: isLightMode ? "border-[#08120F]/10" : "border-[#F3E5AB]/10",
     textAcc: "text-[#F3E5AB]",
-    textMuted: "text-[#FDF8F0]/60",
-    searchBg: "bg-white/5",
-    searchIcon: "text-[#F3E5AB]",
-    switchBtn: "bg-white/5 border-white/15 text-[#F3E5AB]",
-    heroGradient: "from-[#08120F] to-[#08120F]",
-    catBgActive: "bg-[#F3E5AB] text-[#08120F] shadow-[0_8px_32px_0_rgba(0,0,0,0.8)]",
-    catBgInactive: "bg-white/5 text-[#FDF8F0]/70 border-white/15 hover:border-[#F3E5AB]/40",
-    watermark: "text-[#F3E5AB]/5",
-    cardBg: "bg-white/5 backdrop-blur-[20px] border-white/15 shadow-[0_8px_32px_0_rgba(0,0,0,0.8)] hover:border-white/25",
-    cardTitle: "text-[#F3E5AB]",
-    cardTitleSecondary: "text-[#FDF8F0] group-hover:text-[#F3E5AB]",
-    cardDesc: "text-[#FDF8F0]/70",
-    textDesc: "text-[#FDF8F0]/70",
-    borderCard: "border-white/15 hover:border-white/25",
-    smallBtnBg: "bg-white/5 border-white/15 text-[#F3E5AB] hover:bg-white/10",
-    addBtnActive: "bg-[#F3E5AB] text-[#08120F] hover:scale-105 active:scale-95 shadow-[0_8px_32px_0_rgba(0,0,0,0.8)]",
-    addBtnDisabled: "border border-white/5 text-[#FDF8F0]/20 bg-white/5 cursor-not-allowed",
-    modalOverlay: "bg-[#08120F]/95 backdrop-blur-sm",
-    modalBg: "bg-white/5 backdrop-blur-[20px] border border-white/15 shadow-[0_8px_32px_0_rgba(0,0,0,0.8)]",
-    modalText: "text-[#FDF8F0]",
-    footerBg: "bg-[#08120F]",
-    cartModalTotal: "text-[#F3E5AB]",
+    textMuted: isLightMode ? "text-[#08120F]/60" : "text-[#F3E5AB]/60",
+    searchBg: isLightMode ? "bg-[#FDF8F0]/80" : "bg-[#08120F]/80",
+    searchIcon: isLightMode ? "text-[#08120F]" : "text-[#F3E5AB]",
+    switchBtn: isLightMode ? "bg-[#FDF8F0] border-[#08120F]/10 text-[#08120F]" : "bg-[#08120F] border-[#F3E5AB]/10 text-[#F3E5AB]",
+    catBgActive: "bg-[#F3E5AB] text-[#08120F] shadow-lg",
+    catBgInactive: isLightMode ? "bg-[#FDF8F0]/80 text-[#08120F]/70 border-[#08120F]/10 hover:border-[#08120F]/40" : "bg-[#08120F]/80 text-[#F3E5AB]/70 border-[#F3E5AB]/10 hover:border-[#F3E5AB]/40",
+    cardBg: isLightMode ? "bg-[#FDF8F0]/80 backdrop-blur-md border-[#08120F]/10 shadow-xl" : "bg-[#08120F]/80 backdrop-blur-md border-[#F3E5AB]/10 shadow-xl",
+    modalOverlay: "bg-[#08120F]/60 backdrop-blur-sm",
+    modalBg: isLightMode ? "bg-[#FDF8F0] backdrop-blur-xl border border-[#08120F]/10" : "bg-[#08120F] backdrop-blur-xl border border-[#F3E5AB]/10",
     // Food card specifics
-    cardFrameBg: "bg-white/5 backdrop-blur-[20px]",
-    cardFrameBorder: "border-white/15",
-    cardFrameShadow: "shadow-[0_8px_32px_0_rgba(0,0,0,0.8)]",
-    cardFrameHoverBorder: "hover:border-white/25",
-    cardFrameHoverShadow: "hover:shadow-[0_12px_40px_0_rgba(0,0,0,0.9)]",
-    cardTitleColor: "text-[#FDF8F0]",
-    cardDescColor: "text-[#FDF8F0]/70",
-    cardPriceColor: "text-[#F3E5AB]",
-    cardDivider: "border-white/15"
+    cardFrameBg: isLightMode ? "bg-[#FDF8F0]/85 backdrop-blur-md" : "bg-[#08120F]/85 backdrop-blur-md",
+    cardFrameBorder: isLightMode ? "border-[#08120F]/10" : "border-[#F3E5AB]/10",
+    cardTitleColor: isLightMode ? "text-[#08120F]" : "text-[#F3E5AB]",
+    cardDescColor: isLightMode ? "text-[#08120F]/70" : "text-[#F3E5AB]/70",
+    cardPriceColor: isLightMode ? "text-[#08120F]" : "text-[#F3E5AB]",
+    cardDivider: isLightMode ? "border-[#08120F]/10" : "border-[#F3E5AB]/10"
   };
 
   const addToCart = (id: number, e?: React.MouseEvent) => {
-    setCart(prev => ({
-      ...prev,
-      [id]: (prev[id] || 0) + 1
-    }));
-    // Analytics
-    fetch('/api/analytics', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'cartAdd', itemId: id })
-    }).catch(console.error);
-
-    // Fly-to-Cart Animation
+    setCart(prev => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
     if (e && typeof window !== "undefined") {
       const item = menuData.flatMap(c => c.items).find(i => i.id === id);
       if (item && item.image) {
         const startX = e.clientX;
         const startY = e.clientY;
         const cartBtn = document.getElementById("cart-btn");
-        
         if (cartBtn) {
           const rect = cartBtn.getBoundingClientRect();
-          const endX = rect.left + rect.width / 2;
-          const endY = rect.top + rect.height / 2;
-          
           const flyId = Math.random().toString(36).substring(7);
-          
-          setFlyingItems(prev => [...prev, { id: flyId, image: item.image, startX, startY, endX, endY, active: false }]);
-          
+          setFlyingItems(prev => [...prev, { id: flyId, image: item.image, startX, startY, endX: rect.left + rect.width / 2, endY: rect.top + rect.height / 2, active: false }]);
           requestAnimationFrame(() => {
             requestAnimationFrame(() => {
               setFlyingItems(prev => prev.map(f => f.id === flyId ? { ...f, active: true } : f));
             });
           });
-
           setTimeout(() => {
             setFlyingItems(prev => prev.filter(f => f.id !== flyId));
             setCartPulse(true);
@@ -304,94 +283,32 @@ export default function Home() {
     }
   };
 
-  const handleItemClick = (id: number) => {
-    setExpandedDesc(expandedDesc === id ? null : id);
-    if (expandedDesc !== id) {
-      fetch('/api/analytics', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'itemClick', itemId: id })
-      }).catch(console.error);
-    }
-  };
-
   const removeFromCart = (id: number) => {
     setCart(prev => {
       const newCart = { ...prev };
-      if (newCart[id] > 1) {
-        newCart[id] -= 1;
-      } else {
-        delete newCart[id];
-      }
+      if (newCart[id] > 1) newCart[id] -= 1;
+      else delete newCart[id];
       return newCart;
     });
   };
 
-  const clearCart = () => {
-    setCart({});
-  };
-
   const cartTotal = useMemo(() => {
     let total = 0;
-    menuData.forEach(cat => {
-      cat.items.forEach(item => {
-        if (cart[item.id]) {
-          total += item.price * cart[item.id];
-        }
-      });
-    });
+    menuData.forEach(cat => cat.items.forEach(item => { if (cart[item.id]) total += item.price * cart[item.id]; }));
     return total;
   }, [cart, menuData]);
-
-  const formattedTotal = `${cartTotal.toLocaleString()} ETB`;
-
-  const handleLongPressStart = () => {
-    longPressTimerRef.current = setTimeout(() => {
-      router.push("/admin");
-    }, 5000);
-  };
-
-  const handleLongPressEnd = () => {
-    if (longPressTimerRef.current) {
-      clearTimeout(longPressTimerRef.current);
-      longPressTimerRef.current = null;
-    }
-  };
 
   const handleLogoClick = () => {
     const newCount = logoClicks + 1;
     setLogoClicks(newCount);
-    
-    if (newCount === 3) {
-      router.push("/admin");
-      setLogoClicks(0);
-      if (logoClickTimeoutRef.current) clearTimeout(logoClickTimeoutRef.current);
-      return;
-    }
-    
+    if (newCount === 3) { router.push("/admin"); setLogoClicks(0); return; }
     if (logoClickTimeoutRef.current) clearTimeout(logoClickTimeoutRef.current);
-    logoClickTimeoutRef.current = setTimeout(() => {
-      setLogoClicks(0);
-    }, 1500);
+    logoClickTimeoutRef.current = setTimeout(() => setLogoClicks(0), 1500);
   };
 
   const cartItemCount = Object.values(cart).reduce((a, b) => a + b, 0);
 
-  const cartItemsData = useMemo(() => {
-    const items: any[] = [];
-    menuData.forEach(cat => {
-      cat.items.forEach(item => {
-        if (cart[item.id]) {
-          items.push({ ...item, quantity: cart[item.id] });
-        }
-      });
-    });
-    return items;
-  }, [cart, menuData]);
-
-  const specials = useMemo(() => {
-    return menuData.flatMap(cat => cat.items).filter(item => item.isSpecial);
-  }, [menuData]);
+  const specials = useMemo(() => menuData.flatMap(cat => cat.items).filter(item => item.isSpecial), [menuData]);
 
   const filteredMenuData = useMemo(() => {
     return menuData.map(section => ({
@@ -402,561 +319,632 @@ export default function Home() {
         const matchesSearch = (itemName || "").toLowerCase().includes((searchQuery || "").toLowerCase());
         const matchesPrice = item.price <= priceLimit;
         const matchesCategory = activeCategory === "All" || sectionCat === activeCategory;
-        
         return matchesSearch && matchesPrice && matchesCategory;
       })
     })).filter(section => section.items.length > 0);
   }, [searchQuery, priceLimit, activeCategory, lang, menuData]);
 
   return (
-    <div className={`min-h-screen ${tm.bgApp} ${tm.textApp} transition-colors duration-500`}>
-      <div className={`fixed inset-0 ${tm.bgApp} tilet-pattern -z-20 transition-colors duration-500`} />
+    <div className={`min-h-screen ${tm.bgApp} ${tm.textApp} transition-colors duration-500 font-sans selection:bg-[#F3E5AB] selection:text-[#08120F]`}>
+      <div className={`fixed inset-0 ${tm.bgApp} tilet-pattern -z-20 transition-colors duration-500 opacity-20`} />
       
-      {/* Decorative Glows Removed to eliminate elusive blue tints in Dark Mode */}
-
-      {/* Layer 1: Main Header (70px) */}
-      <header 
-        className={`!sticky !top-0 !z-[1000] ${tm.bgHeader} backdrop-blur-md border-b ${tm.borderMain} px-2 md:px-12 w-full !h-[70px] flex items-center transition-colors duration-500`}
-        style={{ position: 'sticky', top: '0px', zIndex: 1000, height: '70px' }}
-      >
-        <div className="max-w-7xl mx-auto flex flex-row items-center justify-between gap-3 md:gap-8 w-full py-2">
-          {/* Logo and Title Group */}
-          <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
-            <div 
-              className="w-9 h-9 md:w-16 md:h-16 relative flex-shrink-0 border border-[#F3E5AB]/30 rounded-lg overflow-hidden bg-black shadow-lg cursor-pointer"
-              onClick={handleLogoClick}
-            >
-              <img src={siteContent.logo || "/logo.png"} alt="Logo" className="w-full h-full object-cover pointer-events-none select-none" />
+      {/* Global Header */}
+      <header className={`sticky top-0 z-[1000] ${tm.bgHeader} backdrop-blur-xl border-b ${tm.borderMain} px-4 md:px-12 w-full h-[80px] md:h-[100px] flex items-center`}>
+        <div className="max-w-7xl mx-auto flex items-center justify-between w-full relative">
+          
+          {/* Mobile Header Row (Visible only on mobile/tablet < 768px) */}
+          <div className="flex lg:hidden items-center justify-between w-full h-full gap-2">
+            {/* Left: Logo & Company Name */}
+            <div className="flex items-center gap-2 flex-shrink-0 cursor-pointer" onClick={handleLogoClick}>
+              <div className="w-8 h-8 relative rounded-lg overflow-hidden border border-[#F3E5AB]/20">
+                <img src={siteContent.logo || "/logo.png"} alt="Logo" className="w-full h-full object-cover" />
+              </div>
+              <h1 className="text-xs font-serif font-black tracking-tighter uppercase text-[#F3E5AB] whitespace-nowrap">Mas Coffee</h1>
             </div>
-            <div className="flex flex-col justify-center">
-              <h1 className="text-[10px] md:text-3xl font-serif text-[#F3E5AB] tracking-tighter leading-none font-bold uppercase">{siteContent.hotelName}</h1>
-              <p className={`text-[5px] md:text-[10px] ${tm.textMuted} uppercase tracking-[0.2em] mt-0.5 whitespace-nowrap font-medium`}>{siteContent.hotelSlogan}</p>
+
+            {/* Icons Group: Search, Filter, Lang, Hamburger */}
+            <div className="flex items-center gap-1.5 md:gap-3 flex-grow justify-end">
+              <button 
+                onClick={() => setShowSearchInput(!showSearchInput)}
+                className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all active:scale-95 ${showSearchInput ? 'bg-[#F3E5AB] text-[#08120F]' : 'text-[#F3E5AB]'}`}
+              >
+                <Search className="w-4 h-4 md:w-5 md:h-5" />
+              </button>
+              <button 
+                onClick={() => setShowPriceFilter(!showPriceFilter)}
+                className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center text-[#F3E5AB] transition-all active:scale-95 ${showPriceFilter ? 'bg-[#F3E5AB] text-[#08120F]' : ''}`}
+              >
+                <SlidersHorizontal className="w-4 h-4 md:w-5 md:h-5" />
+              </button>
+              <button 
+                onClick={() => setLang(lang === 'en' ? 'am' : 'en')}
+                className={`w-9 h-9 md:w-10 md:h-10 rounded-full border border-[#F3E5AB]/10 flex items-center justify-center text-[10px] font-bold text-[#F3E5AB] transition-all active:scale-95`}
+              >
+                {lang === 'en' ? 'አማ' : 'EN'}
+              </button>
+              <button 
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center text-[#F3E5AB] transition-all active:scale-95 ${isMobileMenuOpen ? 'bg-[#F3E5AB] text-[#08120F]' : ''}`}
+              >
+                {isMobileMenuOpen ? <X className="w-5 h-5 md:w-6 md:h-6" /> : <Menu className="w-5 h-5 md:w-6 md:h-6" />}
+              </button>
             </div>
           </div>
-          
-          {/* Search and Filters Group */}
-          <div className="flex-1 flex items-center justify-end gap-2 md:gap-6 ml-1 md:ml-4">
-            <div className="relative flex-grow max-w-[120px] md:max-w-[400px] group">
+
+          {/* Desktop Header Content (Hidden on mobile) */}
+          <div className="hidden lg:flex items-center justify-between w-full">
+            {/* Logo */}
+            <div className="flex items-center gap-3 md:gap-6 cursor-pointer group" onClick={handleLogoClick}>
+              <div className="w-10 h-10 md:w-14 md:h-14 relative rounded-xl overflow-hidden border border-[#F3E5AB]/30 shadow-2xl transition-transform group-hover:scale-105">
+                <img src={siteContent.logo || "/logo.png"} alt="Logo" className="w-full h-full object-cover" />
+              </div>
+              <div className="hidden sm:flex flex-col">
+                <h1 className="text-xl md:text-2xl font-serif font-black tracking-tighter uppercase text-[#F3E5AB]">Mas Coffee</h1>
+                <p className={`text-[10px] uppercase tracking-[0.3em] font-medium opacity-60`}>Midnight Forest Experience</p>
+              </div>
+            </div>
+
+            {/* Navigation Bar */}
+            <nav className="hidden lg:flex items-center gap-8">
+              {[
+                { id: 'home', label: t.home },
+                { id: 'menu', label: t.menu },
+                { id: 'specials', label: t.specials },
+                { id: 'story', label: t.ourStory },
+                { id: 'contact', label: t.contact }
+              ].map((link) => (
+                <button
+                  key={link.id}
+                  onClick={() => setActiveSection(link.id as any)}
+                  className={`text-xs font-black uppercase tracking-[0.2em] transition-all relative py-2 ${
+                    activeSection === link.id ? 'text-[#F3E5AB]' : 'opacity-40 hover:opacity-100'
+                  }`}
+                >
+                  {link.label}
+                  {activeSection === link.id && (
+                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#F3E5AB] rounded-full animate-scale-x" />
+                  )}
+                </button>
+              ))}
+            </nav>
+
+            {/* Actions */}
+            <div className="flex items-center gap-2 md:gap-4">
+              <button 
+                onClick={() => setLang(lang === 'en' ? 'am' : 'en')}
+                className={`w-9 h-9 md:w-11 md:h-11 rounded-full border ${tm.borderMain} flex items-center justify-center text-[10px] md:text-xs font-bold transition-all hover:bg-[#F3E5AB] hover:text-[#08120F] active:scale-95 ${tm.switchBtn}`}
+              >
+                {lang === 'en' ? 'አማ' : 'EN'}
+              </button>
+              <button 
+                onClick={() => setIsLightMode(!isLightMode)}
+                className={`w-9 h-9 md:w-11 md:h-11 rounded-full border ${tm.borderMain} flex items-center justify-center transition-all hover:bg-[#F3E5AB] hover:text-[#08120F] active:scale-95 ${tm.switchBtn}`}
+              >
+                {isLightMode ? <Moon className="w-4 h-4 md:w-5 md:h-5" /> : <Sun className="w-4 h-4 md:w-5 md:h-5" />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Search Input Overlay */}
+        {showSearchInput && (
+          <div className="lg:hidden absolute top-[80px] left-0 w-full p-4 bg-[#08120F] border-b border-[#F3E5AB]/10 animate-fade-in z-[900]">
+            <div className="relative">
               <input 
+                autoFocus
                 type="text" 
                 placeholder={t.search} 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full ${tm.searchBg} border ${tm.borderMain} rounded-full compact-input text-[10px] md:text-base py-1 px-6 md:py-2.5 md:px-10 focus:outline-none focus:border-[#F3E5AB] transition-all`}
+                className={`w-full ${tm.searchBg} border border-[#F3E5AB]/30 rounded-full py-3 px-12 focus:outline-none focus:border-[#F3E5AB] transition-all text-sm text-[#F3E5AB]`}
               />
-              <svg className={`absolute left-2 md:left-3.5 top-1/2 -translate-y-1/2 w-2.5 h-2.5 md:w-4 md:h-4 ${tm.searchIcon} transition-colors`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-            
-            {/* Price Filter - Desktop: inline slider, Mobile: gold icon + dropdown */}
-            <div className={`hidden lg:flex items-center gap-2 ${tm.searchBg} border ${tm.borderMain} rounded-full px-3 py-1 flex-shrink-0 h-9 transition-colors`}>
-              <span className="text-[10px] text-[#F3E5AB] font-black">{priceLimit} ETB</span>
-              <input 
-                type="range" 
-                min={Number(minPrice) || 0} 
-                max={Number(maxPrice) || 1000} 
-                value={Number(priceLimit) || 0}
-                onChange={(e) => setPriceLimit(Number(e.target.value))}
-                className="price-range-slider w-16 md:w-24"
-                style={{ '--progress': `${(Number(maxPrice) || 1000) > (Number(minPrice) || 0) ? ((Number(priceLimit) || 0) - (Number(minPrice) || 0)) / ((Number(maxPrice) || 1000) - (Number(minPrice) || 0)) * 100 : 0}%` } as React.CSSProperties}
-              />
-            </div>
-
-            {/* Mobile Price Filter Icon */}
-            <div className="relative lg:hidden flex-shrink-0">
-              <button
-                onClick={() => setShowPriceFilter(!showPriceFilter)}
-                className={`px-3 md:px-4 h-7 md:h-9 rounded-full border flex items-center justify-center transition-all active:scale-95 flex-shrink-0 ${
-                  showPriceFilter
-                    ? 'bg-[#F3E5AB] border-[#F3E5AB] text-[#08120F] shadow-[0_8px_32px_0_rgba(0,0,0,0.8)]'
-                    : `${tm.switchBtn} ${tm.borderMain}`
-                }`}
-                aria-label="Price filter"
-              >
-                <span className="text-[10px] md:text-xs font-black tracking-widest uppercase">ETB</span>
-              </button>
-              
-              {/* Mobile Price Filter Dropdown Overlay */}
-              {showPriceFilter && (
-                <>
-                  {/* Transparent Backdrop to close */}
-                  <div 
-                    className="fixed inset-0 z-[1050] bg-transparent" 
-                    onClick={() => setShowPriceFilter(false)} 
-                  />
-                  <div className={`fixed left-1/2 -translate-x-1/2 top-[85px] z-[1060] w-[92%] max-w-md rounded-3xl border border-white/15 ${
-                    tm.modalBg
-                  } p-6 md:p-8 animate-price-filter-in shadow-[0_8px_32px_0_rgba(0,0,0,0.8)]`}>
-                    {/* Centered Gold notch arrow */}
-                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 rotate-45 border-l border-t border-white/15 bg-[#08120F]/50 backdrop-blur-md" />
-                    
-                    <div className="flex items-center justify-between mb-6">
-                      <div className="flex flex-col">
-                        <span className={`text-[10px] uppercase tracking-[0.4em] font-black text-[#F3E5AB]/40`}>Price Range</span>
-                        <span className={`text-[8px] uppercase tracking-[0.2em] font-serif italic text-[#FDF8F0]/20`}>Live Filtering</span>
-                      </div>
-                      <span className="text-2xl font-black text-[#F3E5AB] font-serif">{priceLimit} <small className="text-[10px] tracking-widest">ETB</small></span>
-                    </div>
-                    
-                    {/* Sleek Range Slider */}
-                    <div className="relative mb-2 px-2">
-                      <input 
-                        type="range" 
-                        min={Number(minPrice) || 0} 
-                        max={Number(maxPrice) || 1000} 
-                        value={Number(priceLimit) || 0}
-                        onChange={(e) => setPriceLimit(Number(e.target.value))}
-                        className="price-range-slider w-full"
-                        style={{ '--progress': `${(Number(maxPrice) || 1000) > (Number(minPrice) || 0) ? ((Number(priceLimit) || 0) - (Number(minPrice) || 0)) / ((Number(maxPrice) || 1000) - (Number(minPrice) || 0)) * 100 : 0}%` } as React.CSSProperties}
-                      />
-                      <div className="flex justify-between mt-4">
-                        <span className={`text-[10px] font-bold tracking-tighter text-[#FDF8F0]/30`}>{minPrice} ETB</span>
-                        <span className={`text-[10px] font-bold tracking-tighter text-[#FDF8F0]/30`}>{maxPrice} ETB</span>
-                      </div>
-                    </div>
-                  </div>
-                </>
-              )}
-            </div>
-
-            {/* Icons Group */}
-            <div className="flex items-center gap-1.5 md:gap-4 flex-shrink-0">
-              <button 
-                onClick={() => setLang(lang === 'en' ? 'am' : 'en')}
-                className={`w-7 h-7 md:w-11 md:h-11 rounded-full border ${tm.borderMain} flex items-center justify-center text-[8px] md:text-xs font-bold transition-all hover:bg-[#F3E5AB] hover:text-[#08120F] active:scale-95 ${tm.switchBtn}`}
-              >
-                {lang === 'en' ? 'አማ' : 'EN'}
-              </button>
-              
-              <button 
-                onClick={() => setIsLightMode(!isLightMode)}
-                className={`w-7 h-7 md:w-11 md:h-11 rounded-full border ${tm.borderMain} flex items-center justify-center transition-all hover:bg-[#F3E5AB] hover:text-[#08120F] active:scale-95 ${tm.switchBtn}`}
-              >
-                {isLightMode ? <Moon className="w-3.5 h-3.5 md:w-5 md:h-5" /> : <Sun className="w-3.5 h-3.5 md:w-5 md:h-5" />}
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#F3E5AB]/50" />
+              <button onClick={() => { setSearchQuery(""); setShowSearchInput(false); }} className="absolute right-4 top-1/2 -translate-y-1/2">
+                <X className="w-4 h-4 text-[#F3E5AB]/50" />
               </button>
             </div>
           </div>
-        </div>
+        )}
+
+        {/* Mobile Price Filter Overlay */}
+        {showPriceFilter && (
+          <div className="lg:hidden absolute top-[80px] left-0 w-full p-6 bg-[#08120F] border-b border-[#F3E5AB]/10 animate-fade-in z-[900]">
+            <div className="flex items-center justify-between mb-4">
+              <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Price Limit</span>
+              <span className="font-serif font-black text-[#F3E5AB]">{priceLimit} ETB</span>
+            </div>
+            <input 
+              type="range" 
+              min={minPrice} 
+              max={maxPrice} 
+              value={priceLimit}
+              onChange={(e) => setPriceLimit(Number(e.target.value))}
+              className="w-full h-1.5 bg-[#F3E5AB]/10 rounded-full appearance-none accent-[#F3E5AB]"
+            />
+          </div>
+        )}
       </header>
 
-      {/* Layer 2: Specials Hero Section (180px) */}
+      {/* Mobile Hamburger Menu Overlay (Right Slide-In) */}
       <div 
-        className={`${tm.bgHeader} border-b ${tm.borderMain} overflow-hidden w-full !h-[180px] relative transition-colors duration-500 specials-scroll-container`}
-        style={{ height: '180px' }}
+        className={`fixed inset-0 z-[1500] lg:hidden transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
       >
-        <div className={`absolute left-0 top-1/2 -translate-y-1/2 z-20 bg-white/5 backdrop-blur-md px-4 py-2 rounded-r-xl border-y border-r border-white/15 shadow-none hidden md:block`}>
-          <span className="text-[10px] md:text-xs font-serif text-[#F3E5AB] uppercase tracking-[0.4em] whitespace-nowrap">{t.specials}</span>
-        </div>
+        <div className="absolute inset-0 bg-[#08120F]/60 backdrop-blur-md" onClick={() => setIsMobileMenuOpen(false)} />
         <div 
-          className="animate-infinite-scroll flex h-full gap-4 px-4 py-4 items-center relative z-10 pointer-events-auto"
-          style={{ animationPlayState: isSpecialsHovered ? 'paused' : 'running' }}
-          onMouseEnter={() => setIsSpecialsHovered(true)}
-          onMouseLeave={() => setIsSpecialsHovered(false)}
+          className={`absolute top-0 right-0 h-full w-[80%] max-w-sm ${tm.modalBg} shadow-2xl transition-transform duration-300 ease-in-out flex flex-col p-8 md:p-12 ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+          style={{ willChange: 'transform' }}
         >
-          {[...specials, ...specials, ...specials].map((item, idx) => (
-            <div 
-              key={`${item.id}-${idx}`} 
-              className="relative h-[148px] w-[195px] md:w-[325px] flex-shrink-0 group overflow-hidden rounded-xl border border-white/15 shadow-[0_8px_32px_0_rgba(0,0,0,0.8)]"
+          <div className="flex justify-between items-center mb-12">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 relative rounded-xl overflow-hidden border border-[#F3E5AB]/20">
+                <img src={siteContent.logo || "/logo.png"} alt="Logo" className="w-full h-full object-cover" />
+              </div>
+              <h2 className={`text-xl font-serif font-black ${tm.textApp}`}>Mas Coffee</h2>
+            </div>
+            <button onClick={() => setIsMobileMenuOpen(false)} className={`w-10 h-10 rounded-full border ${tm.borderMain} flex items-center justify-center ${tm.textApp}`}>
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <nav className="flex flex-col gap-6 flex-1 overflow-y-auto">
+            {[
+              { id: 'home', label: t.home },
+              { id: 'menu', label: t.menu },
+              { id: 'specials', label: t.specials },
+              { id: 'story', label: t.ourStory },
+              { id: 'contact', label: t.contact }
+            ].map((link) => (
+              <button
+                key={link.id}
+                onClick={() => { setActiveSection(link.id as any); setIsMobileMenuOpen(false); }}
+                className={`text-xl font-serif font-black uppercase tracking-widest text-left transition-all py-2 border-b ${tm.borderMain} ${
+                  activeSection === link.id ? 'text-[#F3E5AB]' : tm.textMuted
+                }`}
+              >
+                {link.label}
+              </button>
+            ))}
+          </nav>
+
+          <div className="mt-auto pt-8 border-t border-[#F3E5AB]/10 space-y-4">
+             <button 
+              onClick={() => setIsLightMode(!isLightMode)}
+              className={`flex items-center gap-4 w-full py-4 px-6 rounded-2xl border ${tm.borderMain} ${tm.textApp} font-black uppercase tracking-widest text-xs`}
             >
-              {item.image ? (
-                <>
-                  <SafeImage 
-                    src={item.image} 
-                    alt={lang === 'en' ? item.name_en : item.name_am} 
-                    fill
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000" 
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-b from-transparent to-[#08120F]/90" />
-                </>
-              ) : (
-                <div className={`absolute inset-0 w-full h-full bg-[#08120F] flex items-center justify-center`}>
-                  <span className={`${tm.textAcc} font-serif text-4xl opacity-40`}>{(lang === 'en' ? item.name_en : item.name_am).charAt(0)}</span>
+              {isLightMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+              <span>{isLightMode ? 'Dark Mode' : 'Light Mode'}</span>
+            </button>
+            <button 
+              onClick={() => setLang(lang === 'en' ? 'am' : 'en')}
+              className={`flex items-center gap-4 w-full py-4 px-6 rounded-2xl border ${tm.borderMain} ${tm.textApp} font-black uppercase tracking-widest text-xs`}
+            >
+              <Globe className="w-4 h-4" />
+              <span>{lang === 'en' ? 'Switch to Amharic' : 'ወደ እንግሊዝኛ ቀይር'}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Sections */}
+      <div className="relative overflow-hidden">
+        
+        {/* Home Section */}
+        {activeSection === 'home' && (
+          <section className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center text-center px-4 relative">
+            <div className="absolute inset-0 -z-10 overflow-hidden">
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#F3E5AB]/10 rounded-full blur-[120px]" />
+            </div>
+            <h2 className="text-5xl md:text-8xl font-serif font-black mb-6 tracking-tight animate-fade-in-up">
+              Mas Coffee: <br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F3E5AB] to-[#FDF8F0]">Where Every Sip Tells a Story</span>
+            </h2>
+            <p className="max-w-2xl text-lg md:text-xl opacity-60 mb-12 animate-fade-in-up delay-200">
+              Immerse yourself in the luxury of Ethiopian coffee culture. A sensory journey through the highlands, delivered with elegance.
+            </p>
+            <button 
+              onClick={() => setActiveSection('menu')}
+              className="bg-[#F3E5AB] text-[#08120F] px-12 py-5 rounded-full font-black uppercase tracking-[0.3em] text-sm hover:scale-105 active:scale-95 transition-all shadow-2xl animate-fade-in-up delay-400"
+            >
+              Explore Menu
+            </button>
+          </section>
+        )}
+
+        {/* Menu Section */}
+        {activeSection === 'menu' && (
+          <div className="animate-fade-in">
+            {/* Specials Carousel (Mobile Only) - Now NOT sticky, so it scrolls away */}
+            <div className={`lg:hidden py-1 border-b border-[#F3E5AB]/5 overflow-hidden ${isLightMode ? 'bg-[#FDF8F0]/50' : 'bg-[#08120F]/50'} backdrop-blur-sm`}>
+              <div className="px-4 mb-0.5 flex items-center justify-between">
+                <span className={`text-[8px] font-black uppercase tracking-widest ${isLightMode ? 'text-[#08120F]/40' : 'text-[#F3E5AB]/40'}`}>{t.specials}</span>
+                <div className="flex gap-0.5">
+                  <div className={`w-0.5 h-0.5 rounded-full ${isLightMode ? 'bg-[#08120F]' : 'bg-[#F3E5AB]'}`} />
+                  <div className={`w-0.5 h-0.5 rounded-full ${isLightMode ? 'bg-[#08120F]/20' : 'bg-[#F3E5AB]/20'}`} />
                 </div>
-              )}
-              <div className="absolute bottom-2 left-4 z-10">
-                <h3 className={`font-serif text-sm md:text-xl tracking-wide leading-tight transition-colors text-[#FDF8F0] drop-shadow-md`}>{lang === 'en' ? item.name_en : item.name_am}</h3>
-                <div className="flex items-center gap-4 mt-1">
-                  <span className="text-[#F3E5AB] font-black text-xs md:text-lg">{item.price} ETB</span>
-                  <div className="flex items-center gap-2">
-                    {cart[item.id] > 0 ? (
-                      <div className={`flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-1.5 py-0.5 border border-white/20`}>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); removeFromCart(item.id); }}
-                          className={`w-5 h-5 md:w-6 md:h-6 flex items-center justify-center bg-white/5 text-[#F3E5AB] border border-white/10 rounded-full text-xs hover:bg-[#F3E5AB] hover:text-[#08120F] transition-all`}
+              </div>
+              <div 
+                ref={carouselRef}
+                className="flex gap-2 overflow-x-auto no-scrollbar px-4 pb-1 snap-x snap-mandatory"
+              >
+                {specials.map((item) => (
+                  <div 
+                    key={item.id} 
+                    className={`flex-shrink-0 w-48 h-24 rounded-lg border ${isLightMode ? 'border-[#08120F]/10' : 'border-[#F3E5AB]/10'} overflow-hidden relative snap-center group`}
+                    onClick={() => setExpandedDesc(item.id)}
+                  >
+                    <img src={item.image} className="w-full h-full object-cover opacity-60 transition-transform duration-700 group-hover:scale-105" alt="" />
+                    <div className={`absolute inset-0 ${isLightMode ? 'bg-gradient-to-t from-[#FDF8F0] via-[#FDF8F0]/10 to-transparent' : 'bg-gradient-to-t from-[#08120F] via-[#08120F]/10 to-transparent'}`} />
+                    <div className="absolute bottom-1.5 left-2 right-2">
+                      <h4 className={`text-[10px] font-serif font-black ${isLightMode ? 'text-[#08120F]' : 'text-[#F3E5AB]'} line-clamp-1`}>{lang === 'en' ? item.name_en : item.name_am}</h4>
+                      <p className={`text-[8px] font-black ${isLightMode ? 'text-[#08120F]/50' : 'text-[#F3E5AB]/50'}`}>{item.price} ETB</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Categories Row - Sticky to the top (below global header) */}
+            <div className={`sticky top-[80px] md:top-[100px] z-[800] ${tm.bgHeader} backdrop-blur-xl border-b ${tm.borderMain} py-1.5 md:py-4`}>
+              <div className="max-w-7xl mx-auto px-4 md:px-12">
+                <div className="flex items-center gap-2 md:gap-4 w-full overflow-x-auto no-scrollbar">
+                  {["All", ...menuData.map(c => lang === 'en' ? c.category_en : c.category_am)].map((cat) => (
+                    <button
+                      key={cat}
+                      onClick={() => setActiveCategory(cat)}
+                      className={`px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest transition-all flex-shrink-0 border ${
+                        activeCategory === cat ? tm.catBgActive : tm.catBgInactive
+                      }`}
+                    >
+                      {t.categories[cat as keyof typeof t.categories] || cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <main className="max-w-7xl mx-auto px-4 md:px-12 pt-1 md:pt-8 pb-32 min-h-[70vh]">
+              <div className="space-y-6 md:space-y-24">
+                {filteredMenuData.map((section) => (
+                  <section key={section.category_en} className="scroll-mt-[120px]">
+                    <div className="flex items-center gap-2 mb-3 md:mb-12">
+                      <CategoryIcon name={section.category_en} className="w-3.5 h-3.5 md:w-6 md:h-6 opacity-40" />
+                      <h3 className="text-[10px] md:text-xl font-serif font-black uppercase tracking-[0.3em] opacity-40">
+                        {t.categories[section.category_en as keyof typeof t.categories] || section.category_en}
+                      </h3>
+                      <div className={`h-[1px] flex-grow ${tm.borderMain} border-t`} />
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
+                      {section.items.map((item) => (
+                        <article 
+                          key={item.id} 
+                          className={`relative flex items-center w-full h-40 md:h-56 group ${item.isSoldOut ? 'opacity-40 grayscale' : ''}`}
                         >
-                          -
-                        </button>
-                        <span className="text-[10px] md:text-xs font-black text-[#F3E5AB] px-1">{cart[item.id]}</span>
-                        <button 
-                          onClick={(e) => { e.stopPropagation(); addToCart(item.id); }}
-                          className={`w-5 h-5 md:w-6 md:h-6 flex items-center justify-center bg-[#F3E5AB] text-[#08120F] rounded-full text-xs font-black hover:scale-110 transition-transform shadow-none border-none`}
-                        >
-                          +
-                        </button>
-                      </div>
-                    ) : (
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); addToCart(item.id); }}
-                        className={`w-5 h-5 md:w-6 md:h-6 rounded-full flex items-center justify-center text-xs font-black hover:scale-110 transition-transform shadow-none border-none bg-[#F3E5AB] text-[#08120F]`}
-                      >
-                        +
-                      </button>
-                    )}
+                          {/* Item Image */}
+                          <div className="absolute left-0 w-36 h-36 md:w-52 md:h-52 z-10 transition-transform duration-500 group-hover:scale-105">
+                            <div className="w-full h-full rounded-full overflow-hidden border-2 border-[#F3E5AB] shadow-2xl bg-[#08120F]">
+                              {item.image ? <SafeImage src={item.image} alt={item.name_en} fill className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-4xl font-serif opacity-20">{item.name_en[0]}</div>}
+                            </div>
+                            {item.isSpecial && (
+                              <div className="absolute top-4 right-4 bg-[#F3E5AB] text-[#08120F] px-2 py-1 rounded text-[8px] font-black uppercase tracking-widest shadow-xl">Special</div>
+                            )}
+                          </div>
+
+                          {/* Item Content */}
+                          <div className={`w-full h-full ${tm.cardFrameBg} rounded-3xl border ${tm.cardFrameBorder} ml-16 md:ml-28 pl-24 md:pl-32 pr-4 md:pr-12 py-4 md:py-6 flex flex-col justify-between shadow-2xl transition-all duration-500 hover:border-[#F3E5AB]/40`}>
+                            <div>
+                              <div className="flex justify-between items-start mb-1">
+                                <h4 className={`text-lg md:text-2xl font-serif font-black ${tm.cardTitleColor} line-clamp-1`}>{lang === 'en' ? item.name_en : item.name_am}</h4>
+                                <span className="font-black text-base md:text-lg text-[#F3E5AB] whitespace-nowrap">{item.price} ETB</span>
+                              </div>
+                              <p className={`text-[10px] md:text-sm line-clamp-2 italic opacity-60 cursor-pointer`} onClick={() => setExpandedDesc(item.id)}>
+                                {lang === 'en' ? item.description_en : item.description_am}
+                              </p>
+                            </div>
+
+                            <div className="flex items-center justify-between pt-2 md:pt-4 border-t border-[#F3E5AB]/10">
+                              <div className="flex items-center gap-3">
+                                {cart[item.id] > 0 ? (
+                                  <div className="flex items-center gap-2 md:gap-4 bg-[#F3E5AB]/10 rounded-full px-1.5 md:py-1">
+                                    <button onClick={() => removeFromCart(item.id)} className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center hover:bg-[#F3E5AB] hover:text-[#08120F] transition-colors">-</button>
+                                    <span className="font-black text-xs md:text-sm">{cart[item.id]}</span>
+                                    <button onClick={(e) => addToCart(item.id, e)} className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-[#F3E5AB] text-[#08120F] flex items-center justify-center font-black">+</button>
+                                  </div>
+                                ) : (
+                                  <button 
+                                    disabled={item.isSoldOut}
+                                    onClick={(e) => addToCart(item.id, e)}
+                                    className="bg-[#F3E5AB] text-[#08120F] px-4 md:px-6 py-1.5 md:py-2 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all disabled:opacity-50"
+                                  >
+                                    Add to Order
+                                  </button>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  </section>
+                ))}
+              </div>
+            </main>
+          </div>
+        )}
+
+        {/* Our Story Section */}
+        {activeSection === 'story' && (
+          <section className="min-h-[calc(100vh-80px)] py-20 px-4 md:px-12 animate-fade-in">
+            <div className="max-w-5xl mx-auto">
+              <div className="text-center mb-12 md:mb-20">
+                <h2 className="text-3xl md:text-6xl font-serif font-black uppercase tracking-widest mb-4">{t.ourStory}</h2>
+                <div className="w-16 md:w-24 h-1 bg-[#F3E5AB] mx-auto rounded-full" />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
+                <div className="relative h-[400px] md:h-[500px] rounded-3xl overflow-hidden border border-[#F3E5AB]/20 shadow-2xl">
+                  <img src="/story-image.jpg" alt="Our Story" className="w-full h-full object-cover opacity-80" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#08120F] to-transparent" />
+                </div>
+                <div className={`${tm.cardBg} p-8 md:p-12 rounded-3xl border border-[#F3E5AB]/10 backdrop-blur-2xl`}>
+                  <h3 className="text-2xl md:text-3xl font-serif font-black mb-6 text-[#F3E5AB]">{t.storyTitle}</h3>
+                  <p className="text-base md:text-lg leading-relaxed opacity-70 whitespace-pre-wrap">
+                    {t.storyText}
+                  </p>
+                  <div className="mt-8 md:mt-12 flex gap-8">
+                    <div className="text-center">
+                      <div className="text-2xl md:text-3xl font-serif font-black text-[#F3E5AB]">25+</div>
+                      <div className="text-[8px] md:text-[10px] uppercase tracking-widest opacity-40">Years of Heritage</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-2xl md:text-3xl font-serif font-black text-[#F3E5AB]">100%</div>
+                      <div className="text-[8px] md:text-[10px] uppercase tracking-widest opacity-40">Organic Beans</div>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
+          </section>
+        )}
 
-      {/* Layer 3: Category List Section (60px) */}
-      <div 
-        className={`!sticky !top-[70px] !z-[998] ${tm.bgHeader} border-b ${tm.borderMain} px-4 md:px-12 w-full !h-[60px] flex items-center transition-colors duration-500`}
-        style={{ position: 'sticky', top: '70px', zIndex: 998, height: '60px' }}
-      >
-        <div className="max-w-7xl mx-auto flex flex-nowrap justify-start gap-2 md:gap-4 overflow-x-auto no-scrollbar py-2 w-full category-scroll-list">
-          {["All", ...menuData.map(c => lang === 'en' ? c.category_en : c.category_am)].map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`relative px-4 py-2 md:px-8 md:py-2.5 rounded-full text-[10px] md:text-xs font-bold tracking-[0.15em] uppercase transition-all duration-300 border flex-shrink-0 whitespace-nowrap flex items-center justify-center gap-1.5 md:gap-2 ${
-                activeCategory === cat 
-                  ? `${tm.catBgActive} scale-[1.02]`
-                  : tm.catBgInactive
-              }`}
-            >
-              <CategoryIcon name={cat} className={`w-3.5 h-3.5 md:w-4 md:h-4 transition-colors ${
-                activeCategory === cat ? '' : 'text-[#F3E5AB]/50'
-              }`} />
-              {t.categories[cat as keyof typeof t.categories] || cat}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <main className="max-w-7xl mx-auto px-4 md:px-12 pt-4 md:pt-6 pb-32">
-        {/* Menu Watermark Heading */}
-        <section className="mb-8 md:mb-10">
-          <div className="text-center relative">
-            <h2 className={`text-2xl md:text-4xl font-black ${tm.textAcc} select-none tracking-[0.4em] m-0 leading-none transition-colors duration-500 uppercase pb-1`}>
-              {t.menu}
-            </h2>
-            <div className={`h-1 w-20 bg-[#F3E5AB]/20 mx-auto mt-2 rounded-full shadow-none`}></div>
-          </div>
-        </section>
-
-        {/* Main Grid */}
-        <div className="space-y-16 md:space-y-24">
-          {filteredMenuData.map((section) => (
-            <section key={section.category_en} className="">
-              <div className="flex items-center gap-3 mb-10">
-                <CategoryIcon name={lang === 'en' ? section.category_en : section.category_am} className={`w-5 h-5 ${tm.textMuted}`} />
-                <h3 className={`text-sm md:text-base font-serif ${tm.textMuted} uppercase tracking-[0.4em]`}>
-                  {t.categories[(lang === 'en' ? section.category_en : section.category_am) as keyof typeof t.categories] || (lang === 'en' ? section.category_en : section.category_am)}
-                </h3>
-                <div className={`h-[1px] flex-grow ${tm.borderMain} border-t ml-2`}></div>
+        {/* Specials Section */}
+        {activeSection === 'specials' && (
+          <section className="min-h-[calc(100vh-80px)] py-20 px-4 md:px-12 animate-fade-in">
+            <div className="max-w-7xl mx-auto">
+              <div className="text-center mb-12 md:mb-20">
+                <h2 className="text-3xl md:text-6xl font-serif font-black uppercase tracking-widest mb-4">{t.specials}</h2>
+                <div className="w-16 md:w-24 h-1 bg-[#F3E5AB] mx-auto rounded-full" />
               </div>
 
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 md:gap-8">
-                {section.items.map((item) => (
-                  <article 
-                    key={item.id} 
-                    className={`relative flex items-center justify-center w-full max-w-[340px] md:max-w-[700px] mx-auto h-36 md:h-48 my-6 md:my-10 translate-x-2 md:translate-x-4 ${
-                      item.isSoldOut ? 'opacity-50 grayscale contrast-75' : ''
-                    }`}
-                  >
-                    {/* Floating Circular Image Layer (Offset Left) */}
-                    <div className="absolute -left-4 md:-left-8 w-44 h-44 md:w-60 md:h-60 flex-shrink-0 z-30 transition-transform duration-500 group-hover:scale-105">
-                      <div className={`relative w-full h-full rounded-full overflow-hidden border-2 border-[#F3E5AB] shadow-[0_8px_32px_0_rgba(0,0,0,0.8)] bg-[#08120F]`}>
-                      {item.image ? (
-                        <SafeImage 
-                          src={item.image} 
-                          alt={lang === 'en' ? item.name_en : item.name_am} 
-                          fill
-                          className="w-full h-full object-cover" 
-                        />
-                      ) : (
-                        <div className={`w-full h-full flex items-center justify-center bg-[#08120F]`}>
-                          <span className={`${tm.textAcc} font-serif text-5xl opacity-40`}>{(lang === 'en' ? item.name_en : item.name_am).charAt(0)}</span>
-                        </div>
-                      )}
-                      </div>
-                      
-                      {/* Tags inside floating circle */}
-                      <div className="absolute top-6 left-6 flex flex-col gap-1 z-40">
-                          {item.isSpecial && (
-                            <div className={`px-2 py-0.5 rounded text-[8px] md:text-[10px] font-black uppercase tracking-widest bg-[#F3E5AB] text-[#08120F] w-fit shadow-md`}>
-                              {t.special}
-                            </div>
-                          )}
-                          {item.isNew && (
-                            <div className={`px-2 py-0.5 rounded text-[8px] md:text-[10px] font-black uppercase tracking-widest bg-[#28A745] text-white w-fit shadow-md`}>
-                              {t.new}
-                            </div>
-                          )}
-                        </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {specials.map((item) => (
+                  <div key={item.id} className={`${tm.cardBg} rounded-3xl border border-[#F3E5AB]/10 overflow-hidden group hover:border-[#F3E5AB]/40 transition-all`}>
+                    <div className="h-56 md:h-64 relative overflow-hidden">
+                      {item.image ? <img src={item.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" /> : <div className="w-full h-full bg-[#F3E5AB]/5" />}
+                      <div className="absolute top-4 left-4 bg-[#F3E5AB] text-[#08120F] px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest">Chef's Choice</div>
                     </div>
-
-                    {/* Symmetrical Structured Frame Layer */}
-                    <div className={`w-full h-full ${tm.cardFrameBg} rounded-3xl border ${tm.cardFrameBorder} ${tm.cardFrameHoverBorder} pl-40 md:pl-56 pr-4 md:pr-12 py-3 md:py-6 flex flex-col items-center justify-between text-center relative overflow-hidden ${tm.cardFrameShadow} ${tm.cardFrameHoverShadow} transition-all duration-500`}>
-                      {/* Top: Name & Price */}
-                      <div className="flex-shrink-0 w-full max-w-[200px] md:max-w-[300px]">
-                        <h3 className={`text-lg md:text-3xl font-serif font-black ${tm.cardTitleColor} transition-colors leading-tight break-words line-clamp-1`}>{lang === 'en' ? item.name_en : item.name_am}</h3>
-                        <span className={`${tm.cardPriceColor} font-black text-base md:text-2xl whitespace-nowrap`}>{item.price} ETB</span>
-                      </div>
-
-                      {/* Middle: Description (clamped, click to expand) */}
-                      <div className="flex-1 flex items-center w-full max-w-[200px] md:max-w-[300px] min-h-0 overflow-hidden py-1">
-                        <p
-                          onClick={() => handleItemClick(item.id)}
-                          className={`${tm.cardDescColor} text-[10px] md:text-sm italic font-light leading-relaxed transition-colors cursor-pointer hover:opacity-80 w-full line-clamp-2 overflow-hidden`}
-                          title="Tap to read more"
-                        >{lang === 'en' ? item.description_en : item.description_am}</p>
-                      </div>
-
-                      {/* Bottom: ADD button (always anchored) */}
-                      <div className={`flex-shrink-0 flex items-center justify-center pt-2 border-t ${tm.cardDivider} w-full max-w-[200px] md:max-w-[300px]`}>
-                        <div className="flex items-center gap-2">
-                          {cart[item.id] > 0 && !item.isSoldOut && (
-                            <div className={`flex items-center gap-2 border border-white/10 bg-white/5 rounded-full px-1.5 py-1 shadow-md`}>
-                              <button 
-                                onClick={() => removeFromCart(item.id)}
-                                className={`w-6 h-6 flex items-center justify-center rounded-full text-xs transition-colors bg-white/10 text-[#F3E5AB] hover:bg-[#F3E5AB] hover:text-[#08120F]`}
-                              >
-                                -
-                              </button>
-                              <span className={`text-[11px] font-black px-1 text-[#F3E5AB]`}>{cart[item.id]}</span>
-                              <button 
-                                onClick={(e) => addToCart(item.id, e)}
-                                className={`px-3 h-6 flex items-center justify-center rounded-md text-[10px] font-black bg-[#F3E5AB] text-[#08120F] hover:scale-110 transition-transform uppercase tracking-tighter`}
-                              >
-                                ADD
-                              </button>
-                            </div>
-                          )}
-                          {!cart[item.id] && (
-                            <button 
-                              disabled={item.isSoldOut}
-                              onClick={(e) => addToCart(item.id, e)}
-                              className={`flex items-center justify-center gap-2 px-5 py-1.5 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest transition-all ${
-                                item.isSoldOut ? 'bg-white/5 text-[#FDF8F0]/20 cursor-not-allowed' : 'bg-[#F3E5AB] text-[#08120F] hover:scale-105 active:scale-95 shadow-[0_8px_32px_0_rgba(0,0,0,0.8)]'
-                              }`}
-                            >
-                              <svg className="w-3 h-3 md:w-3.5 md:h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
-                              <span>ADD</span>
-                            </button>
-                          )}
-                        </div>
+                    <div className="p-6 md:p-8">
+                      <h4 className="text-xl md:text-2xl font-serif font-black mb-2">{lang === 'en' ? item.name_en : item.name_am}</h4>
+                      <p className="text-xs md:text-sm opacity-60 mb-6 line-clamp-3">{lang === 'en' ? item.description_en : item.description_am}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg md:text-xl font-black text-[#F3E5AB]">{item.price} ETB</span>
+                        <button onClick={(e) => addToCart(item.id, e)} className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#F3E5AB] text-[#08120F] flex items-center justify-center font-black hover:scale-110 transition-transform shadow-xl">+</button>
                       </div>
                     </div>
-                  </article>
+                  </div>
                 ))}
               </div>
-            </section>
-          ))}
-        </div>
-      </main>
+            </div>
+          </section>
+        )}
 
-      {/* Fly-to-Cart Animation Layer */}
-      <div className="fixed inset-0 pointer-events-none z-[2000] overflow-hidden">
-        {flyingItems.map((f) => (
-          <div
-            key={f.id}
-            className="absolute rounded-full overflow-hidden border-2 border-[#F3E5AB] bg-[#08120F] shadow-xl"
-            style={{
-              width: '80px',
-              height: '80px',
-              left: 0,
-              top: 0,
-              willChange: 'transform, opacity',
-              transition: f.active ? 'all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1)' : 'none',
-              opacity: f.active ? 0 : 0.7,
-              transform: f.active 
-                ? `translate(${f.endX - 40}px, ${f.endY - 40}px) scale(0.2)` 
-                : `translate(${f.startX - 40}px, ${f.startY - 40}px) scale(1)`,
-            }}
-          >
-            <img src={f.image} className="w-full h-full object-cover" alt="Flying item" />
-          </div>
-        ))}
+        {/* Contact Section */}
+        {activeSection === 'contact' && (
+          <section className="min-h-[calc(100vh-80px)] py-20 px-4 md:px-12 animate-fade-in">
+            <div className="max-w-7xl mx-auto">
+              <div className="text-center mb-12 md:mb-20">
+                <h2 className="text-3xl md:text-6xl font-serif font-black uppercase tracking-widest mb-4">{t.contact}</h2>
+                <div className="w-16 md:w-24 h-1 bg-[#F3E5AB] mx-auto rounded-full" />
+              </div>
+
+              <div className="grid lg:grid-cols-3 gap-8 md:gap-12">
+                {/* Contact Cards */}
+                <div className="lg:col-span-1 space-y-4 md:space-y-6">
+                  {[
+                    { icon: MapPin, label: t.address, val: t.addressVal },
+                    { icon: Clock, label: t.hours, val: t.hoursVal },
+                    { icon: Phone, label: t.phone, val: t.phoneVal }
+                  ].map((info, idx) => (
+                    <div key={idx} className={`${tm.cardBg} p-6 md:p-8 rounded-3xl border border-[#F3E5AB]/10 flex items-start gap-4 md:gap-6`}>
+                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-[#F3E5AB]/10 flex items-center justify-center flex-shrink-0">
+                        <info.icon className="w-5 h-5 md:w-6 md:h-6 text-[#F3E5AB]" />
+                      </div>
+                      <div>
+                        <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 mb-1">{info.label}</p>
+                        <p className="text-base md:text-lg font-medium">{info.val}</p>
+                      </div>
+                    </div>
+                  ))}
+                  <button className="w-full bg-[#F3E5AB] text-[#08120F] py-5 md:py-6 rounded-3xl font-black uppercase tracking-[0.3em] text-xs md:text-sm shadow-2xl hover:scale-[1.02] transition-all">
+                    {t.callToOrder}
+                  </button>
+                </div>
+
+                {/* Google Maps Placeholder */}
+                <div className="lg:col-span-2 relative h-[400px] md:h-[600px] rounded-3xl overflow-hidden border border-[#F3E5AB]/20 bg-[#08120F] group">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center opacity-20 transition-opacity group-hover:opacity-40">
+                    <MapPin className="w-16 h-16 md:w-24 md:h-24 mb-6" />
+                    <p className="font-serif text-xl md:text-2xl uppercase tracking-[0.5em]">Map View</p>
+                  </div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#08120F] via-transparent to-transparent" />
+                  <div className="absolute bottom-8 left-8 md:bottom-12 md:left-12">
+                    <h4 className="text-2xl md:text-3xl font-serif font-black text-[#F3E5AB] mb-2">Mas Coffee Plaza</h4>
+                    <p className="text-sm md:text-base opacity-60">The heart of luxury coffee in Addis Ababa</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
       </div>
 
       {/* Expanded Description Popup */}
       {expandedDesc !== null && (() => {
-        const allItems = menuData.flatMap(s => s.items);
-        const found = allItems.find(i => i.id === expandedDesc);
+        const found = menuData.flatMap(s => s.items).find(i => i.id === expandedDesc);
         if (!found) return null;
         return (
-          <div className="fixed inset-0 z-[1200] flex items-center justify-center px-4" onClick={() => setExpandedDesc(null)}>
-            <div className={`absolute inset-0 ${tm.modalOverlay} backdrop-blur-sm`} />
-            <div
-              className={`relative z-10 ${tm.modalBg} border border-white/15 rounded-2xl p-6 max-w-sm w-full shadow-[0_8px_32px_0_rgba(0,0,0,0.8)] animate-fade-in-up`}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <button
-                onClick={() => setExpandedDesc(null)}
-                className="absolute top-3 right-3 w-8 h-8 flex items-center justify-center rounded-full bg-white/5 text-[#F3E5AB] hover:bg-[#F3E5AB]/20 transition-colors"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+          <div className="fixed inset-0 z-[2000] flex items-center justify-center px-4" onClick={() => setExpandedDesc(null)}>
+            <div className="absolute inset-0 bg-[#08120F]/95 backdrop-blur-md" />
+            <div className={`${tm.modalBg} relative z-10 p-8 max-w-lg w-full rounded-3xl shadow-2xl animate-fade-in-up`} onClick={(e) => e.stopPropagation()}>
+              <button onClick={() => setExpandedDesc(null)} className="absolute top-6 right-6 opacity-40 hover:opacity-100 transition-opacity">
+                <X className="w-6 h-6" />
               </button>
-              <h3 className={`text-xl font-serif font-black ${tm.cardTitleColor} mb-1`}>{lang === 'en' ? found.name_en : found.name_am}</h3>
-              <span className={`${tm.cardPriceColor} font-black text-lg`}>{found.price} ETB</span>
-              <div className={`mt-3 pt-3 border-t border-white/10`}>
-                <p className={`${tm.cardDescColor} text-sm italic font-light leading-relaxed`}>{lang === 'en' ? found.description_en : found.description_am}</p>
-              </div>
+              <h3 className="text-2xl md:text-3xl font-serif font-black mb-2 text-[#F3E5AB]">{lang === 'en' ? found.name_en : found.name_am}</h3>
+              <p className="text-lg md:text-xl font-black mb-6 md:mb-8 opacity-60">{found.price} ETB</p>
+              <p className="text-base md:text-lg leading-relaxed italic opacity-80">{lang === 'en' ? found.description_en : found.description_am}</p>
             </div>
           </div>
         );
       })()}
 
-      {/* Floating Cart Button (Mobile Optimized) */}
-      <div className={`fixed bottom-0 left-0 right-0 p-6 z-[950] transition-all duration-700 pointer-events-none lg:px-12 ${cartItemCount > 0 ? 'translate-y-0 opacity-100' : 'translate-y-24 opacity-0'}`}>
+      {/* Floating Cart Button */}
+      <div className={`fixed bottom-8 left-0 right-0 px-6 z-[950] pointer-events-none transition-all duration-700 ${cartItemCount > 0 ? 'translate-y-0 opacity-100' : 'translate-y-24 opacity-0'}`}>
         <button 
           id="cart-btn"
           onClick={() => setShowModal("cart")}
-          className={`mx-auto bg-[#F3E5AB] text-[#08120F] px-8 py-4 rounded-full font-black uppercase tracking-[0.2em] text-sm shadow-[0_8px_32px_0_rgba(0,0,0,0.8)] border-none hover:scale-105 active:scale-95 flex items-center justify-center gap-3 pointer-events-auto w-full max-w-md md:w-auto relative overflow-hidden group ${cartPulse ? 'scale-110 shadow-[0_12px_48px_0_rgba(0,0,0,0.9)]' : 'transition-all'}`}
+          className={`mx-auto bg-[#F3E5AB] text-[#08120F] px-8 md:px-12 py-4 md:py-5 rounded-full font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-xs md:text-sm shadow-2xl hover:scale-105 active:scale-95 flex items-center gap-4 pointer-events-auto relative overflow-hidden group ${cartPulse ? 'scale-110' : ''}`}
         >
-          <div className="absolute inset-0 bg-white/20 -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-          </svg>
-          <span className="flex-1 text-center font-black">View Order - {cartTotal.toFixed(2)} ETB</span>
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+          <span>View Order ({cartTotal.toFixed(0)} ETB)</span>
         </button>
       </div>
 
-      {/* Modals & Bottom Sheet */}
-      {showModal && (
-        <div className="fixed inset-0 z-[1100] flex items-end lg:items-center justify-center">
-          <div className={`absolute inset-0 ${tm.modalOverlay} backdrop-blur-md transition-opacity duration-500`} onClick={() => setShowModal(null)} />
+      {/* Cart Modal (Bottom Slide-Up Drawer) */}
+      <div className={`fixed inset-0 z-[2000] lg:hidden transition-opacity duration-300 ${showModal === "cart" ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        <div className="absolute inset-0 bg-[#08120F]/60 backdrop-blur-md" onClick={() => setShowModal(null)} />
+        <div 
+          className={`absolute bottom-0 left-0 w-full ${tm.modalBg} rounded-t-[40px] flex flex-col overflow-hidden transition-transform duration-500 ease-in-out ${showModal === "cart" ? 'translate-y-0' : 'translate-y-full'}`}
+          style={{ maxHeight: '90vh', willChange: 'transform' }}
+        >
+          {/* Drag Handle / Close Header */}
+          <div className="pt-4 pb-2 flex flex-col items-center gap-4 border-b border-[#F3E5AB]/10">
+            <div className="w-12 h-1.5 bg-[#F3E5AB]/20 rounded-full" onClick={() => setShowModal(null)} />
+            <div className="w-full px-8 flex items-center justify-between">
+              <h2 className={`text-2xl font-serif font-black uppercase tracking-widest ${tm.textApp}`}>My Order</h2>
+              <button onClick={() => setShowModal(null)} className={`w-10 h-10 rounded-full border ${tm.borderMain} flex items-center justify-center ${tm.textApp}`}>
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
           
-          <div className={`
-            ${tm.modalBg} relative z-10 w-full lg:max-w-xl transition-all duration-500
-            ${showModal === "cart" 
-              ? "h-[65vh] lg:h-auto lg:max-h-[85vh] rounded-t-[32px] lg:rounded-2xl border-t border-white/15 lg:border" 
-              : "p-8 max-h-[90vh] rounded-t-[32px] lg:rounded-2xl lg:m-4"
-            }
-            flex flex-col overflow-hidden animate-slide-up lg:animate-fade-in-up
-          `}>
-            {/* Top Indicator for Bottom Sheet */}
-            <div className="lg:hidden w-full flex justify-center pt-3 pb-1" onClick={() => setShowModal(null)}>
-              <div className="w-12 h-1.5 bg-white/15 rounded-full" />
+          <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            {menuData.flatMap(c => c.items).filter(i => cart[i.id]).map(item => (
+              <div key={item.id} className="flex items-center gap-4">
+                <div className="w-16 h-16 rounded-2xl overflow-hidden border border-[#F3E5AB]/10 flex-shrink-0">
+                  <img src={item.image} className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h4 className={`text-lg font-serif font-black mb-1 truncate ${tm.textApp}`}>{lang === 'en' ? item.name_en : item.name_am}</h4>
+                  <p className="font-black text-[#F3E5AB] opacity-60 text-sm">{item.price} ETB</p>
+                </div>
+                <div className="flex items-center gap-2 bg-[#F3E5AB]/10 rounded-full px-2 py-1">
+                  <button onClick={() => removeFromCart(item.id)} className={`w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#F3E5AB] hover:text-[#08120F] transition-colors ${tm.textApp}`}>-</button>
+                  <span className={`font-black text-sm ${tm.textApp}`}>{cart[item.id]}</span>
+                  <button onClick={() => addToCart(item.id)} className="w-8 h-8 rounded-full bg-[#F3E5AB] text-[#08120F] flex items-center justify-center font-black">+</button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <div className={`p-8 bg-[#08120F]/50 border-t ${tm.borderMain}`}>
+            <div className="flex justify-between items-center mb-6">
+              <span className={`text-[10px] font-black uppercase tracking-[0.5em] opacity-40 ${tm.textApp}`}>Total Amount</span>
+              <span className="text-3xl font-serif font-black text-[#F3E5AB]">{cartTotal.toFixed(0)} ETB</span>
+            </div>
+            <button className="w-full bg-[#F3E5AB] text-[#08120F] py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-xs shadow-2xl hover:scale-[1.02] transition-all">
+              Complete Checkout
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Desktop Cart Modal */}
+      {showModal === "cart" && (
+        <div className="hidden lg:flex fixed inset-0 z-[2000] items-center justify-center px-4">
+          <div className="absolute inset-0 bg-[#08120F]/60 backdrop-blur-xl" onClick={() => setShowModal(null)} />
+          <div className={`${tm.modalBg} relative z-10 w-full max-w-2xl max-h-[85vh] rounded-3xl flex flex-col overflow-hidden animate-fade-in-up`}>
+            <div className="p-8 border-b border-[#F3E5AB]/10 flex items-center justify-between">
+              <h2 className="text-3xl font-serif font-black uppercase tracking-widest text-[#F3E5AB]">My Order</h2>
+              <button onClick={() => setShowModal(null)} className="opacity-40 hover:opacity-100">
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-8 space-y-8">
+              {menuData.flatMap(c => c.items).filter(i => cart[i.id]).map(item => (
+                <div key={item.id} className="flex items-center gap-6">
+                  <div className="w-20 h-20 rounded-2xl overflow-hidden border border-[#F3E5AB]/10 flex-shrink-0">
+                    <img src={item.image} className="w-full h-full object-cover" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-xl font-serif font-black mb-1 truncate">{lang === 'en' ? item.name_en : item.name_am}</h4>
+                    <p className="font-black text-[#F3E5AB] opacity-60">{item.price} ETB</p>
+                  </div>
+                  <div className="flex items-center gap-4 bg-[#F3E5AB]/10 rounded-full px-4 py-2">
+                    <button onClick={() => removeFromCart(item.id)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#F3E5AB] hover:text-[#08120F] transition-colors">-</button>
+                    <span className="font-black">{cart[item.id]}</span>
+                    <button onClick={() => addToCart(item.id)} className="w-8 h-8 rounded-full bg-[#F3E5AB] text-[#08120F] flex items-center justify-center font-black">+</button>
+                  </div>
+                </div>
+              ))}
             </div>
 
-            {showModal === "cart" ? (
-              <div className="flex flex-col h-full uppercase tracking-tight">
-                <div className="px-6 py-4 border-b border-white/15 flex items-center justify-between">
-                  <h2 className={`text-xl font-serif text-[#F3E5AB] font-black tracking-[0.2em]`}>My Order</h2>
-                  <button onClick={() => setShowModal(null)} className="h-10 w-10 flex items-center justify-center rounded-full bg-white/5 text-[#F3E5AB]">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
-                  </button>
-                </div>
-
-                <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
-                  {cartItemsData.map((item) => (
-                    <div key={item.id} className="flex items-center gap-4 group">
-                      <div className="w-16 h-16 relative flex-shrink-0 rounded-xl overflow-hidden border border-white/15 bg-[#08120F]">
-                        {item.image ? <Image src={item.image} alt={lang === 'en' ? item.name_en : item.name_am} fill className="object-cover" /> : <div className="w-full h-full flex items-center justify-center text-[#F3E5AB] font-serif text-2xl">{(lang === 'en' ? item.name_en : item.name_am)[0]}</div>}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex justify-between items-start">
-                          <h4 className="font-serif text-[#FDF8F0] font-bold text-lg truncate pr-2">{lang === 'en' ? item.name_en : item.name_am}</h4>
-                          <span className="font-black text-[#F3E5AB] whitespace-nowrap">{item.price} ETB</span>
-                        </div>
-                        <div className="flex items-center justify-between mt-2">
-                           <div className="flex items-center gap-1">
-                              <button 
-                                onClick={() => removeFromCart(item.id)}
-                                className="w-10 h-10 flex items-center justify-center rounded-xl border border-white/15 text-[#F3E5AB] bg-white/5 active:scale-90 transition-transform"
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M20 12H4" /></svg>
-                              </button>
-                              <span className={`w-10 text-center font-black text-[#FDF8F0] text-lg`}>{item.quantity}</span>
-                              <button 
-                                onClick={() => addToCart(item.id)}
-                                className="w-10 h-10 flex items-center justify-center rounded-xl bg-[#F3E5AB] text-[#08120F] active:scale-90 transition-transform"
-                                style={{ minHeight: '44px' }}
-                              >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M12 4v16m8-8H4" /></svg>
-                              </button>
-                           </div>
-                           <span className="text-[10px] text-[#FDF8F0]/50 font-bold tracking-widest uppercase">Subtotal: {(item.price * item.quantity).toFixed(0)}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  {cartItemsData.length === 0 && (
-                    <div className="flex flex-col items-center justify-center py-20 opacity-40">
-                      <svg className="w-16 h-16 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
-                      <p className="font-serif uppercase tracking-[0.3em] text-sm">Your cart is empty</p>
-                    </div>
-                  )}
-                </div>
-
-                <div className="p-6 bg-[#08120F] border-t border-white/15">
-                  <div className="flex justify-between items-center mb-6">
-                    <span className="text-[#FDF8F0]/50 text-xs uppercase tracking-[0.4em] font-black">Grand Total</span>
-                    <span className="text-4xl font-serif font-black text-[#F3E5AB]">{cartTotal.toFixed(2)} <small className="text-xs">ETB</small></span>
-                  </div>
-                  <button 
-                    onClick={() => setShowModal(null)}
-                    className="w-full bg-[#F3E5AB] text-[#08120F] py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-sm shadow-[0_8px_32px_0_rgba(0,0,0,0.8)] active:scale-95 transition-all"
-                  >
-                    Close & Browse
-                  </button>
-                </div>
+            <div className="p-8 bg-[#08120F]/50 border-t border-[#F3E5AB]/10">
+              <div className="flex justify-between items-center mb-8">
+                <span className="text-[10px] font-black uppercase tracking-[0.5em] opacity-40">Total Amount</span>
+                <span className="text-4xl font-serif font-black text-[#F3E5AB]">{cartTotal.toFixed(0)} ETB</span>
               </div>
-            ) : showModal === "story" ? (
-              <div className="p-8 text-center bg-[#08120F]">
-                <h2 className="text-3xl font-serif text-[#F3E5AB] uppercase tracking-widest mb-6">{t.ourStory}</h2>
-                <div className="w-12 h-[1px] border-b border-white/15 mx-auto mb-6" />
-                <h3 className="text-lg text-[#FDF8F0] mb-4 italic leading-tight">{siteContent.storyTitle}</h3>
-                <p className="text-[#FDF8F0]/70 text-sm leading-relaxed mb-8 whitespace-pre-wrap">{siteContent.storyText}</p>
-                <button onClick={() => setShowModal(null)} className="w-full py-4 border border-white/15 text-[#F3E5AB] rounded-full uppercase tracking-widest font-black text-xs hover:bg-[#F3E5AB] hover:text-[#08120F] transition-all">Close</button>
-              </div>
-            ) : (
-              <div className="p-8 text-center bg-[#08120F]">
-                <h2 className="text-3xl font-serif text-[#F3E5AB] uppercase tracking-widest mb-6">{t.contactInfo}</h2>
-                <div className="w-12 h-[1px] border-b border-white/15 mx-auto mb-6" />
-                <div className="space-y-8 mb-8 text-[#FDF8F0]">
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.4em] text-[#FDF8F0]/50 font-black mb-2">{t.address}</p>
-                    <p className="text-sm font-medium">{siteContent.address}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.4em] text-[#FDF8F0]/50 font-black mb-2">{t.phone}</p>
-                    <p className="text-2xl font-serif font-bold text-[#F3E5AB]">{siteContent.phone}</p>
-                  </div>
-                  <div>
-                    <p className="text-[10px] uppercase tracking-[0.4em] text-[#FDF8F0]/50 font-black mb-2">Email</p>
-                    <p className="text-sm font-medium font-mono">{siteContent.email}</p>
-                  </div>
-                </div>
-                <button onClick={() => setShowModal(null)} className="w-full py-4 border border-white/15 text-[#F3E5AB] rounded-full uppercase tracking-widest font-black text-xs hover:bg-[#F3E5AB] hover:text-[#08120F] transition-all">Close</button>
-              </div>
-            )}
+              <button className="w-full bg-[#F3E5AB] text-[#08120F] py-6 rounded-3xl font-black uppercase tracking-[0.3em] text-sm shadow-2xl hover:scale-[1.02] transition-all">
+                Complete Checkout
+              </button>
+            </div>
           </div>
         </div>
       )}
 
-      <footer className={`mt-32 py-20 border-t ${tm.borderMain} relative overflow-hidden ${tm.footerBg} transition-colors duration-500`}>
+      {/* Footer */}
+      <footer className={`py-20 border-t ${tm.borderMain} relative overflow-hidden transition-colors duration-500`}>
         <div className="max-w-7xl mx-auto px-4 text-center relative z-10">
-          <h2 
-            onPointerDown={handleLongPressStart}
-            onPointerUp={handleLongPressEnd}
-            onPointerLeave={handleLongPressEnd}
-            className={`text-3xl font-serif ${tm.textAcc} mb-6 tracking-tighter font-bold uppercase select-none cursor-default`}
-          >
-            {siteContent.hotelName}
-          </h2>
-          <div className={`flex justify-center gap-6 ${tm.textMuted} text-[9px] tracking-[0.3em] uppercase font-black`}>
-            <button onClick={() => setShowModal("story")} className={`hover:opacity-80 transition-all`}>Our Story</button>
-            <button onClick={() => setShowModal("contact")} className={`hover:opacity-80 transition-all`}>Contact</button>
+          <h2 className="text-2xl md:text-3xl font-serif font-black mb-8 tracking-widest uppercase text-[#F3E5AB]">Mas Coffee</h2>
+          <div className="flex justify-center gap-8 md:gap-12 text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em] opacity-40">
+            <button onClick={() => setActiveSection('story')} className="hover:opacity-100 transition-opacity">Our Story</button>
+            <button onClick={() => setActiveSection('contact')} className="hover:opacity-100 transition-opacity">Contact</button>
+            <button onClick={() => setActiveSection('menu')} className="hover:opacity-100 transition-opacity">Menu</button>
           </div>
+          <p className="mt-12 text-[8px] md:text-[10px] opacity-20 tracking-widest uppercase">© 2026 MAS COFFEE - THE MIDNIGHT FOREST EXPERIENCE</p>
         </div>
-        <div className="absolute inset-0 opacity-[0.05] pointer-events-none tilet-pattern" />
-      </footer>
+      </footer >
+
+      {/* Fly-to-Cart Animation Layer */}
+      <div className="fixed inset-0 pointer-events-none z-[3000] overflow-hidden">
+        {flyingItems.map((f) => (
+          <div
+            key={f.id}
+            className="absolute rounded-full overflow-hidden border-2 border-[#F3E5AB] bg-[#08120F] shadow-2xl"
+            style={{
+              width: '80px', height: '80px', left: 0, top: 0,
+              willChange: 'transform, opacity',
+              transition: f.active ? 'all 0.6s cubic-bezier(0.165, 0.84, 0.44, 1)' : 'none',
+              opacity: f.active ? 0 : 0.8,
+              transform: f.active 
+                ? `translate(${f.endX - 40}px, ${f.endY - 40}px) scale(0.1)` 
+                : `translate(${f.startX - 40}px, ${f.startY - 40}px) scale(1)`,
+            }}
+          >
+            <img src={f.image} className="w-full h-full object-cover" alt="" />
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

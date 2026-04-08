@@ -35,13 +35,13 @@ interface MenuContextType {
 const MenuContext = createContext<MenuContextType | undefined>(undefined);
 
 const initialSiteContent: SiteContent = {
-  hotelName: "ABAY INTERNATIONAL HOTEL",
-  hotelSlogan: "THE ESSENCE OF ETHIOPIA",
-  storyTitle: "The Essence of Addis",
-  storyText: "Established in 1998, Addis Culinary brings the rich heritage of Ethiopian hospitality to your table. Every dish is prepared with love and authentic spices imported directly from the highlands. Our mission is to share the vibrant flavors and communal dining traditions of our motherland with the world.",
-  address: "123 Cultural Way, Addis Ababa, Ethiopia",
-  phone: "+251 11 123 4567",
-  email: "info@abayhotel.com",
+  hotelName: "MAS COFFEE",
+  hotelSlogan: "WHERE EVERY SIP TELLS A STORY",
+  storyTitle: "A Legacy of Flavor",
+  storyText: "At Mas Coffee, we believe that coffee is more than just a drink—it's a journey. Founded on the principles of quality, community, and heritage, we source the finest beans from the heart of Ethiopia. Our 'Midnight Forest' experience is designed to transport you to the lush highlands where every bean is nurtured with care.",
+  address: "Mas Coffee Plaza, Addis Ababa, Ethiopia",
+  phone: "+251 911 234 567",
+  email: "info@mascoffee.com",
   logo: "/logo.png"
 };
 
