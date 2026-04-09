@@ -16,9 +16,56 @@ interface SiteContent {
   dailyViews?: number;
 }
 
+export interface MainHero {
+  id: string;
+  title: string;
+  subtitle: string;
+  image: string;
+  order: number;
+}
+
+export interface LookbookCategory {
+  id: string;
+  name: string;
+}
+
+export interface LookbookItem {
+  id: number;
+  name: string;
+  price: string;
+  image: string;
+  category: string;
+  description: string;
+}
+
+export interface Announcement {
+  id: string;
+  text: string;
+  isActive: boolean;
+  createdAt: Date;
+}
+
+export interface Inquiry {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  subject: string;
+  message: string;
+  status: 'new' | 'read' | 'replied';
+  createdAt: Date;
+}
+
 interface MenuContextType {
   menuData: MenuSection[];
   siteContent: SiteContent;
+  websiteContent: {
+    heroes: MainHero[];
+    lookbookCategories: LookbookCategory[];
+    lookbookItems: LookbookItem[];
+    announcements: Announcement[];
+    inquiries: Inquiry[];
+  };
   updateMenuItem: (itemId: number, updates: Partial<MenuItem>) => Promise<boolean>;
   bulkUpdateItems: (itemIds: number[], updates: Partial<MenuItem>) => Promise<boolean>;
   addMenuItem: (categoryId: string, item: Omit<MenuItem, "id">) => Promise<boolean>;
@@ -27,6 +74,14 @@ interface MenuContextType {
   renameCategory: (categoryId: string, newName: string) => Promise<boolean>;
   deleteCategory: (categoryId: string) => Promise<boolean>;
   updateSiteContent: (updates: Partial<SiteContent>) => Promise<boolean>;
+  
+  // Website Manager Methods
+  updateHero: (action: 'add' | 'update' | 'delete' | 'reorder', payload: any) => Promise<boolean>;
+  updateLookbookCategory: (action: 'add' | 'delete', payload: any) => Promise<boolean>;
+  updateLookbookItem: (action: 'add' | 'update' | 'delete', payload: any) => Promise<boolean>;
+  updateAnnouncement: (action: 'add' | 'update' | 'delete' | 'toggle', payload: any) => Promise<boolean>;
+  updateInquiry: (action: 'updateStatus' | 'delete', payload: any) => Promise<boolean>;
+
   refreshData: () => Promise<void>;
   language: 'en' | 'am';
   setLanguage: (lang: 'en' | 'am') => void;
@@ -49,6 +104,13 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Use empty array initially to stop auto-seeds from appearing before fetch
   const [menuData, setMenuData] = useState<MenuSection[]>([]);
   const [siteContent, setSiteContent] = useState<SiteContent>(initialSiteContent);
+  const [websiteContent, setWebsiteContent] = useState({
+    heroes: [] as MainHero[],
+    lookbookCategories: [] as LookbookCategory[],
+    lookbookItems: [] as LookbookItem[],
+    announcements: [] as Announcement[],
+    inquiries: [] as Inquiry[],
+  });
   const [language, setLanguageState] = useState<'en' | 'am'>('en');
 
   // Load language preference from localStorage on mount
@@ -71,17 +133,36 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshData = useCallback(async () => {
     try {
       const timestamp = new Date().getTime();
-      const menuRes = await fetch(`/api/menu?t=${timestamp}`, { cache: 'no-store' });
-      const data = await menuRes.json();
-      if (Array.isArray(data)) {
-        setMenuData(data);
-      }
+      const [menuRes, settingsRes, heroRes, lookCatRes, lookItemRes, annRes, inqRes] = await Promise.all([
+        fetch(`/api/menu?t=${timestamp}`, { cache: 'no-store' }),
+        fetch(`/api/settings?t=${timestamp}`, { cache: 'no-store' }),
+        fetch(`/api/website/hero?t=${timestamp}`, { cache: 'no-store' }),
+        fetch(`/api/website/lookbook/categories?t=${timestamp}`, { cache: 'no-store' }),
+        fetch(`/api/website/lookbook/items?t=${timestamp}`, { cache: 'no-store' }),
+        fetch(`/api/website/announcements?t=${timestamp}`, { cache: 'no-store' }),
+        fetch(`/api/website/inquiries?t=${timestamp}`, { cache: 'no-store' })
+      ]);
 
-      const settingsRes = await fetch(`/api/settings?t=${timestamp}`, { cache: 'no-store' });
-      const settingsData = await settingsRes.json();
-      if (!settingsData.error) {
-        setSiteContent(settingsData);
-      }
+      const [menuData, settingsData, heroData, lookCatData, lookItemData, annData, inqData] = await Promise.all([
+        menuRes.json(),
+        settingsRes.json(),
+        heroRes.json(),
+        lookCatRes.json(),
+        lookItemRes.json(),
+        annRes.json(),
+        inqRes.json()
+      ]);
+
+      if (Array.isArray(menuData)) setMenuData(menuData);
+      if (!settingsData.error) setSiteContent(settingsData);
+      
+      setWebsiteContent({
+        heroes: Array.isArray(heroData) ? heroData : [],
+        lookbookCategories: Array.isArray(lookCatData) ? lookCatData : [],
+        lookbookItems: Array.isArray(lookItemData) ? lookItemData : [],
+        announcements: Array.isArray(annData) ? annData : [],
+        inquiries: Array.isArray(inqData) ? inqData : [],
+      });
     } catch (err) {
       console.error("Failed to refresh data", err);
     }
@@ -90,6 +171,102 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     refreshData();
   }, [refreshData]);
+
+  // Website Manager Methods Implementation
+  const updateHero = async (action: 'add' | 'update' | 'delete' | 'reorder', payload: any) => {
+    try {
+      const res = await fetch('/api/website/hero', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, payload }),
+        cache: 'no-store'
+      });
+      if (res.ok) {
+        await refreshData();
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error("Failed to update hero", err);
+      return false;
+    }
+  };
+
+  const updateLookbookCategory = async (action: 'add' | 'delete', payload: any) => {
+    try {
+      const res = await fetch('/api/website/lookbook/categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, payload }),
+        cache: 'no-store'
+      });
+      if (res.ok) {
+        await refreshData();
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error("Failed to update lookbook category", err);
+      return false;
+    }
+  };
+
+  const updateLookbookItem = async (action: 'add' | 'update' | 'delete', payload: any) => {
+    try {
+      const res = await fetch('/api/website/lookbook/items', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, payload }),
+        cache: 'no-store'
+      });
+      if (res.ok) {
+        await refreshData();
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error("Failed to update lookbook item", err);
+      return false;
+    }
+  };
+
+  const updateAnnouncement = async (action: 'add' | 'update' | 'delete' | 'toggle', payload: any) => {
+    try {
+      const res = await fetch('/api/website/announcements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, payload }),
+        cache: 'no-store'
+      });
+      if (res.ok) {
+        await refreshData();
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error("Failed to update announcement", err);
+      return false;
+    }
+  };
+
+  const updateInquiry = async (action: 'updateStatus' | 'delete', payload: any) => {
+    try {
+      const res = await fetch('/api/website/inquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, payload }),
+        cache: 'no-store'
+      });
+      if (res.ok) {
+        await refreshData();
+        return true;
+      }
+      return false;
+    } catch (err) {
+      console.error("Failed to update inquiry", err);
+      return false;
+    }
+  };
 
   // NEW ATOMIC INTERACTION METHODS
   
@@ -285,6 +462,7 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
     <MenuContext.Provider value={{ 
       menuData, 
       siteContent,
+      websiteContent,
       updateMenuItem, 
       bulkUpdateItems, 
       addMenuItem, 
@@ -293,6 +471,11 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
       renameCategory, 
       deleteCategory,
       updateSiteContent,
+      updateHero,
+      updateLookbookCategory,
+      updateLookbookItem,
+      updateAnnouncement,
+      updateInquiry,
       refreshData,
       language,
       setLanguage

@@ -43,3 +43,51 @@ const SettingsSchema = new mongoose.Schema({
 
 export const MenuSection = mongoose.models.MenuSection || mongoose.model('MenuSection', MenuSectionSchema);
 export const Settings = mongoose.models.Settings || mongoose.model('Settings', SettingsSchema);
+
+// --- Main Website Manager Models ---
+
+const MainHeroSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  title: { type: String, required: true },
+  subtitle: { type: String, default: "" },
+  image: { type: String, required: true },
+  order: { type: Number, default: 0 }
+});
+
+const LookbookCategorySchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  name: { type: String, required: true }
+});
+
+const LookbookItemSchema = new mongoose.Schema({
+  id: { type: Number, required: true, unique: true },
+  name: { type: String, required: true },
+  price: { type: String, default: "" },
+  image: { type: String, required: true },
+  category: { type: String, required: true },
+  description: { type: String, default: "" }
+});
+
+const AnnouncementSchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  text: { type: String, required: true },
+  isActive: { type: Boolean, default: true },
+  createdAt: { type: Date, default: Date.now }
+});
+
+const InquirySchema = new mongoose.Schema({
+  id: { type: String, required: true, unique: true },
+  name: { type: String, required: true },
+  email: { type: String, required: true },
+  phone: { type: String, default: "" },
+  subject: { type: String, default: "" },
+  message: { type: String, required: true },
+  status: { type: String, enum: ['new', 'read', 'replied'], default: 'new' },
+  createdAt: { type: Date, default: Date.now }
+});
+
+export const MainHero = mongoose.models.MainHero || mongoose.model('MainHero', MainHeroSchema);
+export const LookbookCategory = mongoose.models.LookbookCategory || mongoose.model('LookbookCategory', LookbookCategorySchema);
+export const LookbookItem = mongoose.models.LookbookItem || mongoose.model('LookbookItem', LookbookItemSchema);
+export const Announcement = mongoose.models.Announcement || mongoose.model('Announcement', AnnouncementSchema);
+export const Inquiry = mongoose.models.Inquiry || mongoose.model('Inquiry', InquirySchema);

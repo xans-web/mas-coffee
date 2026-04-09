@@ -126,7 +126,7 @@ const SafeImage = ({ src, alt, fill, ...props }: any) => {
 
 export default function Home() {
   const router = useRouter();
-  const { menuData, siteContent, refreshData, language: lang, setLanguage: setLang } = useMenu();
+  const { menuData, siteContent, websiteContent, refreshData, language: lang, setLanguage: setLang } = useMenu();
   const [isLightMode, setIsLightMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [priceLimit, setPriceLimit] = useState(30);
@@ -135,6 +135,11 @@ export default function Home() {
   const [expandedDesc, setExpandedDesc] = useState<number | null>(null);
   const [activeSection, setActiveSection] = useState<"home" | "menu" | "story" | "specials" | "contact">("home");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Website Manager Frontend States
+  const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
+  const [activeLookbookCategory, setActiveLookbookCategory] = useState("All");
+  const [lookbookSearch, setLookbookSearch] = useState("");
   
   const [flyingItems, setFlyingItems] = useState<{ id: string, image: string, startX: number, startY: number, endX: number, endY: number, active: boolean }[]>([]);
   const [cartPulse, setCartPulse] = useState(false);
@@ -188,6 +193,25 @@ export default function Home() {
     }
   }, [activeSection]);
 
+  // Auto-scroll for hero carousel
+  useEffect(() => {
+    if (activeSection === 'home' && websiteContent.heroes.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentHeroIndex(prev => (prev + 1) % websiteContent.heroes.length);
+      }, 6000);
+      return () => clearInterval(interval);
+    }
+  }, [activeSection, websiteContent.heroes.length]);
+
+  const filteredLookbookItems = useMemo(() => {
+    return websiteContent.lookbookItems.filter(item => {
+      const matchesCategory = activeLookbookCategory === "All" || item.category === activeLookbookCategory;
+      const matchesSearch = item.name.toLowerCase().includes(lookbookSearch.toLowerCase()) || 
+                           item.description.toLowerCase().includes(lookbookSearch.toLowerCase());
+      return matchesCategory && matchesSearch;
+    });
+  }, [websiteContent.lookbookItems, activeLookbookCategory, lookbookSearch]);
+
   const [activeCategory, setActiveCategory] = useState("All");
   const [cart, setCart] = useState<{ [key: number]: number }>({});
   const [showModal, setShowModal] = useState<"cart" | null>(null);
@@ -230,6 +254,9 @@ export default function Home() {
   }, [isLightMode]);
 
   const t = translations[lang];
+
+  // Loading State
+  const isWebsiteLoading = websiteContent.heroes.length === 0 && websiteContent.lookbookItems.length === 0;
 
   // Theme variables - Midnight Forest Luxury Theme
   const tm = {
@@ -325,7 +352,7 @@ export default function Home() {
   }, [searchQuery, priceLimit, activeCategory, lang, menuData]);
 
   return (
-    <div className={`min-h-screen ${tm.bgApp} ${tm.textApp} transition-colors duration-500 font-sans selection:bg-[#F3E5AB] selection:text-[#08120F]`}>
+    <div className={`min-h-screen ${tm.bgApp} ${tm.textApp} transition-colors duration-500 font-sans selection:bg-[#F3E5AB] selection:text-[#08120F] overflow-x-hidden touch-pan-y`}>
       <div className={`fixed inset-0 ${tm.bgApp} tilet-pattern -z-20 transition-colors duration-500 opacity-20`} />
       
       {/* Global Header */}
@@ -528,55 +555,173 @@ export default function Home() {
       {/* Sections */}
       <div className="relative overflow-hidden">
         
-        {/* Home Section */}
+        {/* Home Section (Dynamic Hero & Lookbook) */}
         {activeSection === 'home' && (
-          <section className="min-h-[calc(100vh-80px)] flex flex-col items-center justify-center text-center px-4 relative">
-            <div className="absolute inset-0 -z-10 overflow-hidden">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#F3E5AB]/10 rounded-full blur-[120px]" />
-            </div>
-            <h2 className="text-5xl md:text-8xl font-serif font-black mb-6 tracking-tight animate-fade-in-up">
-              Mas Coffee: <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F3E5AB] to-[#FDF8F0]">Where Every Sip Tells a Story</span>
-            </h2>
-            <p className="max-w-2xl text-lg md:text-xl opacity-60 mb-12 animate-fade-in-up delay-200">
-              Immerse yourself in the luxury of Ethiopian coffee culture. A sensory journey through the highlands, delivered with elegance.
-            </p>
-            <button 
-              onClick={() => setActiveSection('menu')}
-              className="bg-[#F3E5AB] text-[#08120F] px-12 py-5 rounded-full font-black uppercase tracking-[0.3em] text-sm hover:scale-105 active:scale-95 transition-all shadow-2xl animate-fade-in-up delay-400"
-            >
-              Explore Menu
-            </button>
-          </section>
+          <div className="animate-fade-in">
+            {isWebsiteLoading ? (
+              <div className="h-[calc(100vh-80px)] md:h-[calc(100vh-100px)] flex flex-col items-center justify-center space-y-8">
+                <div className="w-20 h-20 border-2 border-[#F3E5AB]/20 border-t-[#F3E5AB] rounded-full animate-spin" />
+                <p className="text-[#F3E5AB] font-serif italic uppercase tracking-widest opacity-40">Loading Luxury Experience...</p>
+              </div>
+            ) : (
+              <>
+                {/* Hero Slider */}
+                <section className="relative h-[calc(100vh-80px)] md:h-[calc(100vh-100px)] overflow-hidden">
+                  {websiteContent.heroes.length > 0 ? (
+                    websiteContent.heroes.map((hero, idx) => (
+                      <div
+                        key={hero.id}
+                        className={`absolute inset-0 transition-all duration-1000 ease-in-out ${idx === currentHeroIndex ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-110 z-0'}`}
+                      >
+                        <div className="absolute inset-0 bg-black/40 z-10" />
+                        <img src={hero.image} className="w-full h-full object-cover" alt={hero.title} />
+                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-4">
+                          <h2 className="text-5xl md:text-8xl font-serif font-black mb-6 tracking-tight text-white drop-shadow-2xl max-w-5xl">
+                            {hero.title}
+                          </h2>
+                          <p className="max-w-2xl text-lg md:text-2xl text-[#F3E5AB] font-medium mb-12 drop-shadow-lg opacity-90 tracking-wide uppercase">
+                            {hero.subtitle}
+                          </p>
+                          <button 
+                            onClick={() => setActiveSection('menu')}
+                            className="bg-[#F3E5AB] text-[#08120F] px-12 py-5 rounded-full font-black uppercase tracking-[0.3em] text-sm hover:scale-105 active:scale-95 transition-all shadow-2xl"
+                          >
+                            Explore Menu
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="h-full flex flex-col items-center justify-center text-center px-4 relative">
+                      <div className="absolute inset-0 -z-10 overflow-hidden">
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#F3E5AB]/10 rounded-full blur-[120px]" />
+                      </div>
+                      <h2 className="text-5xl md:text-8xl font-serif font-black mb-6 tracking-tight animate-fade-in-up">
+                        Mas Coffee: <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F3E5AB] to-[#FDF8F0]">Where Every Sip Tells a Story</span>
+                      </h2>
+                      <p className="max-w-2xl text-lg md:text-xl opacity-60 mb-12 animate-fade-in-up delay-200">
+                        Immerse yourself in the luxury of Ethiopian coffee culture. A sensory journey through the highlands, delivered with elegance.
+                      </p>
+                      <button 
+                        onClick={() => setActiveSection('menu')}
+                        className="bg-[#F3E5AB] text-[#08120F] px-12 py-5 rounded-full font-black uppercase tracking-[0.3em] text-sm hover:scale-105 active:scale-95 transition-all shadow-2xl animate-fade-in-up delay-400"
+                      >
+                        Explore Menu
+                      </button>
+                    </div>
+                  )}
+                  
+                  {/* Slider Dots */}
+                  {websiteContent.heroes.length > 1 && (
+                    <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex gap-3">
+                      {websiteContent.heroes.map((_, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => setCurrentHeroIndex(idx)}
+                          className={`w-3 h-3 rounded-full transition-all ${idx === currentHeroIndex ? 'bg-[#F3E5AB] w-10' : 'bg-white/30 hover:bg-white/50'}`}
+                        />
+                      ))}
+                    </div>
+                  )}
+                </section>
+
+                {/* Lookbook (Gallery) Section */}
+                <section className="py-24 md:py-32 px-4 md:px-12 max-w-7xl mx-auto space-y-16">
+                  <div className="text-center space-y-6">
+                    <h2 className="text-3xl md:text-6xl font-serif font-black uppercase tracking-[0.3em] text-[#F3E5AB]">The Lookbook</h2>
+                    <div className="w-24 h-1 bg-[#F3E5AB] mx-auto rounded-full" />
+                    <p className="max-w-2xl mx-auto text-sm md:text-lg opacity-60 uppercase tracking-widest leading-relaxed">
+                      A visual celebration of our finest creations, from artisanal cakes to specialty coffee brews.
+                    </p>
+                  </div>
+
+                  {/* Lookbook Filters */}
+                  <div className="flex flex-wrap items-center justify-center gap-4 border-b border-[#F3E5AB]/10 pb-8">
+                    <button
+                      onClick={() => setActiveLookbookCategory("All")}
+                      className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${activeLookbookCategory === "All" ? 'bg-[#F3E5AB] text-[#08120F]' : 'border-[#F3E5AB]/20 opacity-40 hover:opacity-100'}`}
+                    >
+                      All Gallery
+                    </button>
+                    {websiteContent.lookbookCategories.map(cat => (
+                      <button
+                        key={cat.id}
+                        onClick={() => setActiveLookbookCategory(cat.id)}
+                        className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${activeLookbookCategory === cat.id ? 'bg-[#F3E5AB] text-[#08120F]' : 'border-[#F3E5AB]/20 opacity-40 hover:opacity-100'}`}
+                      >
+                        {cat.name}
+                      </button>
+                    ))}
+                  </div>
+
+                  {/* Lookbook Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+                    {filteredLookbookItems.map((item, idx) => (
+                      <div 
+                        key={item.id} 
+                        className={`group relative aspect-[4/5] overflow-hidden rounded-[32px] border border-[#F3E5AB]/10 bg-[#08120F] shadow-2xl animate-fade-in-up`}
+                        style={{ animationDelay: `${idx * 100}ms` }}
+                      >
+                        <img src={item.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt={item.name} />
+                        <div className="absolute inset-0 bg-gradient-to-t from-[#08120F] via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
+                        
+                        <div className="absolute bottom-0 left-0 right-0 p-8 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-[10px] font-black text-[#F3E5AB] uppercase tracking-[0.3em] opacity-60">
+                              {websiteContent.lookbookCategories.find(c => c.id === item.category)?.name || "Collection"}
+                            </span>
+                            {item.price && (
+                              <span className="text-xs font-black text-[#F3E5AB] tracking-widest">{item.price} ETB</span>
+                            )}
+                          </div>
+                          <h3 className="text-2xl md:text-3xl font-serif font-black text-[#F3E5AB] mb-4 tracking-tight">
+                            {item.name}
+                          </h3>
+                          <p className="text-xs md:text-sm text-[#F3E5AB]/60 line-clamp-2 italic font-light">
+                            {item.description}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                    {filteredLookbookItems.length === 0 && (
+                      <div className="col-span-full py-20 text-center">
+                        <p className="font-serif italic text-2xl opacity-20 uppercase tracking-widest">No items found in this collection.</p>
+                      </div>
+                    )}
+                  </div>
+                </section>
+              </>
+            )}
+          </div>
         )}
 
         {/* Menu Section */}
         {activeSection === 'menu' && (
           <div className="animate-fade-in">
-            {/* Specials Carousel (Mobile Only) - Now NOT sticky, so it scrolls away */}
-            <div className={`lg:hidden py-1 border-b border-[#F3E5AB]/5 overflow-hidden ${isLightMode ? 'bg-[#FDF8F0]/50' : 'bg-[#08120F]/50'} backdrop-blur-sm`}>
-              <div className="px-4 mb-0.5 flex items-center justify-between">
-                <span className={`text-[8px] font-black uppercase tracking-widest ${isLightMode ? 'text-[#08120F]/40' : 'text-[#F3E5AB]/40'}`}>{t.specials}</span>
-                <div className="flex gap-0.5">
-                  <div className={`w-0.5 h-0.5 rounded-full ${isLightMode ? 'bg-[#08120F]' : 'bg-[#F3E5AB]'}`} />
-                  <div className={`w-0.5 h-0.5 rounded-full ${isLightMode ? 'bg-[#08120F]/20' : 'bg-[#F3E5AB]/20'}`} />
+            {/* Specials Carousel (Mobile Only) - Wide Aspect Ratio Refinement */}
+            <div className={`lg:hidden py-1 border-b border-[#F3E5AB]/5 overflow-hidden ${isLightMode ? 'bg-[#FDF8F0]/50' : 'bg-[#08120F]/50'} backdrop-blur-sm mt-4 md:mt-8 max-w-[95%] mx-auto rounded-3xl`}>
+              <div className="px-4 mb-2 flex items-center justify-between">
+                <span className={`text-[10px] font-black uppercase tracking-widest ${isLightMode ? 'text-[#08120F]/40' : 'text-[#F3E5AB]/40'}`}>{t.specials}</span>
+                <div className="flex gap-1.5">
+                  <div className={`w-1.5 h-1.5 rounded-full ${isLightMode ? 'bg-[#08120F]' : 'bg-[#F3E5AB]'}`} />
+                  <div className={`w-1.5 h-1.5 rounded-full ${isLightMode ? 'bg-[#08120F]/20' : 'bg-[#F3E5AB]/20'}`} />
                 </div>
               </div>
               <div 
                 ref={carouselRef}
-                className="flex gap-2 overflow-x-auto no-scrollbar px-4 pb-1 snap-x snap-mandatory"
+                className="flex gap-4 overflow-x-auto no-scrollbar px-4 pb-3 snap-x snap-mandatory h-40 md:h-64"
               >
                 {specials.map((item) => (
                   <div 
                     key={item.id} 
-                    className={`flex-shrink-0 w-48 h-24 rounded-lg border ${isLightMode ? 'border-[#08120F]/10' : 'border-[#F3E5AB]/10'} overflow-hidden relative snap-center group`}
+                    className={`flex-shrink-0 w-64 md:w-96 h-full rounded-3xl border ${isLightMode ? 'border-[#08120F]/10' : 'border-[#F3E5AB]/10'} overflow-hidden relative snap-center group`}
                     onClick={() => setExpandedDesc(item.id)}
                   >
-                    <img src={item.image} className="w-full h-full object-cover opacity-60 transition-transform duration-700 group-hover:scale-105" alt="" />
-                    <div className={`absolute inset-0 ${isLightMode ? 'bg-gradient-to-t from-[#FDF8F0] via-[#FDF8F0]/10 to-transparent' : 'bg-gradient-to-t from-[#08120F] via-[#08120F]/10 to-transparent'}`} />
-                    <div className="absolute bottom-1.5 left-2 right-2">
-                      <h4 className={`text-[10px] font-serif font-black ${isLightMode ? 'text-[#08120F]' : 'text-[#F3E5AB]'} line-clamp-1`}>{lang === 'en' ? item.name_en : item.name_am}</h4>
-                      <p className={`text-[8px] font-black ${isLightMode ? 'text-[#08120F]/50' : 'text-[#F3E5AB]/50'}`}>{item.price} ETB</p>
+                    <img src={item.image} className="w-full h-full object-cover opacity-100 transition-transform duration-1000 group-hover:scale-110" alt="" />
+                    <div className="absolute bottom-4 left-5 right-5">
+                      <h4 className={`text-sm font-serif font-black ${isLightMode ? 'text-[#08120F]' : 'text-[#F3E5AB]'} line-clamp-1`}>{lang === 'en' ? item.name_en : item.name_am}</h4>
+                      <p className={`text-[10px] font-black ${isLightMode ? 'text-[#08120F]/50' : 'text-[#F3E5AB]/50'}`}>{item.price} ETB</p>
                     </div>
                   </div>
                 ))}
@@ -584,7 +729,7 @@ export default function Home() {
             </div>
 
             {/* Categories Row - Sticky to the top (below global header) */}
-            <div className={`sticky top-[80px] md:top-[100px] z-[800] ${tm.bgHeader} backdrop-blur-xl border-b ${tm.borderMain} py-1.5 md:py-4`}>
+            <div className={`sticky top-[80px] md:top-[100px] z-[800] ${tm.bgHeader} backdrop-blur-xl border-b ${tm.borderMain} py-1.5 md:py-4 mt-4 md:mt-8`}>
               <div className="max-w-7xl mx-auto px-4 md:px-12">
                 <div className="flex items-center gap-2 md:gap-4 w-full overflow-x-auto no-scrollbar">
                   {["All", ...menuData.map(c => lang === 'en' ? c.category_en : c.category_am)].map((cat) => (
@@ -602,64 +747,77 @@ export default function Home() {
               </div>
             </div>
 
-            <main className="max-w-7xl mx-auto px-4 md:px-12 pt-1 md:pt-8 pb-32 min-h-[70vh]">
-              <div className="space-y-6 md:space-y-24">
+            <main className="max-w-7xl mx-auto px-4 md:px-12 pt-8 md:pt-12 pb-32 min-h-[70vh]">
+              <div className="space-y-12 md:space-y-24">
                 {filteredMenuData.map((section) => (
                   <section key={section.category_en} className="scroll-mt-[120px]">
-                    <div className="flex items-center gap-2 mb-3 md:mb-12">
-                      <CategoryIcon name={section.category_en} className="w-3.5 h-3.5 md:w-6 md:h-6 opacity-40" />
-                      <h3 className="text-[10px] md:text-xl font-serif font-black uppercase tracking-[0.3em] opacity-40">
+                    <div className="flex items-center gap-3 mb-12">
+                      <CategoryIcon name={section.category_en} className="w-8 h-8 md:w-12 md:h-12 opacity-40" />
+                      <h3 className="text-2xl md:text-5xl font-serif font-black uppercase tracking-[0.4em] opacity-40">
                         {t.categories[section.category_en as keyof typeof t.categories] || section.category_en}
                       </h3>
                       <div className={`h-[1px] flex-grow ${tm.borderMain} border-t`} />
                     </div>
 
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
+                    <div className="grid grid-cols-1 gap-4 md:gap-8">
                       {section.items.map((item) => (
                         <article 
                           key={item.id} 
-                          className={`relative flex items-center w-full h-40 md:h-56 group ${item.isSoldOut ? 'opacity-40 grayscale' : ''}`}
+                          className={`relative flex items-center w-full h-56 md:h-80 group ${item.isSoldOut ? 'opacity-40 grayscale' : ''}`}
                         >
-                          {/* Item Image */}
-                          <div className="absolute left-0 w-36 h-36 md:w-52 md:h-52 z-10 transition-transform duration-500 group-hover:scale-105">
-                            <div className="w-full h-full rounded-full overflow-hidden border-2 border-[#F3E5AB] shadow-2xl bg-[#08120F]">
-                              {item.image ? <SafeImage src={item.image} alt={item.name_en} fill className="w-full h-full object-cover" /> : <div className="w-full h-full flex items-center justify-center text-4xl font-serif opacity-20">{item.name_en[0]}</div>}
+                          {/* Circular "Out-of-Frame" Image (80% Massive Hero Layer) */}
+                          <div className="absolute left-2 md:left-4 z-20 w-48 h-48 md:w-80 md:h-80">
+                            <div className="w-full h-full rounded-full overflow-hidden border-2 border-[#c5a367] shadow-[0_20px_50px_rgba(0,0,0,1)] bg-[#08120F]">
+                              {item.image ? (
+                                <SafeImage src={item.image} alt={item.name_en} fill className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-5xl font-serif text-[#c5a367] opacity-40">
+                                  {item.name_en[0]}
+                                </div>
+                              )}
                             </div>
-                            {item.isSpecial && (
-                              <div className="absolute top-4 right-4 bg-[#F3E5AB] text-[#08120F] px-2 py-1 rounded text-[8px] font-black uppercase tracking-widest shadow-xl">Special</div>
+                            {/* Badges */}
+                            {(item.isSpecial || item.isNew) && (
+                              <div className="absolute top-4 right-4 bg-[#c5a367] text-black px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg z-20 animate-pulse">
+                                {item.isSpecial ? 'Special' : 'New'}
+                              </div>
                             )}
                           </div>
 
-                          {/* Item Content */}
-                          <div className={`w-full h-full ${tm.cardFrameBg} rounded-3xl border ${tm.cardFrameBorder} ml-16 md:ml-28 pl-24 md:pl-32 pr-4 md:pr-12 py-4 md:py-6 flex flex-col justify-between shadow-2xl transition-all duration-500 hover:border-[#F3E5AB]/40`}>
-                            <div>
-                              <div className="flex justify-between items-start mb-1">
-                                <h4 className={`text-lg md:text-2xl font-serif font-black ${tm.cardTitleColor} line-clamp-1`}>{lang === 'en' ? item.name_en : item.name_am}</h4>
-                                <span className="font-black text-base md:text-lg text-[#F3E5AB] whitespace-nowrap">{item.price} ETB</span>
-                              </div>
-                              <p className={`text-[10px] md:text-sm line-clamp-2 italic opacity-60 cursor-pointer`} onClick={() => setExpandedDesc(item.id)}>
-                                {lang === 'en' ? item.description_en : item.description_am}
-                              </p>
+                          {/* Description Card (80% Width / 70% Substantial Rectangle Layer - Dark Green) */}
+                          <div className="absolute right-0 w-[85%] h-40 md:h-64 bg-[#0a2c26] rounded-[24px] md:rounded-[40px] flex flex-col items-center justify-center pl-24 md:pl-48 pr-6 md:pr-12 shadow-[0_15px_60px_rgba(0,0,0,0.6)] border border-[#c5a367]/10 transition-all duration-500 hover:border-[#c5a367]/40 text-center">
+                            {/* Centered Information Stack: Name -> Price -> Description -> Button */}
+                            <div className="flex flex-col gap-1 md:gap-2 mb-2 md:mb-3 items-center">
+                              <h4 className="text-base md:text-3xl font-semibold text-[#c5a367] leading-tight line-clamp-1 uppercase tracking-widest">
+                                {lang === 'en' ? item.name_en : item.name_am}
+                              </h4>
+                              <span className="text-[#c5a367] font-bold text-lg md:text-4xl leading-none">
+                                {item.price} ETB
+                              </span>
                             </div>
 
-                            <div className="flex items-center justify-between pt-2 md:pt-4 border-t border-[#F3E5AB]/10">
-                              <div className="flex items-center gap-3">
-                                {cart[item.id] > 0 ? (
-                                  <div className="flex items-center gap-2 md:gap-4 bg-[#F3E5AB]/10 rounded-full px-1.5 md:py-1">
-                                    <button onClick={() => removeFromCart(item.id)} className="w-6 h-6 md:w-8 md:h-8 rounded-full flex items-center justify-center hover:bg-[#F3E5AB] hover:text-[#08120F] transition-colors">-</button>
-                                    <span className="font-black text-xs md:text-sm">{cart[item.id]}</span>
-                                    <button onClick={(e) => addToCart(item.id, e)} className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-[#F3E5AB] text-[#08120F] flex items-center justify-center font-black">+</button>
-                                  </div>
-                                ) : (
-                                  <button 
-                                    disabled={item.isSoldOut}
-                                    onClick={(e) => addToCart(item.id, e)}
-                                    className="bg-[#F3E5AB] text-[#08120F] px-4 md:px-6 py-1.5 md:py-2 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest hover:scale-105 transition-all disabled:opacity-50"
-                                  >
-                                    Add to Order
-                                  </button>
-                                )}
-                              </div>
+                            {/* Elegant Description Text (Dynamic from Admin) */}
+                            <p className="text-[10px] md:text-sm text-[#F3E5AB]/40 line-clamp-2 md:line-clamp-3 italic font-light max-w-[85%] mb-4 md:mb-6">
+                              {lang === 'en' ? item.description_en : item.description_am}
+                            </p>
+
+                            {/* Action Button (Gold Pill) */}
+                            <div className="w-fit">
+                              {cart[item.id] > 0 ? (
+                                <div className="flex items-center gap-3 md:gap-6 bg-[#c5a367]/10 rounded-full px-2 py-1.5 border border-[#c5a367]/20 backdrop-blur-sm">
+                                  <button onClick={() => removeFromCart(item.id)} className="w-6 h-6 md:w-12 md:h-12 rounded-full flex items-center justify-center text-[#c5a367] hover:bg-[#c5a367] hover:text-black transition-all">-</button>
+                                  <span className="font-black text-xs md:text-2xl text-[#c5a367] w-4 md:w-10 text-center">{cart[item.id]}</span>
+                                  <button onClick={(e) => addToCart(item.id, e)} className="w-6 h-6 md:w-12 md:h-12 rounded-full bg-[#c5a367] text-black flex items-center justify-center font-black hover:scale-105 transition-all">+</button>
+                                </div>
+                              ) : (
+                                <button 
+                                  disabled={item.isSoldOut}
+                                  onClick={(e) => addToCart(item.id, e)}
+                                  className="bg-[#c5a367] text-black px-6 md:px-12 py-2 md:py-5 rounded-full text-[10px] md:text-base font-black uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-[0_8px_30px_rgba(197,163,103,0.3)] disabled:opacity-50"
+                                >
+                                  + ADD
+                                </button>
+                              )}
                             </div>
                           </div>
                         </article>

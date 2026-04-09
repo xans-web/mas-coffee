@@ -4,14 +4,17 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useMenu } from "@/context/MenuContext";
 import { MenuItem } from "@/lib/menu-data";
-import { Sun, Moon, Upload, Link, Trash2, Printer } from "lucide-react";
+import { Sun, Moon, Upload, Link, Trash2, Printer, Layout, Menu as MenuIcon, Image, Bell, Mail, Plus, X, ChevronRight, ChevronLeft, Globe } from "lucide-react";
 
+type Module = "menu" | "website";
 type Tab = "dashboard" | "menu" | "categories" | "settings";
+type WebsiteTab = "hero" | "lookbook" | "announcements" | "inquiries";
 
 export default function AdminDashboard() {
   const { 
     menuData, 
     siteContent,
+    websiteContent,
     updateMenuItem, 
     bulkUpdateItems, 
     addMenuItem, 
@@ -20,9 +23,16 @@ export default function AdminDashboard() {
     renameCategory, 
     deleteCategory,
     updateSiteContent,
+    updateHero,
+    updateLookbookCategory,
+    updateLookbookItem,
+    updateAnnouncement,
+    updateInquiry,
     refreshData
   } = useMenu();
+  const [activeModule, setActiveModule] = useState<Module>("menu");
   const [activeTab, setActiveTab] = useState<Tab>("dashboard");
+  const [activeWebsiteTab, setActiveWebsiteTab] = useState<WebsiteTab>("hero");
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   // Existing states needed
@@ -41,6 +51,17 @@ export default function AdminDashboard() {
   const [isUploading, setIsUploading] = useState(false);
   const [editingImageUrlId, setEditingImageUrlId] = useState<number | null>(null);
   const [tempUrl, setTempUrl] = useState("");
+
+  // Website Manager States
+  const [showHeroForm, setShowHeroForm] = useState(false);
+  const [newHero, setNewHero] = useState({ title: "", subtitle: "", image: "", order: 0 });
+  
+  const [showLookbookForm, setShowLookbookForm] = useState(false);
+  const [newLookbookItem, setNewLookbookItem] = useState({ name: "", price: "", image: "", category: "", description: "" });
+  const [newLookbookCategory, setNewLookbookCategory] = useState("");
+
+  const [showAnnouncementForm, setShowAnnouncementForm] = useState(false);
+  const [newAnnouncement, setNewAnnouncement] = useState({ text: "", isActive: true });
 
   // ── Batch Save State ────────────────────────────────────────────
   // Accumulated local edits per menu item (id → partial updates)
@@ -357,28 +378,62 @@ export default function AdminDashboard() {
       {/* Mobile Overlay Menu */}
       {isMobileMenuOpen && (
         <div className={`lg:hidden fixed inset-0 z-[1050] ${tm.bgSidebar} flex flex-col items-center justify-center p-8 transition-colors duration-500`}>
-          <div className="flex flex-col gap-8 w-full max-w-sm">
-            {[
-              { id: "dashboard", label: "Dashboard", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
-              { id: "menu", label: "Menu Items", icon: "M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" },
-              { id: "categories", label: "Categories", icon: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" },
-              { id: "settings", label: "Settings", icon: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z" }
-            ].map(tab => (
+          <div className="flex flex-col gap-4 w-full max-w-sm">
+            {/* Module Switcher (Mobile) */}
+            <div className="flex gap-2 p-1 rounded-xl bg-zinc-950/50 border border-[#D4AF37]/20 mb-4">
               <button
-                key={tab.id}
-                onClick={() => { setActiveTab(tab.id as Tab); setIsMobileMenuOpen(false); }}
-                className={`flex items-center gap-6 px-8 py-5 rounded-2xl transition-all h-20 shadow-lg ${activeTab === tab.id ? tm.activeTab : tm.inactiveTab}`}
+                onClick={() => setActiveModule("menu")}
+                className={`flex-1 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${activeModule === "menu" ? "bg-[#D4AF37] text-black shadow-lg" : "text-zinc-500"}`}
               >
-                <svg className="w-8 h-8 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d={tab.icon}/></svg>
-                <span className="font-black uppercase tracking-[0.2em] text-lg">{tab.label}</span>
+                <MenuIcon className="w-4 h-4" /> Menu
               </button>
-            ))}
+              <button
+                onClick={() => setActiveModule("website")}
+                className={`flex-1 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${activeModule === "website" ? "bg-[#D4AF37] text-black shadow-lg" : "text-zinc-500"}`}
+              >
+                <Globe className="w-4 h-4" /> Website
+              </button>
+            </div>
+
+            {activeModule === "menu" ? (
+              [
+                { id: "dashboard", label: "Dashboard", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
+                { id: "menu", label: "Menu Items", icon: "M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" },
+                { id: "categories", label: "Categories", icon: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" },
+                { id: "settings", label: "Settings", icon: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z" }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => { setActiveTab(tab.id as Tab); setIsMobileMenuOpen(false); }}
+                  className={`flex items-center gap-6 px-8 py-4 rounded-2xl transition-all h-16 shadow-lg ${activeTab === tab.id ? tm.activeTab : tm.inactiveTab}`}
+                >
+                  <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d={tab.icon}/></svg>
+                  <span className="font-black uppercase tracking-[0.2em] text-sm">{tab.label}</span>
+                </button>
+              ))
+            ) : (
+              [
+                { id: "hero", label: "Hero Manager", icon: Image },
+                { id: "lookbook", label: "Lookbook (Gallery)", icon: Layout },
+                { id: "announcements", label: "Announcements", icon: Bell },
+                { id: "inquiries", label: "Inquiries", icon: Mail }
+              ].map(tab => (
+                <button
+                  key={tab.id}
+                  onClick={() => { setActiveWebsiteTab(tab.id as WebsiteTab); setIsMobileMenuOpen(false); }}
+                  className={`flex items-center gap-6 px-8 py-4 rounded-2xl transition-all h-16 shadow-lg ${activeWebsiteTab === tab.id ? tm.activeTab : tm.inactiveTab}`}
+                >
+                  <tab.icon className="w-6 h-6 flex-shrink-0" />
+                  <span className="font-black uppercase tracking-[0.2em] text-sm">{tab.label}</span>
+                </button>
+              ))
+            )}
             <button 
               onClick={() => { localStorage.removeItem("admin_authenticated"); router.push("/admin"); }} 
-              className={`flex items-center gap-6 px-8 py-5 mt-4 rounded-2xl text-red-400 h-20 border border-red-500/30 ${isLightMode ? 'bg-red-50' : 'bg-red-500/10'}`}
+              className={`flex items-center gap-6 px-8 py-4 mt-2 rounded-2xl text-red-400 h-16 border border-red-500/30 ${isLightMode ? 'bg-red-50' : 'bg-red-500/10'}`}
             >
-              <svg className="w-8 h-8 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-              <span className="font-black uppercase tracking-[0.2em] text-lg">Logout</span>
+              <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+              <span className="font-black uppercase tracking-[0.2em] text-sm">Logout</span>
             </button>
           </div>
         </div>
@@ -416,23 +471,64 @@ export default function AdminDashboard() {
           </div>
         </div>
         
-        <nav className="flex-1 py-6 flex flex-col gap-2 px-3">
-          {[
-            { id: "dashboard", label: "Dashboard", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
-            { id: "menu", label: "Menu Items", icon: "M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" },
-            { id: "categories", label: "Categories", icon: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" },
-            { id: "settings", label: "Settings", icon: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z" }
-          ].map(tab => (
+        {/* Module Switcher (Portal Logic) */}
+        <div className={`p-3 border-b ${tm.sidebarBorder}`}>
+          <div className={`flex ${isSidebarOpen ? 'flex-row' : 'flex-col'} gap-2 p-1 rounded-xl bg-zinc-950/50 border ${tm.sidebarBorder}`}>
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as Tab)}
-              className={`flex items-center gap-4 px-4 py-3 rounded-lg transition-all ${activeTab === tab.id ? tm.activeTab : tm.inactiveTab}`}
-              title={tab.label}
+              onClick={() => setActiveModule("menu")}
+              className={`flex-1 py-2 px-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${activeModule === "menu" ? "bg-[#D4AF37] text-black shadow-lg" : "text-zinc-500 hover:text-white"}`}
+              title="Digital Menu Manager"
             >
-              <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={tab.icon}/></svg>
-              {isSidebarOpen && <span className="font-bold uppercase tracking-widest text-xs truncate">{tab.label}</span>}
+              <MenuIcon className="w-3.5 h-3.5" />
+              {isSidebarOpen && "Menu"}
             </button>
-          ))}
+            <button
+              onClick={() => setActiveModule("website")}
+              className={`flex-1 py-2 px-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${activeModule === "website" ? "bg-[#D4AF37] text-black shadow-lg" : "text-zinc-500 hover:text-white"}`}
+              title="Main Website Manager"
+            >
+              <Globe className="w-3.5 h-3.5" />
+              {isSidebarOpen && "Website"}
+            </button>
+          </div>
+        </div>
+
+        <nav className="flex-1 py-6 flex flex-col gap-2 px-3">
+          {activeModule === "menu" ? (
+            [
+              { id: "dashboard", label: "Dashboard", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
+              { id: "menu", label: "Menu Items", icon: "M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" },
+              { id: "categories", label: "Categories", icon: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" },
+              { id: "settings", label: "Settings", icon: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z" }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as Tab)}
+                className={`flex items-center gap-4 px-4 py-3 rounded-lg transition-all ${activeTab === tab.id ? tm.activeTab : tm.inactiveTab}`}
+                title={tab.label}
+              >
+                <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={tab.icon}/></svg>
+                {isSidebarOpen && <span className="font-bold uppercase tracking-widest text-xs truncate">{tab.label}</span>}
+              </button>
+            ))
+          ) : (
+            [
+              { id: "hero", label: "Hero Manager", icon: Image },
+              { id: "lookbook", label: "Lookbook (Gallery)", icon: Layout },
+              { id: "announcements", label: "Announcements", icon: Bell },
+              { id: "inquiries", label: "Inquiries", icon: Mail }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveWebsiteTab(tab.id as WebsiteTab)}
+                className={`flex items-center gap-4 px-4 py-3 rounded-lg transition-all ${activeWebsiteTab === tab.id ? tm.activeTab : tm.inactiveTab}`}
+                title={tab.label}
+              >
+                <tab.icon className="w-6 h-6 flex-shrink-0" />
+                {isSidebarOpen && <span className="font-bold uppercase tracking-widest text-xs truncate">{tab.label}</span>}
+              </button>
+            ))
+          )}
         </nav>
         
         <div className={`p-4 border-t ${tm.sidebarBorder}`}>
@@ -474,8 +570,11 @@ export default function AdminDashboard() {
       }`}>
         <div className="p-4 md:p-8 lg:p-12 max-w-7xl mx-auto">
           
-          {/* TAB 1: DASHBOARD */}
-          {activeTab === "dashboard" && (() => {
+          {/* === DIGITAL MENU MODULE === */}
+          {activeModule === "menu" && (
+            <>
+              {/* TAB 1: DASHBOARD */}
+              {activeTab === "dashboard" && (() => {
             const totalViews = siteContent?.totalViews || 0;
             const dailyViews = siteContent?.dailyViews || 0;
             
@@ -684,10 +783,14 @@ export default function AdminDashboard() {
                         </div>
                       </div>
                       
-                      <div className="grid grid-cols-1 gap-4">
+                      <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <label className={`block text-xs uppercase tracking-widest ${tm.textAcc} font-bold mb-2`}>Description</label>
+                          <label className={`block text-xs uppercase tracking-widest ${tm.textAcc} font-bold mb-2`}>Description (En)</label>
                           <textarea rows={2} value={newItem.description_en} onChange={e => setNewItem({...newItem, description_en: e.target.value})} className={`w-full ${tm.inputBg} border rounded py-3 px-4 focus:outline-none focus:border-[#D4AF37]/50 resize-none`} />
+                        </div>
+                        <div>
+                          <label className={`block text-xs uppercase tracking-widest ${tm.textAcc} font-bold mb-2`}>Description (Am)</label>
+                          <textarea rows={2} value={newItem.description_am} onChange={e => setNewItem({...newItem, description_am: e.target.value})} className={`w-full ${tm.inputBg} border rounded py-3 px-4 focus:outline-none focus:border-[#D4AF37]/50 resize-none`} />
                         </div>
                       </div>
                       <div className="flex gap-4">
@@ -784,33 +887,54 @@ export default function AdminDashboard() {
                       </div>
  
                       {/* Details View/Edit */}
-                      <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
-                        <div className="space-y-1">
-                          <input 
-                            type="text" 
-                            value={(pendingEdits[item.id] as {name_en?: string} | undefined)?.name_en ?? item.name_en}
-                            onChange={(e) => handleUpdateItem(item.id, { name_en: e.target.value })}
-                            className={`bg-transparent border-b text-2xl font-serif ${tm.tableText} font-black focus:outline-none w-full truncate placeholder:opacity-30 ${
-                              dirtyItemIds.has(item.id) ? 'border-[#D4AF37]' : 'border-transparent'
-                            } transition-colors`}
-                            placeholder="Menu name..."
-                          />
-                          <p className={`${tm.tableSubtext} text-[10px] uppercase tracking-[0.1em] font-black opacity-60`}>{item.categoryName}</p>
-                        </div>
+                          <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
+                            <div className="space-y-1">
+                              <input 
+                                type="text" 
+                                value={(pendingEdits[item.id] as {name_en?: string} | undefined)?.name_en ?? item.name_en}
+                                onChange={(e) => handleUpdateItem(item.id, { name_en: e.target.value })}
+                                className={`bg-transparent border-b text-2xl font-serif ${tm.tableText} font-black focus:outline-none w-full truncate placeholder:opacity-30 ${
+                                  dirtyItemIds.has(item.id) ? 'border-[#D4AF37]' : 'border-transparent'
+                                } transition-colors`}
+                                placeholder="Menu name..."
+                              />
+                              <p className={`${tm.tableSubtext} text-[10px] uppercase tracking-[0.1em] font-black opacity-60`}>{item.categoryName}</p>
+                            </div>
 
-                        <div className="flex items-center gap-2 mt-2">
-                           <span className={`${tm.textAcc} font-black text-xl`}>ETB</span>
-                           <input 
-                            type="number" step="0.01" 
-                            value={pendingEdits[item.id]?.price ?? item.price}
-                            onChange={(e) => handlePriceChange(item.id, e.target.value)}
-                            onFocus={(e) => e.target.select()}
-                            className={`bg-transparent border-b text-[#D4AF37] font-black w-24 focus:outline-none text-2xl ${
-                              dirtyItemIds.has(item.id) ? 'border-[#D4AF37]' : 'border-transparent'
-                            } transition-colors`}
-                          />
-                        </div>
-                      </div>
+                            <div className="flex items-center gap-2 mt-2">
+                               <span className={`${tm.textAcc} font-black text-xl`}>ETB</span>
+                               <input 
+                                type="number" step="0.01" 
+                                value={pendingEdits[item.id]?.price ?? item.price}
+                                onChange={(e) => handlePriceChange(item.id, e.target.value)}
+                                onFocus={(e) => e.target.select()}
+                                className={`bg-transparent border-b text-[#D4AF37] font-black w-24 focus:outline-none text-2xl ${
+                                  dirtyItemIds.has(item.id) ? 'border-[#D4AF37]' : 'border-transparent'
+                                } transition-colors`}
+                              />
+                            </div>
+
+                            <div className="mt-4 space-y-2">
+                              <textarea 
+                                rows={2}
+                                value={(pendingEdits[item.id] as {description_en?: string} | undefined)?.description_en ?? item.description_en}
+                                onChange={(e) => handleUpdateItem(item.id, { description_en: e.target.value })}
+                                className={`bg-transparent border rounded-lg p-2 text-xs ${tm.tableText} focus:outline-none w-full resize-none placeholder:opacity-30 ${
+                                  dirtyItemIds.has(item.id) ? 'border-[#D4AF37]' : 'border-zinc-800'
+                                } transition-colors`}
+                                placeholder="Description (En)..."
+                              />
+                              <textarea 
+                                rows={2}
+                                value={(pendingEdits[item.id] as {description_am?: string} | undefined)?.description_am ?? item.description_am}
+                                onChange={(e) => handleUpdateItem(item.id, { description_am: e.target.value })}
+                                className={`bg-transparent border rounded-lg p-2 text-xs ${tm.tableText} focus:outline-none w-full resize-none placeholder:opacity-30 ${
+                                  dirtyItemIds.has(item.id) ? 'border-[#D4AF37]' : 'border-zinc-800'
+                                } transition-colors`}
+                                placeholder="Description (Am)..."
+                              />
+                            </div>
+                          </div>
                     </div>
                     
                     {/* Status & Tags Toggles */}
@@ -921,7 +1045,7 @@ export default function AdminDashboard() {
                               </div>
                             </div>
                           </td>
-                          <td className="p-4 flex flex-col gap-1">
+                          <td className="p-4 flex flex-col gap-2">
                             <input 
                               type="text"
                               value={(pendingEdits[item.id] as {name_en?: string} | undefined)?.name_en ?? item.name_en}
@@ -930,7 +1054,27 @@ export default function AdminDashboard() {
                                 dirtyItemIds.has(item.id) ? 'border-[#D4AF37]' : 'border-transparent'
                               } transition-colors`}
                             />
-                            <span className={`${tm.tableSubtext} text-xs font-serif italic ml-1`}>{item.categoryName}</span>
+                            <div className="flex flex-col gap-1">
+                              <textarea 
+                                rows={1}
+                                value={(pendingEdits[item.id] as {description_en?: string} | undefined)?.description_en ?? item.description_en}
+                                onChange={(e) => handleUpdateItem(item.id, { description_en: e.target.value })}
+                                className={`bg-transparent border-b text-[10px] ${tm.tableSubtext} focus:outline-none w-full resize-none placeholder:opacity-30 ${
+                                  dirtyItemIds.has(item.id) ? 'border-[#D4AF37]' : 'border-transparent'
+                                } transition-colors`}
+                                placeholder="Description (En)..."
+                              />
+                              <textarea 
+                                rows={1}
+                                value={(pendingEdits[item.id] as {description_am?: string} | undefined)?.description_am ?? item.description_am}
+                                onChange={(e) => handleUpdateItem(item.id, { description_am: e.target.value })}
+                                className={`bg-transparent border-b text-[10px] ${tm.tableSubtext} focus:outline-none w-full resize-none placeholder:opacity-30 ${
+                                  dirtyItemIds.has(item.id) ? 'border-[#D4AF37]' : 'border-transparent'
+                                } transition-colors`}
+                                placeholder="Description (Am)..."
+                              />
+                            </div>
+                            <span className={`${tm.tableSubtext} text-[10px] font-serif italic ml-1`}>{item.categoryName}</span>
                           </td>
                           <td className="p-4">
                              <div className="flex items-center gap-1">
@@ -1242,8 +1386,337 @@ export default function AdminDashboard() {
             </div>
           </div>
           )}
+        </>
+      )}
+
+      {/* === MAIN WEBSITE MANAGER MODULE === */}
+      {activeModule === "website" && (
+        <div className="animate-fade-in-up space-y-8">
+          
+          {/* TAB: HERO MANAGER */}
+          {activeWebsiteTab === "hero" && (
+            <div className="space-y-8">
+              <div className={`flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 border-b ${tm.sidebarBorder} pb-4`}>
+                <h2 className={`text-2xl md:text-3xl font-serif ${tm.textAcc} uppercase tracking-widest`}>Hero Banner Manager</h2>
+                <button 
+                  onClick={() => setShowHeroForm(!showHeroForm)} 
+                  className={`w-full md:w-auto px-6 py-2 bg-[#D4AF37] ${isLightMode ? 'text-white' : 'text-black'} rounded-full text-xs font-black uppercase tracking-widest shadow-md transition-all active:scale-95 flex items-center justify-center gap-2`}
+                >
+                  {showHeroForm ? <><X className="w-4 h-4" /> Close</> : <><Plus className="w-4 h-4" /> Add Banner</>}
+                </button>
+              </div>
+
+              {showHeroForm && (
+                <div className={`${tm.formBg} p-8 rounded-2xl animate-fade-in-up`}>
+                  <form onSubmit={async (e) => {
+                    e.preventDefault();
+                    if (!newHero.title || !newHero.image) return;
+                    setIsSaving(true);
+                    const success = await updateHero('add', newHero);
+                    if (success) {
+                      setNewHero({ title: "", subtitle: "", image: "", order: 0 });
+                      setShowHeroForm(false);
+                      triggerSuccess();
+                    }
+                    setIsSaving(false);
+                  }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div>
+                        <label className={`block text-xs uppercase tracking-widest ${tm.textAcc} font-bold mb-2`}>Banner Title</label>
+                        <input type="text" required value={newHero.title} onChange={e => setNewHero({...newHero, title: e.target.value})} className={`w-full ${tm.inputBg} border rounded py-3 px-4 focus:outline-none focus:border-[#D4AF37]/50`} />
+                      </div>
+                      <div>
+                        <label className={`block text-xs uppercase tracking-widest ${tm.textAcc} font-bold mb-2`}>Subtitle (Optional)</label>
+                        <input type="text" value={newHero.subtitle} onChange={e => setNewHero({...newHero, subtitle: e.target.value})} className={`w-full ${tm.inputBg} border rounded py-3 px-4 focus:outline-none focus:border-[#D4AF37]/50`} />
+                      </div>
+                      <div>
+                        <label className={`block text-xs uppercase tracking-widest ${tm.textAcc} font-bold mb-2`}>Display Order</label>
+                        <input type="number" value={newHero.order} onChange={e => setNewHero({...newHero, order: parseInt(e.target.value)})} className={`w-full ${tm.inputBg} border rounded py-3 px-4 focus:outline-none focus:border-[#D4AF37]/50`} />
+                      </div>
+                    </div>
+                    <div className="space-y-4">
+                      <label className={`block text-xs uppercase tracking-widest ${tm.textAcc} font-bold mb-2`}>Banner Image</label>
+                      <div className={`flex flex-col gap-4 p-4 border ${tm.sidebarBorder} ${tm.inputBg} rounded-2xl`}>
+                        <label className={`w-full flex flex-col items-center justify-center border-2 border-dashed ${tm.sidebarBorder} rounded-xl p-8 cursor-pointer hover:border-[#D4AF37]/50 transition-all group bg-[#D4AF37]/5 border-[#D4AF37]/30`}>
+                          <Upload className={`w-10 h-10 mb-2 text-[#D4AF37] group-hover:scale-110 transition-transform`} />
+                          <span className={`text-[10px] font-black uppercase tracking-widest text-[#D4AF37]`}>
+                            {isUploading ? "Uploading..." : "Upload Banner Image"}
+                          </span>
+                          <input type="file" accept="image/*" disabled={isUploading} className="hidden" onChange={async (e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const url = await handleImageUpload(file);
+                              if (url) setNewHero({...newHero, image: url});
+                            }
+                          }} />
+                        </label>
+                        {newHero.image && (
+                          <div className="relative w-full h-32 rounded-xl overflow-hidden border border-[#D4AF37]/30">
+                            <img src={newHero.image} className="w-full h-full object-cover" />
+                            <button type="button" onClick={() => setNewHero({...newHero, image: ""})} className="absolute top-2 right-2 p-1.5 bg-red-500 text-white rounded-full shadow-lg"><Trash2 className="w-4 h-4" /></button>
+                          </div>
+                        )}
+                      </div>
+                      <button type="submit" disabled={isSaving || isUploading} className={`w-full bg-[#D4AF37] ${isLightMode ? 'text-white' : 'text-black'} py-4 rounded-lg font-black uppercase tracking-[0.2em] text-sm shadow-md active:scale-95 disabled:opacity-50 transition-all`}>
+                        {isSaving ? "Adding..." : "Add Hero Banner"}
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {websiteContent.heroes.map((hero) => (
+                  <div key={hero.id} className={`${tm.tableBg} rounded-2xl overflow-hidden border ${tm.sidebarBorder} group transition-all hover:shadow-2xl`}>
+                    <div className="relative h-48">
+                      <img src={hero.image} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                        <button onClick={async () => { if(confirm("Delete this banner?")) { await updateHero('delete', { id: hero.id }); triggerSuccess(); }}} className="p-3 bg-red-500 text-white rounded-full hover:scale-110 transition-transform"><Trash2 className="w-5 h-5" /></button>
+                      </div>
+                      <div className="absolute top-4 left-4 px-3 py-1 bg-black/60 backdrop-blur-md rounded-full text-[10px] font-black text-[#D4AF37] border border-[#D4AF37]/30">
+                        Order: {hero.order}
+                      </div>
+                    </div>
+                    <div className="p-6">
+                      <h3 className={`text-lg font-serif ${tm.tableText} font-black truncate`}>{hero.title}</h3>
+                      <p className={`text-xs ${tm.tableSubtext} mt-1 truncate`}>{hero.subtitle || "No subtitle"}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB: LOOKBOOK MANAGER */}
+          {activeWebsiteTab === "lookbook" && (
+            <div className="space-y-12">
+              
+              {/* Category Manager */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className={`${tm.formBg} p-8 rounded-2xl h-fit`}>
+                  <h3 className={`text-xl font-serif ${tm.textAcc} uppercase tracking-widest mb-6 border-b ${tm.sidebarBorder} pb-4`}>Add Lookbook Category</h3>
+                  <div className="flex gap-4">
+                    <input type="text" value={newLookbookCategory} onChange={(e) => setNewLookbookCategory(e.target.value)} placeholder="e.g. Wedding Cakes" className={`w-full ${tm.inputBg} border rounded py-3 px-4 focus:outline-none focus:border-[#D4AF37]/50`} />
+                    <button onClick={async () => { if(newLookbookCategory){ const success = await updateLookbookCategory('add', { name: newLookbookCategory }); if(success) { setNewLookbookCategory(""); triggerSuccess(); }}}} className={`bg-[#D4AF37] ${isLightMode ? 'text-white' : 'text-black'} px-8 py-3 rounded-lg font-black uppercase tracking-widest shadow-md transition-all active:scale-95`}>Add</button>
+                  </div>
+                </div>
+
+                <div className={`${tm.formBg} p-8 rounded-2xl`}>
+                  <h3 className={`text-xl font-serif ${tm.textAcc} uppercase tracking-widest mb-6 border-b ${tm.sidebarBorder} pb-4`}>Gallery Categories</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {websiteContent.lookbookCategories.map(cat => (
+                      <div key={cat.id} className={`flex items-center gap-3 px-4 py-2 rounded-full border ${tm.sidebarBorder} bg-zinc-950/30`}>
+                        <span className={`text-xs font-bold uppercase tracking-widest ${tm.tableText}`}>{cat.name}</span>
+                        <button onClick={async () => { if(confirm(`Delete category "${cat.name}"?`)) { await updateLookbookCategory('delete', { id: cat.id }); triggerSuccess(); }}} className="text-red-500 hover:text-red-400 transition-colors"><X className="w-4 h-4" /></button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Items Manager */}
+              <div className="space-y-8">
+                <div className={`flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 border-b ${tm.sidebarBorder} pb-4`}>
+                  <h2 className={`text-2xl md:text-3xl font-serif ${tm.textAcc} uppercase tracking-widest`}>Gallery Management</h2>
+                  <button onClick={() => setShowLookbookForm(!showLookbookForm)} className={`w-full md:w-auto px-6 py-2 bg-[#D4AF37] ${isLightMode ? 'text-white' : 'text-black'} rounded-full text-xs font-black uppercase tracking-widest shadow-md transition-all active:scale-95 flex items-center justify-center gap-2`}>
+                    {showLookbookForm ? <><X className="w-4 h-4" /> Close</> : <><Plus className="w-4 h-4" /> Add Gallery Item</>}
+                  </button>
+                </div>
+
+                {showLookbookForm && (
+                  <div className={`${tm.formBg} p-8 rounded-2xl animate-fade-in-up`}>
+                    <form onSubmit={async (e) => {
+                      e.preventDefault();
+                      if (!newLookbookItem.name || !newLookbookItem.category || !newLookbookItem.image) return;
+                      setIsSaving(true);
+                      const success = await updateLookbookItem('add', newLookbookItem);
+                      if (success) {
+                        setNewLookbookItem({ name: "", price: "", image: "", category: "", description: "" });
+                        setShowLookbookForm(false);
+                        triggerSuccess();
+                      }
+                      setIsSaving(false);
+                    }} className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      <div className="space-y-4">
+                        <div>
+                          <label className={`block text-xs uppercase tracking-widest ${tm.textAcc} font-bold mb-2`}>Item Name</label>
+                          <input type="text" required value={newLookbookItem.name} onChange={e => setNewLookbookItem({...newLookbookItem, name: e.target.value})} className={`w-full ${tm.inputBg} border rounded py-3 px-4 focus:outline-none focus:border-[#D4AF37]/50`} />
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className={`block text-xs uppercase tracking-widest ${tm.textAcc} font-bold mb-2`}>Price Range/Value</label>
+                            <input type="text" value={newLookbookItem.price} onChange={e => setNewLookbookItem({...newLookbookItem, price: e.target.value})} placeholder="e.g. 500-1000" className={`w-full ${tm.inputBg} border rounded py-3 px-4 focus:outline-none focus:border-[#D4AF37]/50`} />
+                          </div>
+                          <div>
+                            <label className={`block text-xs uppercase tracking-widest ${tm.textAcc} font-bold mb-2`}>Category</label>
+                            <select required value={newLookbookItem.category} onChange={e => setNewLookbookItem({...newLookbookItem, category: e.target.value})} className={`w-full ${tm.inputBg} border rounded py-3 px-4 focus:outline-none focus:border-[#D4AF37]/50`}>
+                              <option value="">Select...</option>
+                              {websiteContent.lookbookCategories.map(cat => <option key={cat.id} value={cat.id}>{cat.name}</option>)}
+                            </select>
+                          </div>
+                        </div>
+                        <div>
+                          <label className={`block text-xs uppercase tracking-widest ${tm.textAcc} font-bold mb-2`}>Description</label>
+                          <textarea rows={3} value={newLookbookItem.description} onChange={e => setNewLookbookItem({...newLookbookItem, description: e.target.value})} className={`w-full ${tm.inputBg} border rounded py-3 px-4 focus:outline-none focus:border-[#D4AF37]/50 resize-none`} />
+                        </div>
+                      </div>
+                      <div className="space-y-4">
+                        <label className={`block text-xs uppercase tracking-widest ${tm.textAcc} font-bold mb-2`}>Item Image</label>
+                        <div className={`flex flex-col gap-4 p-4 border ${tm.sidebarBorder} ${tm.inputBg} rounded-2xl`}>
+                          <label className={`w-full flex flex-col items-center justify-center border-2 border-dashed ${tm.sidebarBorder} rounded-xl p-8 cursor-pointer hover:border-[#D4AF37]/50 transition-all group bg-[#D4AF37]/5 border-[#D4AF37]/30`}>
+                            <Upload className={`w-10 h-10 mb-2 text-[#D4AF37] group-hover:scale-110 transition-transform`} />
+                            <span className={`text-[10px] font-black uppercase tracking-widest text-[#D4AF37]`}>{isUploading ? "Uploading..." : "Upload Photo"}</span>
+                            <input type="file" accept="image/*" disabled={isUploading} className="hidden" onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (file) {
+                                const url = await handleImageUpload(file);
+                                if (url) setNewLookbookItem({...newLookbookItem, image: url});
+                              }
+                            }} />
+                          </label>
+                          {newLookbookItem.image && (
+                            <div className="relative w-32 h-32 rounded-xl overflow-hidden border border-[#D4AF37]/30 mx-auto">
+                              <img src={newLookbookItem.image} className="w-full h-full object-cover" />
+                              <button type="button" onClick={() => setNewLookbookItem({...newLookbookItem, image: ""})} className="absolute top-1 right-1 p-1 bg-red-500 text-white rounded-full"><Trash2 className="w-3.5 h-3.5" /></button>
+                            </div>
+                          )}
+                        </div>
+                        <button type="submit" disabled={isSaving || isUploading} className={`w-full bg-[#D4AF37] ${isLightMode ? 'text-white' : 'text-black'} py-4 rounded-lg font-black uppercase tracking-[0.2em] text-sm shadow-md active:scale-95 disabled:opacity-50 transition-all`}>
+                          {isSaving ? "Saving..." : "Add to Gallery"}
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  {websiteContent.lookbookItems.map((item) => (
+                    <div key={item.id} className={`${tm.tableBg} rounded-2xl overflow-hidden border ${tm.sidebarBorder} group transition-all hover:shadow-2xl`}>
+                      <div className="relative aspect-square">
+                        <img src={item.image} className="w-full h-full object-cover" />
+                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                          <button onClick={async () => { if(confirm(`Delete "${item.name}"?`)) { await updateLookbookItem('delete', { id: item.id }); triggerSuccess(); }}} className="p-3 bg-red-500 text-white rounded-full hover:scale-110 transition-transform"><Trash2 className="w-5 h-5" /></button>
+                        </div>
+                      </div>
+                      <div className="p-4">
+                        <h3 className={`text-sm font-bold ${tm.tableText} truncate`}>{item.name}</h3>
+                        <div className="flex items-center justify-between mt-1">
+                          <span className={`text-[10px] font-black text-[#D4AF37]`}>{item.price ? `${item.price} ETB` : "Inquiry only"}</span>
+                          <span className={`text-[9px] px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 uppercase tracking-widest`}>
+                            {websiteContent.lookbookCategories.find(c => c.id === item.category)?.name || item.category}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* TAB: ANNOUNCEMENTS */}
+          {activeWebsiteTab === "announcements" && (
+            <div className="space-y-8">
+              <div className={`flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 border-b ${tm.sidebarBorder} pb-4`}>
+                <h2 className={`text-2xl md:text-3xl font-serif ${tm.textAcc} uppercase tracking-widest`}>News & Announcements</h2>
+                <button onClick={() => setShowAnnouncementForm(!showAnnouncementForm)} className={`w-full md:w-auto px-6 py-2 bg-[#D4AF37] ${isLightMode ? 'text-white' : 'text-black'} rounded-full text-xs font-black uppercase tracking-widest shadow-md transition-all active:scale-95 flex items-center justify-center gap-2`}>
+                  {showAnnouncementForm ? <><X className="w-4 h-4" /> Close</> : <><Plus className="w-4 h-4" /> Add Announcement</>}
+                </button>
+              </div>
+
+              {showAnnouncementForm && (
+                <div className={`${tm.formBg} p-8 rounded-2xl animate-fade-in-up`}>
+                  <form onSubmit={async (e) => {
+                    e.preventDefault();
+                    if (!newAnnouncement.text) return;
+                    setIsSaving(true);
+                    const success = await updateAnnouncement('add', newAnnouncement);
+                    if (success) {
+                      setNewAnnouncement({ text: "", isActive: true });
+                      setShowAnnouncementForm(false);
+                      triggerSuccess();
+                    }
+                    setIsSaving(false);
+                  }} className="space-y-4">
+                    <div>
+                      <label className={`block text-xs uppercase tracking-widest ${tm.textAcc} font-bold mb-2`}>Announcement Message</label>
+                      <textarea required rows={3} value={newAnnouncement.text} onChange={e => setNewAnnouncement({...newAnnouncement, text: e.target.value})} placeholder="e.g. 20% Off on all Specialty Coffee this weekend!" className={`w-full ${tm.inputBg} border rounded py-3 px-4 focus:outline-none focus:border-[#D4AF37]/50 resize-none`} />
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <label className="flex items-center gap-3 cursor-pointer">
+                        <input type="checkbox" checked={newAnnouncement.isActive} onChange={e => setNewAnnouncement({...newAnnouncement, isActive: e.target.checked})} className="w-5 h-5 accent-[#D4AF37]" />
+                        <span className={`text-xs font-bold uppercase tracking-widest ${tm.tableText}`}>Set Active Immediately</span>
+                      </label>
+                      <button type="submit" disabled={isSaving} className={`ml-auto bg-[#D4AF37] ${isLightMode ? 'text-white' : 'text-black'} px-12 py-3 rounded-lg font-black uppercase tracking-[0.2em] text-xs shadow-md active:scale-95 disabled:opacity-50 transition-all`}>
+                        Publish News
+                      </button>
+                    </div>
+                  </form>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                {websiteContent.announcements.map((ann) => (
+                  <div key={ann.id} className={`${tm.tableBg} p-6 rounded-2xl border ${tm.sidebarBorder} flex items-center justify-between gap-6`}>
+                    <div className="flex-1">
+                      <p className={`text-sm md:text-base font-medium ${tm.tableText}`}>{ann.text}</p>
+                      <span className={`text-[10px] ${tm.tableSubtext} uppercase tracking-widest mt-2 block`}>{new Date(ann.createdAt).toLocaleDateString()}</span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <button onClick={async () => { await updateAnnouncement('toggle', { id: ann.id }); triggerSuccess(); }} className={`px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${ann.isActive ? 'bg-green-500/20 text-green-500 border border-green-500/30' : 'bg-zinc-800 text-zinc-500 border border-zinc-700'}`}>
+                        {ann.isActive ? "Active" : "Paused"}
+                      </button>
+                      <button onClick={async () => { if(confirm("Delete announcement?")) { await updateAnnouncement('delete', { id: ann.id }); triggerSuccess(); }}} className="p-3 text-red-500 hover:bg-red-500/10 rounded-full transition-all"><Trash2 className="w-5 h-5" /></button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* TAB: INQUIRIES */}
+          {activeWebsiteTab === "inquiries" && (
+            <div className="space-y-8">
+              <div className={`border-b ${tm.sidebarBorder} pb-4`}>
+                <h2 className={`text-2xl md:text-3xl font-serif ${tm.textAcc} uppercase tracking-widest`}>Contact Inquiries</h2>
+                <p className={`${tm.tableSubtext} text-xs mt-1 uppercase tracking-widest`}>Read-only list of website contact form submissions</p>
+              </div>
+
+              <div className="space-y-4">
+                {websiteContent.inquiries.map((inq) => (
+                  <div key={inq.id} className={`${tm.tableBg} p-6 rounded-2xl border ${tm.sidebarBorder} space-y-4`}>
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div className="flex items-center gap-4">
+                        <div className={`w-12 h-12 rounded-full bg-[#D4AF37]/10 flex items-center justify-center text-[#D4AF37] font-serif text-xl font-black`}>{inq.name[0]}</div>
+                        <div>
+                          <h3 className={`text-base font-bold ${tm.tableText}`}>{inq.name}</h3>
+                          <p className={`text-xs ${tm.tableSubtext}`}>{inq.email} • {inq.phone || "No phone"}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <select value={inq.status} onChange={async (e) => { await updateInquiry('updateStatus', { id: inq.id, status: e.target.value }); triggerSuccess(); }} className={`text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full border ${tm.sidebarBorder} ${tm.inputBg} focus:outline-none focus:border-[#D4AF37]`}>
+                          <option value="new">New</option>
+                          <option value="read">Read</option>
+                          <option value="replied">Replied</option>
+                        </select>
+                        <button onClick={async () => { if(confirm("Delete this inquiry?")) { await updateInquiry('delete', { id: inq.id }); triggerSuccess(); }}} className="p-2.5 text-red-500 hover:bg-red-500/10 rounded-full transition-all"><Trash2 className="w-5 h-5" /></button>
+                      </div>
+                    </div>
+                    <div className={`p-4 rounded-xl bg-zinc-950/30 border border-zinc-800/50`}>
+                      <p className={`text-[10px] font-black uppercase tracking-widest text-[#D4AF37] mb-1`}>Subject: {inq.subject || "No Subject"}</p>
+                      <p className={`text-sm leading-relaxed ${tm.tableText}`}>{inq.message}</p>
+                    </div>
+                    <span className={`text-[9px] ${tm.tableSubtext} uppercase tracking-widest block text-right`}>{new Date(inq.createdAt).toLocaleString()}</span>
+                  </div>
+                ))}
+                {websiteContent.inquiries.length === 0 && <div className={`${tm.tableBg} p-12 rounded-2xl text-center border ${tm.sidebarBorder}`}><p className={`${tm.tableSubtext} font-serif italic`}>No inquiries yet.</p></div>}
+              </div>
+            </div>
+          )}
         </div>
-      </main>
+      )}
+    </div>
+  </main>
 
       {/* Global Saving Overlay */}
       {isSaving && (
