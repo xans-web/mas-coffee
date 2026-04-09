@@ -355,45 +355,45 @@ export default function Home() {
     <div className={`min-h-screen ${tm.bgApp} ${tm.textApp} transition-colors duration-500 font-sans selection:bg-[#F3E5AB] selection:text-[#08120F] overflow-x-hidden touch-pan-y`}>
       <div className={`fixed inset-0 ${tm.bgApp} tilet-pattern -z-20 transition-colors duration-500 opacity-20`} />
       
-      {/* Global Header */}
-      <header className={`sticky top-0 z-[1000] ${tm.bgHeader} backdrop-blur-xl border-b ${tm.borderMain} px-4 md:px-12 w-full h-[80px] md:h-[100px] flex items-center`}>
+      {/* Global Header - Strictly Fixed */}
+      <header className={`fixed top-0 left-0 right-0 z-[1000] ${tm.bgHeader} backdrop-blur-xl border-b ${tm.borderMain} px-4 md:px-12 w-full h-[56px] md:h-[70px] flex items-center`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between w-full relative">
           
           {/* Mobile Header Row (Visible only on mobile/tablet < 768px) */}
           <div className="flex lg:hidden items-center justify-between w-full h-full gap-2">
             {/* Left: Logo & Company Name */}
-            <div className="flex items-center gap-2 flex-shrink-0 cursor-pointer" onClick={handleLogoClick}>
-              <div className="w-8 h-8 relative rounded-lg overflow-hidden border border-[#F3E5AB]/20">
+            <div className="flex items-center gap-1.5 flex-shrink-0 cursor-pointer" onClick={handleLogoClick}>
+              <div className="w-7 h-7 relative rounded-lg overflow-hidden border border-[#F3E5AB]/20">
                 <img src={siteContent.logo || "/logo.png"} alt="Logo" className="w-full h-full object-cover" />
               </div>
-              <h1 className="text-xs font-serif font-black tracking-tighter uppercase text-[#F3E5AB] whitespace-nowrap">Mas Coffee</h1>
+              <h1 className="text-[10px] font-serif font-black tracking-tighter uppercase text-[#F3E5AB] whitespace-nowrap">Mas Coffee</h1>
             </div>
 
             {/* Icons Group: Search, Filter, Lang, Hamburger */}
-            <div className="flex items-center gap-1.5 md:gap-3 flex-grow justify-end">
+            <div className="flex items-center gap-1 flex-grow justify-end">
               <button 
                 onClick={() => setShowSearchInput(!showSearchInput)}
-                className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center transition-all active:scale-95 ${showSearchInput ? 'bg-[#F3E5AB] text-[#08120F]' : 'text-[#F3E5AB]'}`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-95 ${showSearchInput ? 'bg-[#F3E5AB] text-[#08120F]' : 'text-[#F3E5AB]'}`}
               >
-                <Search className="w-4 h-4 md:w-5 md:h-5" />
+                <Search className="w-3.5 h-3.5" />
               </button>
               <button 
                 onClick={() => setShowPriceFilter(!showPriceFilter)}
-                className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center text-[#F3E5AB] transition-all active:scale-95 ${showPriceFilter ? 'bg-[#F3E5AB] text-[#08120F]' : ''}`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-[#F3E5AB] transition-all active:scale-95 ${showPriceFilter ? 'bg-[#F3E5AB] text-[#08120F]' : ''}`}
               >
-                <SlidersHorizontal className="w-4 h-4 md:w-5 md:h-5" />
+                <SlidersHorizontal className="w-3.5 h-3.5" />
               </button>
               <button 
                 onClick={() => setLang(lang === 'en' ? 'am' : 'en')}
-                className={`w-9 h-9 md:w-10 md:h-10 rounded-full border border-[#F3E5AB]/10 flex items-center justify-center text-[10px] font-bold text-[#F3E5AB] transition-all active:scale-95`}
+                className={`w-8 h-8 rounded-full border border-[#F3E5AB]/10 flex items-center justify-center text-[9px] font-bold text-[#F3E5AB] transition-all active:scale-95`}
               >
                 {lang === 'en' ? 'አማ' : 'EN'}
               </button>
               <button 
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`w-9 h-9 md:w-10 md:h-10 rounded-full flex items-center justify-center text-[#F3E5AB] transition-all active:scale-95 ${isMobileMenuOpen ? 'bg-[#F3E5AB] text-[#08120F]' : ''}`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-[#F3E5AB] transition-all active:scale-95 ${isMobileMenuOpen ? 'bg-[#F3E5AB] text-[#08120F]' : ''}`}
               >
-                {isMobileMenuOpen ? <X className="w-5 h-5 md:w-6 md:h-6" /> : <Menu className="w-5 h-5 md:w-6 md:h-6" />}
+                {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
               </button>
             </div>
           </div>
@@ -455,7 +455,7 @@ export default function Home() {
 
         {/* Mobile Search Input Overlay */}
         {showSearchInput && (
-          <div className="lg:hidden absolute top-[80px] left-0 w-full p-4 bg-[#08120F] border-b border-[#F3E5AB]/10 animate-fade-in z-[900]">
+          <div className="lg:hidden absolute top-[56px] left-0 w-full p-3 bg-[#08120F] border-b border-[#F3E5AB]/10 animate-fade-in z-[900]">
             <div className="relative">
               <input 
                 autoFocus
@@ -463,11 +463,11 @@ export default function Home() {
                 placeholder={t.search} 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full ${tm.searchBg} border border-[#F3E5AB]/30 rounded-full py-3 px-12 focus:outline-none focus:border-[#F3E5AB] transition-all text-sm text-[#F3E5AB]`}
+                className={`w-full ${tm.searchBg} border border-[#F3E5AB]/30 rounded-full py-2 px-10 focus:outline-none focus:border-[#F3E5AB] transition-all text-xs text-[#F3E5AB]`}
               />
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#F3E5AB]/50" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#F3E5AB]/50" />
               <button onClick={() => { setSearchQuery(""); setShowSearchInput(false); }} className="absolute right-4 top-1/2 -translate-y-1/2">
-                <X className="w-4 h-4 text-[#F3E5AB]/50" />
+                <X className="w-3.5 h-3.5 text-[#F3E5AB]/50" />
               </button>
             </div>
           </div>
@@ -475,10 +475,10 @@ export default function Home() {
 
         {/* Mobile Price Filter Overlay */}
         {showPriceFilter && (
-          <div className="lg:hidden absolute top-[80px] left-0 w-full p-6 bg-[#08120F] border-b border-[#F3E5AB]/10 animate-fade-in z-[900]">
-            <div className="flex items-center justify-between mb-4">
-              <span className="text-[10px] font-black uppercase tracking-widest opacity-40">Price Limit</span>
-              <span className="font-serif font-black text-[#F3E5AB]">{priceLimit} ETB</span>
+          <div className="lg:hidden absolute top-[56px] left-0 w-full p-4 bg-[#08120F] border-b border-[#F3E5AB]/10 animate-fade-in z-[900]">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[9px] font-black uppercase tracking-widest opacity-40">Price Limit</span>
+              <span className="font-serif font-black text-[#F3E5AB] text-sm">{priceLimit} ETB</span>
             </div>
             <input 
               type="range" 
@@ -486,7 +486,7 @@ export default function Home() {
               max={maxPrice} 
               value={priceLimit}
               onChange={(e) => setPriceLimit(Number(e.target.value))}
-              className="w-full h-1.5 bg-[#F3E5AB]/10 rounded-full appearance-none accent-[#F3E5AB]"
+              className="w-full h-1 bg-[#F3E5AB]/10 rounded-full appearance-none accent-[#F3E5AB]"
             />
           </div>
         )}
@@ -498,22 +498,22 @@ export default function Home() {
       >
         <div className="absolute inset-0 bg-[#08120F]/60 backdrop-blur-md" onClick={() => setIsMobileMenuOpen(false)} />
         <div 
-          className={`absolute top-0 right-0 h-full w-[80%] max-w-sm ${tm.modalBg} shadow-2xl transition-transform duration-300 ease-in-out flex flex-col p-8 md:p-12 ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+          className={`absolute top-0 right-0 h-full w-[80%] max-w-sm ${tm.modalBg} shadow-2xl transition-transform duration-300 ease-in-out flex flex-col p-6 md:p-12 ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
           style={{ willChange: 'transform' }}
         >
-          <div className="flex justify-between items-center mb-12">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 relative rounded-xl overflow-hidden border border-[#F3E5AB]/20">
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 relative rounded-xl overflow-hidden border border-[#F3E5AB]/20">
                 <img src={siteContent.logo || "/logo.png"} alt="Logo" className="w-full h-full object-cover" />
               </div>
-              <h2 className={`text-xl font-serif font-black ${tm.textApp}`}>Mas Coffee</h2>
+              <h2 className={`text-lg font-serif font-black ${tm.textApp}`}>Mas Coffee</h2>
             </div>
-            <button onClick={() => setIsMobileMenuOpen(false)} className={`w-10 h-10 rounded-full border ${tm.borderMain} flex items-center justify-center ${tm.textApp}`}>
-              <X className="w-5 h-5" />
+            <button onClick={() => setIsMobileMenuOpen(false)} className={`w-8 h-8 rounded-full border ${tm.borderMain} flex items-center justify-center ${tm.textApp}`}>
+              <X className="w-4 h-4" />
             </button>
           </div>
 
-          <nav className="flex flex-col gap-6 flex-1 overflow-y-auto">
+          <nav className="flex flex-col gap-4 flex-1 overflow-y-auto">
             {[
               { id: 'home', label: t.home },
               { id: 'menu', label: t.menu },
@@ -524,7 +524,7 @@ export default function Home() {
               <button
                 key={link.id}
                 onClick={() => { setActiveSection(link.id as any); setIsMobileMenuOpen(false); }}
-                className={`text-xl font-serif font-black uppercase tracking-widest text-left transition-all py-2 border-b ${tm.borderMain} ${
+                className={`text-lg font-serif font-black uppercase tracking-widest text-left transition-all py-1.5 border-b ${tm.borderMain} ${
                   activeSection === link.id ? 'text-[#F3E5AB]' : tm.textMuted
                 }`}
               >
@@ -533,40 +533,40 @@ export default function Home() {
             ))}
           </nav>
 
-          <div className="mt-auto pt-8 border-t border-[#F3E5AB]/10 space-y-4">
+          <div className="mt-auto pt-6 border-t border-[#F3E5AB]/10 space-y-3">
              <button 
               onClick={() => setIsLightMode(!isLightMode)}
-              className={`flex items-center gap-4 w-full py-4 px-6 rounded-2xl border ${tm.borderMain} ${tm.textApp} font-black uppercase tracking-widest text-xs`}
+              className={`flex items-center gap-3 w-full py-3 px-5 rounded-2xl border ${tm.borderMain} ${tm.textApp} font-black uppercase tracking-widest text-[10px]`}
             >
-              {isLightMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+              {isLightMode ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
               <span>{isLightMode ? 'Dark Mode' : 'Light Mode'}</span>
             </button>
             <button 
               onClick={() => setLang(lang === 'en' ? 'am' : 'en')}
-              className={`flex items-center gap-4 w-full py-4 px-6 rounded-2xl border ${tm.borderMain} ${tm.textApp} font-black uppercase tracking-widest text-xs`}
+              className={`flex items-center gap-3 w-full py-3 px-5 rounded-2xl border ${tm.borderMain} ${tm.textApp} font-black uppercase tracking-widest text-[10px]`}
             >
-              <Globe className="w-4 h-4" />
+              <Globe className="w-3.5 h-3.5" />
               <span>{lang === 'en' ? 'Switch to Amharic' : 'ወደ እንግሊዝኛ ቀይር'}</span>
             </button>
           </div>
         </div>
       </div>
 
-      {/* Sections */}
-      <div className="relative overflow-hidden">
+      {/* Sections - Offset by header height */}
+      <div className="relative overflow-hidden pt-[56px] md:pt-[70px]">
         
         {/* Home Section (Dynamic Hero & Lookbook) */}
         {activeSection === 'home' && (
           <div className="animate-fade-in">
             {isWebsiteLoading ? (
-              <div className="h-[calc(100vh-80px)] md:h-[calc(100vh-100px)] flex flex-col items-center justify-center space-y-8">
+              <div className="h-[calc(100vh-56px)] md:h-[calc(100vh-70px)] flex flex-col items-center justify-center space-y-8">
                 <div className="w-20 h-20 border-2 border-[#F3E5AB]/20 border-t-[#F3E5AB] rounded-full animate-spin" />
                 <p className="text-[#F3E5AB] font-serif italic uppercase tracking-widest opacity-40">Loading Luxury Experience...</p>
               </div>
             ) : (
               <>
                 {/* Hero Slider */}
-                <section className="relative h-[calc(100vh-80px)] md:h-[calc(100vh-100px)] overflow-hidden">
+                <section className="relative h-[45vh] md:h-[60vh] overflow-hidden">
                   {websiteContent.heroes.length > 0 ? (
                     websiteContent.heroes.map((hero, idx) => (
                       <div
@@ -576,15 +576,15 @@ export default function Home() {
                         <div className="absolute inset-0 bg-black/40 z-10" />
                         <img src={hero.image} className="w-full h-full object-cover" alt={hero.title} />
                         <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-4">
-                          <h2 className="text-5xl md:text-8xl font-serif font-black mb-6 tracking-tight text-white drop-shadow-2xl max-w-5xl">
+                          <h2 className="text-3xl md:text-6xl font-serif font-black mb-3 tracking-tight text-white drop-shadow-2xl max-w-5xl">
                             {hero.title}
                           </h2>
-                          <p className="max-w-2xl text-lg md:text-2xl text-[#F3E5AB] font-medium mb-12 drop-shadow-lg opacity-90 tracking-wide uppercase">
+                          <p className="max-w-xl text-sm md:text-lg text-[#F3E5AB] font-medium mb-6 drop-shadow-lg opacity-90 tracking-wide uppercase">
                             {hero.subtitle}
                           </p>
                           <button 
                             onClick={() => setActiveSection('menu')}
-                            className="bg-[#F3E5AB] text-[#08120F] px-12 py-5 rounded-full font-black uppercase tracking-[0.3em] text-sm hover:scale-105 active:scale-95 transition-all shadow-2xl"
+                            className="bg-[#F3E5AB] text-[#08120F] px-8 py-3 rounded-full font-black uppercase tracking-[0.3em] text-[9px] md:text-xs hover:scale-105 active:scale-95 transition-all shadow-2xl"
                           >
                             Explore Menu
                           </button>
@@ -594,18 +594,18 @@ export default function Home() {
                   ) : (
                     <div className="h-full flex flex-col items-center justify-center text-center px-4 relative">
                       <div className="absolute inset-0 -z-10 overflow-hidden">
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#F3E5AB]/10 rounded-full blur-[120px]" />
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#F3E5AB]/10 rounded-full blur-[80px]" />
                       </div>
-                      <h2 className="text-5xl md:text-8xl font-serif font-black mb-6 tracking-tight animate-fade-in-up">
+                      <h2 className="text-3xl md:text-6xl font-serif font-black mb-3 tracking-tight animate-fade-in-up">
                         Mas Coffee: <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F3E5AB] to-[#FDF8F0]">Where Every Sip Tells a Story</span>
                       </h2>
-                      <p className="max-w-2xl text-lg md:text-xl opacity-60 mb-12 animate-fade-in-up delay-200">
+                      <p className="max-w-xl text-sm md:text-lg opacity-60 mb-6 animate-fade-in-up delay-200">
                         Immerse yourself in the luxury of Ethiopian coffee culture. A sensory journey through the highlands, delivered with elegance.
                       </p>
                       <button 
                         onClick={() => setActiveSection('menu')}
-                        className="bg-[#F3E5AB] text-[#08120F] px-12 py-5 rounded-full font-black uppercase tracking-[0.3em] text-sm hover:scale-105 active:scale-95 transition-all shadow-2xl animate-fade-in-up delay-400"
+                        className="bg-[#F3E5AB] text-[#08120F] px-8 py-3 rounded-full font-black uppercase tracking-[0.3em] text-[9px] md:text-xs hover:scale-105 active:scale-95 transition-all shadow-2xl animate-fade-in-up delay-400"
                       >
                         Explore Menu
                       </button>
@@ -614,33 +614,32 @@ export default function Home() {
                   
                   {/* Slider Dots */}
                   {websiteContent.heroes.length > 1 && (
-                    <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex gap-3">
+                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2">
                       {websiteContent.heroes.map((_, idx) => (
                         <button
                           key={idx}
                           onClick={() => setCurrentHeroIndex(idx)}
-                          className={`w-3 h-3 rounded-full transition-all ${idx === currentHeroIndex ? 'bg-[#F3E5AB] w-10' : 'bg-white/30 hover:bg-white/50'}`}
+                          className={`w-2 h-2 rounded-full transition-all ${idx === currentHeroIndex ? 'bg-[#F3E5AB] w-8' : 'bg-white/30 hover:bg-white/50'}`}
                         />
                       ))}
                     </div>
                   )}
                 </section>
 
-                {/* Lookbook (Gallery) Section */}
-                <section className="py-24 md:py-32 px-4 md:px-12 max-w-7xl mx-auto space-y-16">
-                  <div className="text-center space-y-6">
-                    <h2 className="text-3xl md:text-6xl font-serif font-black uppercase tracking-[0.3em] text-[#F3E5AB]">The Lookbook</h2>
-                    <div className="w-24 h-1 bg-[#F3E5AB] mx-auto rounded-full" />
-                    <p className="max-w-2xl mx-auto text-sm md:text-lg opacity-60 uppercase tracking-widest leading-relaxed">
-                      A visual celebration of our finest creations, from artisanal cakes to specialty coffee brews.
-                    </p>
-                  </div>
+                {/* Divider line */}
+                <div className="w-full h-px bg-[#F3E5AB]/20" />
 
-                  {/* Lookbook Filters */}
-                  <div className="flex flex-wrap items-center justify-center gap-4 border-b border-[#F3E5AB]/10 pb-8">
+                {/* Lookbook (Gallery) Section */}
+                <section className="py-6 md:py-10 px-4 md:px-12 max-w-7xl mx-auto space-y-6">
+                  {/* Branding text removed per user request */}
+
+                  {/* Lookbook Filters - Sticky Navigation */}
+              <div className={`sticky top-[56px] md:top-[70px] z-[800] ${tm.bgHeader} backdrop-blur-xl border-b ${tm.borderMain} py-2 md:py-4 mb-4`}>
+                <div className="max-w-7xl mx-auto px-4 md:px-12">
+                  <div className="flex items-center justify-start md:justify-center gap-3 md:gap-4 w-full overflow-x-auto no-scrollbar">
                     <button
                       onClick={() => setActiveLookbookCategory("All")}
-                      className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${activeLookbookCategory === "All" ? 'bg-[#F3E5AB] text-[#08120F]' : 'border-[#F3E5AB]/20 opacity-40 hover:opacity-100'}`}
+                      className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all border flex-shrink-0 ${activeLookbookCategory === "All" ? 'bg-[#F3E5AB] text-[#08120F] shadow-lg' : 'border-[#F3E5AB]/20 opacity-40 hover:opacity-100'}`}
                     >
                       All Gallery
                     </button>
@@ -648,12 +647,14 @@ export default function Home() {
                       <button
                         key={cat.id}
                         onClick={() => setActiveLookbookCategory(cat.id)}
-                        className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all border ${activeLookbookCategory === cat.id ? 'bg-[#F3E5AB] text-[#08120F]' : 'border-[#F3E5AB]/20 opacity-40 hover:opacity-100'}`}
+                        className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all border flex-shrink-0 ${activeLookbookCategory === cat.id ? 'bg-[#F3E5AB] text-[#08120F] shadow-lg' : 'border-[#F3E5AB]/20 opacity-40 hover:opacity-100'}`}
                       >
                         {cat.name}
                       </button>
                     ))}
                   </div>
+                </div>
+              </div>
 
                   {/* Lookbook Grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
@@ -700,17 +701,10 @@ export default function Home() {
         {activeSection === 'menu' && (
           <div className="animate-fade-in">
             {/* Specials Carousel (Mobile Only) - Wide Aspect Ratio Refinement */}
-            <div className={`lg:hidden py-1 border-b border-[#F3E5AB]/5 overflow-hidden ${isLightMode ? 'bg-[#FDF8F0]/50' : 'bg-[#08120F]/50'} backdrop-blur-sm mt-4 md:mt-8 max-w-[95%] mx-auto rounded-3xl`}>
-              <div className="px-4 mb-2 flex items-center justify-between">
-                <span className={`text-[10px] font-black uppercase tracking-widest ${isLightMode ? 'text-[#08120F]/40' : 'text-[#F3E5AB]/40'}`}>{t.specials}</span>
-                <div className="flex gap-1.5">
-                  <div className={`w-1.5 h-1.5 rounded-full ${isLightMode ? 'bg-[#08120F]' : 'bg-[#F3E5AB]'}`} />
-                  <div className={`w-1.5 h-1.5 rounded-full ${isLightMode ? 'bg-[#08120F]/20' : 'bg-[#F3E5AB]/20'}`} />
-                </div>
-              </div>
+            <div className={`lg:hidden py-4 border-b border-[#F3E5AB]/5 overflow-hidden ${isLightMode ? 'bg-[#FDF8F0]/50' : 'bg-[#08120F]/50'} backdrop-blur-sm mt-2 md:mt-4 max-w-[95%] mx-auto rounded-3xl`}>
               <div 
                 ref={carouselRef}
-                className="flex gap-4 overflow-x-auto no-scrollbar px-4 pb-3 snap-x snap-mandatory h-40 md:h-64"
+                className="flex gap-4 overflow-x-auto no-scrollbar px-4 pb-1 snap-x snap-mandatory h-40 md:h-64"
               >
                 {specials.map((item) => (
                   <div 
@@ -729,14 +723,14 @@ export default function Home() {
             </div>
 
             {/* Categories Row - Sticky to the top (below global header) */}
-            <div className={`sticky top-[80px] md:top-[100px] z-[800] ${tm.bgHeader} backdrop-blur-xl border-b ${tm.borderMain} py-1.5 md:py-4 mt-4 md:mt-8`}>
+            <div className={`sticky top-[56px] md:top-[70px] z-[800] ${tm.bgHeader} backdrop-blur-xl border-b ${tm.borderMain} py-2 md:py-4 mb-2 md:mb-4`}>
               <div className="max-w-7xl mx-auto px-4 md:px-12">
                 <div className="flex items-center gap-2 md:gap-4 w-full overflow-x-auto no-scrollbar">
                   {["All", ...menuData.map(c => lang === 'en' ? c.category_en : c.category_am)].map((cat) => (
                     <button
                       key={cat}
                       onClick={() => setActiveCategory(cat)}
-                      className={`px-4 py-1.5 rounded-full text-[8px] font-black uppercase tracking-widest transition-all flex-shrink-0 border ${
+                      className={`px-6 py-2 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest transition-all flex-shrink-0 border ${
                         activeCategory === cat ? tm.catBgActive : tm.catBgInactive
                       }`}
                     >
@@ -747,73 +741,74 @@ export default function Home() {
               </div>
             </div>
 
-            <main className="max-w-7xl mx-auto px-4 md:px-12 pt-8 md:pt-12 pb-32 min-h-[70vh]">
-              <div className="space-y-12 md:space-y-24">
+            <main className="max-w-7xl mx-auto px-2 md:px-12 pt-2 md:pt-4 pb-32 min-h-[70vh]">
+              <div className="space-y-4 md:space-y-8">
+                {/* Section 4 Heading - Underlined and Centered with increased bottom spacing */}
+                <div className="flex flex-col items-center mb-10 pt-4">
+                  <h2 className="text-center text-xl md:text-2xl font-serif font-black text-[#F3E5AB] uppercase tracking-[0.5em] underline decoration-[#D4AF37] underline-offset-8">
+                    MENU
+                  </h2>
+                </div>
+                
                 {filteredMenuData.map((section) => (
-                  <section key={section.category_en} className="scroll-mt-[120px]">
-                    <div className="flex items-center gap-3 mb-12">
-                      <CategoryIcon name={section.category_en} className="w-8 h-8 md:w-12 md:h-12 opacity-40" />
-                      <h3 className="text-2xl md:text-5xl font-serif font-black uppercase tracking-[0.4em] opacity-40">
-                        {t.categories[section.category_en as keyof typeof t.categories] || section.category_en}
-                      </h3>
-                      <div className={`h-[1px] flex-grow ${tm.borderMain} border-t`} />
-                    </div>
+                  <section key={section.category_en} className="scroll-mt-[100px]">
+                    {/* Branding/Category text removed per user request */}
 
-                    <div className="grid grid-cols-1 gap-4 md:gap-8">
+                    <div className="grid grid-cols-1 gap-8 md:gap-16">
                       {section.items.map((item) => (
                         <article 
                           key={item.id} 
-                          className={`relative flex items-center w-full h-56 md:h-80 group ${item.isSoldOut ? 'opacity-40 grayscale' : ''}`}
+                          className={`relative flex items-center w-full h-[180px] md:h-[280px] group ${item.isSoldOut ? 'opacity-40 grayscale' : ''}`}
                         >
-                          {/* Circular "Out-of-Frame" Image (80% Massive Hero Layer) */}
-                          <div className="absolute left-2 md:left-4 z-20 w-48 h-48 md:w-80 md:h-80">
-                            <div className="w-full h-full rounded-full overflow-hidden border-2 border-[#c5a367] shadow-[0_20px_50px_rgba(0,0,0,1)] bg-[#08120F]">
+                          {/* Circular "Out-of-Frame" Image (exactly 45% of parent width) */}
+                          <div className="absolute left-[2%] z-20 w-[45%] md:w-[35%] max-w-[180px] md:max-w-[300px] aspect-square flex items-center">
+                            <div className="w-full h-full rounded-full overflow-hidden border border-[#c5a367]/60 shadow-[0_15px_40px_rgba(0,0,0,0.8)] bg-[#08120F]">
                               {item.image ? (
                                 <SafeImage src={item.image} alt={item.name_en} fill className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
                               ) : (
-                                <div className="w-full h-full flex items-center justify-center text-5xl font-serif text-[#c5a367] opacity-40">
+                                <div className="w-full h-full flex items-center justify-center text-4xl md:text-6xl font-serif text-[#c5a367] opacity-40">
                                   {item.name_en[0]}
                                 </div>
                               )}
                             </div>
                             {/* Badges */}
                             {(item.isSpecial || item.isNew) && (
-                              <div className="absolute top-4 right-4 bg-[#c5a367] text-black px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg z-20 animate-pulse">
+                              <div className="absolute top-[10%] right-[10%] bg-[#c5a367] text-black px-3 py-0.5 rounded-full text-[8px] md:text-xs font-black uppercase tracking-widest shadow-lg z-20 animate-pulse">
                                 {item.isSpecial ? 'Special' : 'New'}
                               </div>
                             )}
                           </div>
 
-                          {/* Description Card (80% Width / 70% Substantial Rectangle Layer - Dark Green) */}
-                          <div className="absolute right-0 w-[85%] h-40 md:h-64 bg-[#0a2c26] rounded-[24px] md:rounded-[40px] flex flex-col items-center justify-center pl-24 md:pl-48 pr-6 md:pr-12 shadow-[0_15px_60px_rgba(0,0,0,0.6)] border border-[#c5a367]/10 transition-all duration-500 hover:border-[#c5a367]/40 text-center">
+                          {/* Description Card (Horizontal Expansion to 80% width) */}
+                          <div className="absolute right-[2%] w-[80%] md:w-[75%] h-[80%] md:h-[90%] bg-[#0a2c26] rounded-[24px] md:rounded-[40px] flex flex-col items-center justify-center pl-[28%] md:pl-[20%] pr-4 md:pr-12 shadow-[0_15px_50px_rgba(0,0,0,0.6)] border border-[#c5a367]/10 transition-all duration-500 hover:border-[#c5a367]/40 text-center">
                             {/* Centered Information Stack: Name -> Price -> Description -> Button */}
-                            <div className="flex flex-col gap-1 md:gap-2 mb-2 md:mb-3 items-center">
-                              <h4 className="text-base md:text-3xl font-semibold text-[#c5a367] leading-tight line-clamp-1 uppercase tracking-widest">
+                            <div className="flex flex-col gap-0.5 md:gap-1 mb-1 md:mb-2 items-center">
+                              <h4 className="text-[10px] md:text-2xl font-semibold text-[#c5a367] leading-tight line-clamp-1 uppercase tracking-widest">
                                 {lang === 'en' ? item.name_en : item.name_am}
                               </h4>
-                              <span className="text-[#c5a367] font-bold text-lg md:text-4xl leading-none">
+                              <span className="text-[#c5a367] font-bold text-xs md:text-3xl leading-none">
                                 {item.price} ETB
                               </span>
                             </div>
 
                             {/* Elegant Description Text (Dynamic from Admin) */}
-                            <p className="text-[10px] md:text-sm text-[#F3E5AB]/40 line-clamp-2 md:line-clamp-3 italic font-light max-w-[85%] mb-4 md:mb-6">
+                            <p className="text-[8px] md:text-sm text-[#F3E5AB]/40 line-clamp-1 md:line-clamp-2 italic font-light max-w-[90%] mb-2 md:mb-4">
                               {lang === 'en' ? item.description_en : item.description_am}
                             </p>
 
                             {/* Action Button (Gold Pill) */}
                             <div className="w-fit">
                               {cart[item.id] > 0 ? (
-                                <div className="flex items-center gap-3 md:gap-6 bg-[#c5a367]/10 rounded-full px-2 py-1.5 border border-[#c5a367]/20 backdrop-blur-sm">
-                                  <button onClick={() => removeFromCart(item.id)} className="w-6 h-6 md:w-12 md:h-12 rounded-full flex items-center justify-center text-[#c5a367] hover:bg-[#c5a367] hover:text-black transition-all">-</button>
+                                <div className="flex items-center gap-2 md:gap-4 bg-[#c5a367]/10 rounded-full px-2 py-1 md:py-1.5 border border-[#c5a367]/20 backdrop-blur-sm">
+                                  <button onClick={() => removeFromCart(item.id)} className="w-6 h-6 md:w-12 md:h-12 rounded-full flex items-center justify-center text-[#c5a367] hover:bg-[#c5a367] hover:text-black transition-all text-xs">-</button>
                                   <span className="font-black text-xs md:text-2xl text-[#c5a367] w-4 md:w-10 text-center">{cart[item.id]}</span>
-                                  <button onClick={(e) => addToCart(item.id, e)} className="w-6 h-6 md:w-12 md:h-12 rounded-full bg-[#c5a367] text-black flex items-center justify-center font-black hover:scale-105 transition-all">+</button>
+                                  <button onClick={(e) => addToCart(item.id, e)} className="w-6 h-6 md:w-12 md:h-12 rounded-full bg-[#c5a367] text-black flex items-center justify-center font-black hover:scale-105 transition-all text-xs">+</button>
                                 </div>
                               ) : (
                                 <button 
                                   disabled={item.isSoldOut}
                                   onClick={(e) => addToCart(item.id, e)}
-                                  className="bg-[#c5a367] text-black px-6 md:px-12 py-2 md:py-5 rounded-full text-[10px] md:text-base font-black uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all shadow-[0_8px_30px_rgba(197,163,103,0.3)] disabled:opacity-50"
+                                  className="bg-[#c5a367] text-black px-4 md:px-12 py-1.5 md:py-4 rounded-full text-[9px] md:text-base font-black uppercase tracking-[0.1em] hover:scale-105 active:scale-95 transition-all shadow-[0_5px_20px_rgba(197,163,103,0.3)] disabled:opacity-50"
                                 >
                                   + ADD
                                 </button>
