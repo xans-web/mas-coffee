@@ -257,8 +257,8 @@ export default function Home() {
     searchBg: isLightMode ? "bg-[#FDF8F0]/80" : "bg-[#08120F]/80",
     searchIcon: isLightMode ? "text-[#08120F]" : "text-[#F3E5AB]",
     switchBtn: isLightMode ? "bg-[#FDF8F0] border-[#08120F]/10 text-[#08120F]" : "bg-[#08120F] border-[#F3E5AB]/10 text-[#F3E5AB]",
-    catBgActive: "bg-[#F3E5AB] text-[#08120F] shadow-lg",
-    catBgInactive: isLightMode ? "bg-[#FDF8F0]/80 text-[#08120F]/70 border-[#08120F]/10 hover:border-[#08120F]/40" : "bg-[#08120F]/80 text-[#F3E5AB]/70 border-[#F3E5AB]/10 hover:border-[#F3E5AB]/40",
+    catBgActive: "bg-[#F3E5AB] text-[#08120F] shadow-[0_0_20px_rgba(243,229,171,0.4)] scale-105 border-[#F3E5AB]",
+    catBgInactive: isLightMode ? "bg-[#FDF8F0]/80 text-[#08120F]/70 border-[#08120F]/10 hover:border-[#08120F]/40 hover:scale-105" : "bg-[#08120F]/80 text-[#F3E5AB]/70 border-[#F3E5AB]/10 hover:border-[#F3E5AB]/40 hover:scale-105",
     cardBg: isLightMode ? "bg-[#FDF8F0]/80 backdrop-blur-md border-[#08120F]/10 shadow-xl" : "bg-[#08120F]/80 backdrop-blur-md border-[#F3E5AB]/10 shadow-xl",
     modalOverlay: "bg-[#08120F]/60 backdrop-blur-sm",
     modalBg: isLightMode ? "bg-[#FDF8F0] backdrop-blur-xl border border-[#08120F]/10" : "bg-[#08120F] backdrop-blur-xl border border-[#F3E5AB]/10",
@@ -566,42 +566,31 @@ export default function Home() {
                         key={hero.id}
                         className={`absolute inset-0 transition-all duration-1000 ease-in-out ${idx === currentHeroIndex ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-110 z-0'}`}
                       >
-                        <div className="absolute inset-0 bg-black/40 z-10" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10" />
                         <img src={hero.image} className="w-full h-full object-cover" alt={hero.title} />
-                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-center text-center px-4">
-                          <h2 className="text-3xl md:text-6xl font-serif font-black mb-3 tracking-tight text-white drop-shadow-2xl max-w-5xl">
+                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-end text-center px-4 pb-16 md:pb-24">
+                          <h2 className="text-3xl md:text-6xl font-serif font-black mb-4 tracking-[0.15em] uppercase text-white drop-shadow-2xl max-w-5xl">
                             {hero.title}
                           </h2>
-                          <p className="max-w-xl text-sm md:text-lg text-[#F3E5AB] font-medium mb-6 drop-shadow-lg opacity-90 tracking-wide uppercase">
+                          <p className="max-w-2xl text-xs md:text-base text-[#F3E5AB] font-medium mb-0 drop-shadow-lg opacity-90 tracking-[0.2em] uppercase leading-relaxed [word-spacing:0.3em]">
                             {hero.subtitle}
                           </p>
-                          <button 
-                            onClick={() => setActiveSection('menu')}
-                            className="bg-[#F3E5AB] text-[#08120F] px-8 py-3 rounded-full font-black uppercase tracking-[0.3em] text-[9px] md:text-xs hover:scale-105 active:scale-95 transition-all shadow-2xl"
-                          >
-                            Explore Menu
-                          </button>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <div className="h-full flex flex-col items-center justify-center text-center px-4 relative">
+                    <div className="h-full flex flex-col items-center justify-end text-center px-4 pb-16 md:pb-24 relative">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10" />
                       <div className="absolute inset-0 -z-10 overflow-hidden">
                         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#F3E5AB]/10 rounded-full blur-[80px]" />
                       </div>
-                      <h2 className="text-3xl md:text-6xl font-serif font-black mb-3 tracking-tight animate-fade-in-up">
+                      <h2 className="text-3xl md:text-6xl font-serif font-black mb-4 tracking-[0.15em] animate-fade-in-up text-white drop-shadow-2xl uppercase">
                         Mas Coffee: <br />
                         <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F3E5AB] to-[#FDF8F0]">Where Every Sip Tells a Story</span>
                       </h2>
-                      <p className="max-w-xl text-sm md:text-lg opacity-60 mb-6 animate-fade-in-up delay-200">
+                      <p className="max-w-2xl text-xs md:text-base text-[#F3E5AB] opacity-90 mb-0 animate-fade-in-up delay-200 tracking-[0.2em] uppercase leading-relaxed [word-spacing:0.3em]">
                         Immerse yourself in the luxury of Ethiopian coffee culture. A sensory journey through the highlands, delivered with elegance.
                       </p>
-                      <button 
-                        onClick={() => setActiveSection('menu')}
-                        className="bg-[#F3E5AB] text-[#08120F] px-8 py-3 rounded-full font-black uppercase tracking-[0.3em] text-[9px] md:text-xs hover:scale-105 active:scale-95 transition-all shadow-2xl animate-fade-in-up delay-400"
-                      >
-                        Explore Menu
-                      </button>
                     </div>
                   )}
                   
@@ -632,7 +621,11 @@ export default function Home() {
                   <div className="flex items-center justify-start md:justify-center gap-3 md:gap-4 w-full overflow-x-auto no-scrollbar">
                     <button
                       onClick={() => setActiveLookbookCategory("All")}
-                      className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all border flex-shrink-0 ${activeLookbookCategory === "All" ? 'bg-[#F3E5AB] text-[#08120F] shadow-lg' : 'border-[#F3E5AB]/20 opacity-40 hover:opacity-100'}`}
+                      className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all border flex-shrink-0 ${
+                        activeLookbookCategory === "All" 
+                        ? 'bg-[#F3E5AB] text-[#08120F] shadow-[0_0_20px_rgba(243,229,171,0.4)] scale-105 border-[#F3E5AB]' 
+                        : 'border-[#F3E5AB]/20 opacity-40 hover:opacity-100 hover:border-[#F3E5AB]/40 hover:scale-105'
+                      }`}
                     >
                       All Gallery
                     </button>
@@ -640,7 +633,11 @@ export default function Home() {
                       <button
                         key={cat.id}
                         onClick={() => setActiveLookbookCategory(cat.id)}
-                        className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all border flex-shrink-0 ${activeLookbookCategory === cat.id ? 'bg-[#F3E5AB] text-[#08120F] shadow-lg' : 'border-[#F3E5AB]/20 opacity-40 hover:opacity-100'}`}
+                        className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all border flex-shrink-0 ${
+                          activeLookbookCategory === cat.id 
+                          ? 'bg-[#F3E5AB] text-[#08120F] shadow-[0_0_20px_rgba(243,229,171,0.4)] scale-105 border-[#F3E5AB]' 
+                          : 'border-[#F3E5AB]/20 opacity-40 hover:opacity-100 hover:border-[#F3E5AB]/40 hover:scale-105'
+                        }`}
                       >
                         {cat.name}
                       </button>
@@ -649,37 +646,45 @@ export default function Home() {
                 </div>
               </div>
 
-                  {/* Lookbook Grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+                  {/* Lookbook List - Full Width & Vertical Scroll */}
+                  <div className="w-full max-h-[85vh] overflow-y-auto no-scrollbar space-y-12 py-10 px-4 md:px-12">
                     {filteredLookbookItems.map((item, idx) => (
                       <div 
                         key={item.id} 
-                        className={`group relative aspect-[4/5] overflow-hidden rounded-[32px] border border-[#F3E5AB]/10 bg-[#08120F] shadow-2xl animate-fade-in-up`}
-                        style={{ animationDelay: `${idx * 100}ms` }}
+                        className="group relative w-full h-[50vh] md:h-[60vh] bg-[#08120F] rounded-[32px] md:rounded-[56px] border border-[#F3E5AB]/10 shadow-2xl overflow-hidden transition-all duration-500 hover:border-[#F3E5AB]/30"
                       >
-                        <img src={item.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" alt={item.name} />
-                        <div className="absolute inset-0 bg-gradient-to-t from-[#08120F] via-transparent to-transparent opacity-80 group-hover:opacity-100 transition-opacity" />
-                        
-                        <div className="absolute bottom-0 left-0 right-0 p-8 transform translate-y-4 group-hover:translate-y-0 transition-transform duration-500">
-                          <div className="flex items-center justify-between mb-2">
-                            <span className="text-[10px] font-black text-[#F3E5AB] uppercase tracking-[0.3em] opacity-60">
-                              {websiteContent.lookbookCategories.find(c => c.id === item.category)?.name || "Collection"}
-                            </span>
-                            {item.price && (
-                              <span className="text-xs font-black text-[#F3E5AB] tracking-widest">{item.price} ETB</span>
-                            )}
-                          </div>
-                          <h3 className="text-2xl md:text-3xl font-serif font-black text-[#F3E5AB] mb-4 tracking-tight">
+                        {/* Image Layer - 100% Width & Height Cover */}
+                        <div className="absolute inset-0 z-0">
+                          <img 
+                            src={item.image} 
+                            className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
+                            alt={item.name} 
+                          />
+                          {/* Dark Overlay for Text Readability */}
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#08120F] via-[#08120F]/20 to-transparent opacity-80" />
+                        </div>
+
+                        {/* Card Body Content - Positioned at bottom */}
+                        <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 z-10 flex flex-col items-start text-left">
+                          <span className="text-[8px] md:text-[10px] font-black text-[#F3E5AB] uppercase tracking-[0.4em] mb-2 md:mb-3">
+                            {websiteContent.lookbookCategories.find(c => c.id === item.category)?.name || "Collection"}
+                          </span>
+                          <h3 className="text-xl md:text-4xl font-serif font-black text-[#F3E5AB] mb-2 md:mb-4 tracking-tight drop-shadow-2xl">
                             {item.name}
                           </h3>
-                          <p className="text-xs md:text-sm text-[#F3E5AB]/60 line-clamp-2 italic font-light">
+                          <div className="flex items-center gap-4">
+                            {item.price && (
+                              <span className="text-base md:text-2xl font-black text-[#F3E5AB] tracking-widest drop-shadow-lg">{item.price} ETB</span>
+                            )}
+                          </div>
+                          <p className="hidden lg:block text-xs md:text-sm text-[#F3E5AB]/80 mt-4 italic font-light max-w-2xl drop-shadow-lg leading-relaxed line-clamp-2">
                             {item.description}
                           </p>
                         </div>
                       </div>
                     ))}
                     {filteredLookbookItems.length === 0 && (
-                      <div className="col-span-full py-20 text-center">
+                      <div className="py-20 text-center w-full">
                         <p className="font-serif italic text-2xl opacity-20 uppercase tracking-widest">No items found in this collection.</p>
                       </div>
                     )}
@@ -711,7 +716,7 @@ export default function Home() {
                   {specials.map((item) => (
                     <SwiperSlide key={item.id} className="h-full w-full">
                       <div 
-                        className={`w-full h-full rounded-2xl border ${isLightMode ? 'border-[#08120F]/10' : 'border-[#D4AF37]/30'} overflow-hidden relative group cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.6)]`}
+                        className={`w-full h-full rounded-2xl border ${isLightMode ? 'border-[#08120F]/10' : 'border-[#D4AF37]/30'} overflow-hidden relative group cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.6)] transition-all duration-500 hover:scale-105 hover:border-[#D4AF37]/60 hover:shadow-[0_20px_40px_rgba(0,0,0,0.8)]`}
                         onClick={() => setExpandedDesc(item.id)}
                       >
                         <img src={item.image} className="w-full h-full object-cover opacity-100 transition-transform duration-1000 group-hover:scale-105" alt="" />
@@ -802,7 +807,7 @@ export default function Home() {
                           </div>
 
                           {/* Symmetrical Right Margin - Card */}
-                          <div className="absolute right-[6%] w-[70%] md:w-[68%] h-[85%] md:h-[90%] bg-[#0a2c26] rounded-[24px] md:rounded-[40px] flex flex-col items-center justify-center pl-[36%] sm:pl-[30%] md:pl-[20%] pr-4 md:pr-10 shadow-[0_15px_50px_rgba(0,0,0,0.6)] border border-[#D4AF37]/20 transition-all duration-500 hover:border-[#D4AF37]/40 text-center">
+                          <div className="absolute right-[6%] w-[70%] md:w-[68%] h-[85%] md:h-[90%] bg-[#0a2c26] rounded-[24px] md:rounded-[40px] flex flex-col items-center justify-center pl-[36%] sm:pl-[30%] md:pl-[20%] pr-4 md:pr-10 shadow-[0_15px_50px_rgba(0,0,0,0.6)] border border-[#D4AF37]/20 transition-all duration-500 hover:border-[#D4AF37]/40 hover:shadow-[0_20px_60px_rgba(0,0,0,0.8)] hover:scale-[1.01] text-center">
                             {/* Vibrant Visibility: Name -> Price -> Description */}
                             <div className="flex flex-col gap-1 md:gap-2 mb-2 items-center w-full min-w-0">
                               <h4 className="text-lg sm:text-xl md:text-3xl font-black text-[#D4AF37] leading-tight line-clamp-1 uppercase tracking-widest px-2 w-full">
@@ -896,7 +901,7 @@ export default function Home() {
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {specials.map((item) => (
-                  <div key={item.id} className={`${tm.cardBg} rounded-3xl border border-[#F3E5AB]/10 overflow-hidden group hover:border-[#F3E5AB]/40 transition-all`}>
+                  <div key={item.id} className={`${tm.cardBg} rounded-3xl border border-[#F3E5AB]/10 overflow-hidden group hover:border-[#F3E5AB]/40 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl`}>
                     <div className="h-56 md:h-64 relative overflow-hidden">
                       {item.image ? <img src={item.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" /> : <div className="w-full h-full bg-[#F3E5AB]/5" />}
                       <div className="absolute top-4 left-4 bg-[#F3E5AB] text-[#08120F] px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest">Chef's Choice</div>
@@ -933,7 +938,7 @@ export default function Home() {
                     { icon: Clock, label: t.hours, val: t.hoursVal },
                     { icon: Phone, label: t.phone, val: siteContent.phone }
                   ].map((info, idx) => (
-                    <div key={idx} className={`${tm.cardBg} p-6 md:p-8 rounded-3xl border border-[#F3E5AB]/10 flex items-start gap-4 md:gap-6`}>
+                    <div key={idx} className={`${tm.cardBg} p-6 md:p-8 rounded-3xl border border-[#F3E5AB]/10 flex items-start gap-4 md:gap-6 transition-all duration-500 hover:border-[#F3E5AB]/30 hover:shadow-xl hover:scale-[1.02]`}>
                       <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-[#F3E5AB]/10 flex items-center justify-center flex-shrink-0">
                         <info.icon className="w-5 h-5 md:w-6 md:h-6 text-[#F3E5AB]" />
                       </div>
@@ -974,7 +979,7 @@ export default function Home() {
           <div className="fixed inset-0 z-[2000] flex items-center justify-center px-4" onClick={() => setExpandedDesc(null)}>
             <div className="absolute inset-0 bg-[#08120F]/95 backdrop-blur-md" />
             <div className={`${tm.modalBg} relative z-10 p-8 max-w-lg w-full rounded-3xl shadow-2xl animate-fade-in-up`} onClick={(e) => e.stopPropagation()}>
-              <button onClick={() => setExpandedDesc(null)} className="absolute top-6 right-6 opacity-40 hover:opacity-100 transition-opacity">
+              <button onClick={() => setExpandedDesc(null)} className="absolute top-6 right-6 opacity-40 hover:opacity-100 hover:scale-110 transition-all">
                 <X className="w-6 h-6" />
               </button>
               <h3 className="text-2xl md:text-3xl font-serif font-black mb-2 text-[#F3E5AB]">{lang === 'en' ? found.name_en : found.name_am}</h3>
@@ -1026,9 +1031,9 @@ export default function Home() {
                   <p className="font-black text-[#F3E5AB] opacity-60 text-sm">{item.price} ETB</p>
                 </div>
                 <div className="flex items-center gap-2 bg-[#F3E5AB]/10 rounded-full px-2 py-1">
-                  <button onClick={() => removeFromCart(item.id)} className={`w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#F3E5AB] hover:text-[#08120F] transition-colors ${tm.textApp}`}>-</button>
+                  <button onClick={() => removeFromCart(item.id)} className={`w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#F3E5AB] hover:text-[#08120F] transition-all hover:scale-110 ${tm.textApp}`}>-</button>
                   <span className={`font-black text-sm ${tm.textApp}`}>{cart[item.id]}</span>
-                  <button onClick={() => addToCart(item.id)} className="w-8 h-8 rounded-full bg-[#F3E5AB] text-[#08120F] flex items-center justify-center font-black">+</button>
+                  <button onClick={() => addToCart(item.id)} className="w-8 h-8 rounded-full bg-[#F3E5AB] text-[#08120F] flex items-center justify-center font-black transition-all hover:scale-110">+</button>
                 </div>
               </div>
             ))}
@@ -1069,9 +1074,9 @@ export default function Home() {
                     <p className="font-black text-[#F3E5AB] opacity-60">{item.price} ETB</p>
                   </div>
                   <div className="flex items-center gap-4 bg-[#F3E5AB]/10 rounded-full px-4 py-2">
-                    <button onClick={() => removeFromCart(item.id)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#F3E5AB] hover:text-[#08120F] transition-colors">-</button>
+                    <button onClick={() => removeFromCart(item.id)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#F3E5AB] hover:text-[#08120F] transition-all hover:scale-110">-</button>
                     <span className="font-black">{cart[item.id]}</span>
-                    <button onClick={() => addToCart(item.id)} className="w-8 h-8 rounded-full bg-[#F3E5AB] text-[#08120F] flex items-center justify-center font-black">+</button>
+                    <button onClick={() => addToCart(item.id)} className="w-8 h-8 rounded-full bg-[#F3E5AB] text-[#08120F] flex items-center justify-center font-black transition-all hover:scale-110">+</button>
                   </div>
                 </div>
               ))}
@@ -1095,9 +1100,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 text-center relative z-10">
           <h2 className="text-2xl md:text-3xl font-serif font-black mb-8 tracking-widest uppercase text-[#F3E5AB]">Mas Coffee</h2>
           <div className="flex justify-center gap-8 md:gap-12 text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em] opacity-40">
-            <button onClick={() => setActiveSection('story')} className="hover:opacity-100 transition-opacity">Our Story</button>
-            <button onClick={() => setActiveSection('contact')} className="hover:opacity-100 transition-opacity">Contact</button>
-            <button onClick={() => setActiveSection('menu')} className="hover:opacity-100 transition-opacity">Menu</button>
+            <button onClick={() => setActiveSection('story')} className="hover:opacity-100 hover:scale-110 transition-all">Our Story</button>
+            <button onClick={() => setActiveSection('contact')} className="hover:opacity-100 hover:scale-110 transition-all">Contact</button>
+            <button onClick={() => setActiveSection('menu')} className="hover:opacity-100 hover:scale-110 transition-all">Menu</button>
           </div>
           <p className="mt-12 text-[8px] md:text-[10px] opacity-20 tracking-widest uppercase">© 2026 MAS COFFEE - THE MIDNIGHT FOREST EXPERIENCE</p>
         </div>
