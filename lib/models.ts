@@ -30,6 +30,7 @@ const SettingsSchema = new mongoose.Schema({
   storyTitle: { type: String, default: 'The Essence of Ethiopia' },
   storyText: { type: String, default: '' },
   address: { type: String, default: '' },
+  phoneNumber: { type: String, default: '' },
   phone: { type: String, default: '' },
   email: { type: String, default: '' },
   adminPassword: { type: String, default: 'admin123' },

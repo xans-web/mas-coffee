@@ -23,7 +23,11 @@ export async function GET() {
     
     // Omit adminPassword from the public API response for security
     const { adminPassword, _id, __v, ...publicSettings } = data;
-    return NextResponse.json(publicSettings, {
+    const normalized = {
+      ...publicSettings,
+      phoneNumber: publicSettings.phoneNumber || publicSettings.phone || ''
+    };
+    return NextResponse.json(normalized, {
       headers: {
         'Cache-Control': 'no-store, max-age=0, must-revalidate',
       },
@@ -62,8 +66,14 @@ export async function POST(request: Request) {
     // Default setting updates (hotel name, slogan, etc.)
     // Explicitly delete adminPassword from body just in case to prevent clients from overwriting it
     if ('adminPassword' in body) delete body.adminPassword; 
-    
-    Object.assign(settings, body);
+    const updates: any = { ...body };
+    if (typeof updates.phoneNumber === 'string' && !updates.phone) {
+      updates.phone = updates.phoneNumber;
+    }
+    if (typeof updates.phone === 'string' && !updates.phoneNumber) {
+      updates.phoneNumber = updates.phone;
+    }
+    Object.assign(settings, updates);
     await settings.save();
     revalidatePath('/', 'layout');
     return NextResponse.json({ success: true });

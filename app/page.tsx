@@ -9,6 +9,9 @@ import { useRouter } from "next/navigation";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useMenu } from "@/context/MenuContext";
 import { Sun, Moon, MapPin, Clock, Phone, ChefHat, Info, Search, SlidersHorizontal, Menu, X, Globe } from "lucide-react";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Autoplay } from "swiper/modules";
+import "swiper/css";
 
 const translations = {
   en: {
@@ -176,22 +179,7 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [refreshData]);
 
-  // Auto-scroll for specials carousel
-  useEffect(() => {
-    if (activeSection === 'menu' && carouselRef.current) {
-      const interval = setInterval(() => {
-        if (carouselRef.current) {
-          const { scrollLeft, scrollWidth, clientWidth } = carouselRef.current;
-          if (scrollLeft + clientWidth >= scrollWidth - 5) {
-            carouselRef.current.scrollTo({ left: 0, behavior: 'smooth' });
-          } else {
-            carouselRef.current.scrollBy({ left: 200, behavior: 'smooth' });
-          }
-        }
-      }, 5000);
-      return () => clearInterval(interval);
-    }
-  }, [activeSection]);
+  // Auto-scroll for specials carousel removed in favor of Swiper.js
 
   // Auto-scroll for hero carousel
   useEffect(() => {
@@ -356,13 +344,13 @@ export default function Home() {
       <div className={`fixed inset-0 ${tm.bgApp} tilet-pattern -z-20 transition-colors duration-500 opacity-20`} />
       
       {/* Global Header - Strictly Fixed */}
-      <header className={`fixed top-0 left-0 right-0 z-[1000] ${tm.bgHeader} backdrop-blur-xl border-b ${tm.borderMain} px-4 md:px-12 w-full h-[56px] md:h-[70px] flex items-center`}>
+      <header className={`fixed top-0 left-0 right-0 z-[1000] ${activeSection === 'home' ? 'bg-transparent border-none' : `${tm.bgHeader} backdrop-blur-xl border-b ${tm.borderMain}`} px-4 md:px-12 w-full h-[56px] md:h-[70px] flex items-center transition-all duration-500`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between w-full relative">
           
           {/* Mobile Header Row (Visible only on mobile/tablet < 768px) */}
           <div className="flex lg:hidden items-center justify-between w-full h-full gap-2">
-            {/* Left: Logo & Company Name */}
-            <div className="flex items-center gap-1.5 flex-shrink-0 cursor-pointer" onClick={handleLogoClick}>
+            {/* Left: Logo & Company Name (Hidden on Home Page) */}
+            <div className={`flex items-center gap-1.5 flex-shrink-0 cursor-pointer ${activeSection === 'home' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} onClick={handleLogoClick}>
               <div className="w-7 h-7 relative rounded-lg overflow-hidden border border-[#F3E5AB]/20">
                 <img src={siteContent.logo || "/logo.png"} alt="Logo" className="w-full h-full object-cover" />
               </div>
@@ -371,24 +359,29 @@ export default function Home() {
 
             {/* Icons Group: Search, Filter, Lang, Hamburger */}
             <div className="flex items-center gap-1 flex-grow justify-end">
-              <button 
-                onClick={() => setShowSearchInput(!showSearchInput)}
-                className={`w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-95 ${showSearchInput ? 'bg-[#F3E5AB] text-[#08120F]' : 'text-[#F3E5AB]'}`}
-              >
-                <Search className="w-3.5 h-3.5" />
-              </button>
-              <button 
-                onClick={() => setShowPriceFilter(!showPriceFilter)}
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-[#F3E5AB] transition-all active:scale-95 ${showPriceFilter ? 'bg-[#F3E5AB] text-[#08120F]' : ''}`}
-              >
-                <SlidersHorizontal className="w-3.5 h-3.5" />
-              </button>
-              <button 
-                onClick={() => setLang(lang === 'en' ? 'am' : 'en')}
-                className={`w-8 h-8 rounded-full border border-[#F3E5AB]/10 flex items-center justify-center text-[9px] font-bold text-[#F3E5AB] transition-all active:scale-95`}
-              >
-                {lang === 'en' ? 'አማ' : 'EN'}
-              </button>
+              {/* Other Icons (Hidden on Home Page) */}
+              <div className={`flex items-center gap-1 ${activeSection === 'home' ? 'hidden' : 'flex'}`}>
+                <button 
+                  onClick={() => setShowSearchInput(!showSearchInput)}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-95 ${showSearchInput ? 'bg-[#F3E5AB] text-[#08120F]' : 'text-[#F3E5AB]'}`}
+                >
+                  <Search className="w-3.5 h-3.5" />
+                </button>
+                <button 
+                  onClick={() => setShowPriceFilter(!showPriceFilter)}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-[#F3E5AB] transition-all active:scale-95 ${showPriceFilter ? 'bg-[#F3E5AB] text-[#08120F]' : ''}`}
+                >
+                  <SlidersHorizontal className="w-3.5 h-3.5" />
+                </button>
+                <button 
+                  onClick={() => setLang(lang === 'en' ? 'am' : 'en')}
+                  className={`w-8 h-8 rounded-full border border-[#F3E5AB]/10 flex items-center justify-center text-[9px] font-bold text-[#F3E5AB] transition-all active:scale-95`}
+                >
+                  {lang === 'en' ? 'አማ' : 'EN'}
+                </button>
+              </div>
+
+              {/* Hamburger Menu Icon (Always Visible) */}
               <button 
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-[#F3E5AB] transition-all active:scale-95 ${isMobileMenuOpen ? 'bg-[#F3E5AB] text-[#08120F]' : ''}`}
@@ -552,8 +545,8 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Sections - Offset by header height */}
-      <div className="relative overflow-hidden pt-[56px] md:pt-[70px]">
+      {/* Sections - Offset by header height (Removed offset for Home Section) */}
+      <div className={`relative overflow-hidden ${activeSection === 'home' ? 'pt-0' : 'pt-[56px] md:pt-[70px]'} transition-all duration-500`}>
         
         {/* Home Section (Dynamic Hero & Lookbook) */}
         {activeSection === 'home' && (
@@ -566,7 +559,7 @@ export default function Home() {
             ) : (
               <>
                 {/* Hero Slider */}
-                <section className="relative h-[45vh] md:h-[60vh] overflow-hidden">
+                <section className="relative h-[55vh] md:h-[70vh] overflow-hidden">
                   {websiteContent.heroes.length > 0 ? (
                     websiteContent.heroes.map((hero, idx) => (
                       <div
@@ -700,115 +693,147 @@ export default function Home() {
         {/* Menu Section */}
         {activeSection === 'menu' && (
           <div className="animate-fade-in">
-            {/* Specials Carousel (Mobile Only) - Wide Aspect Ratio Refinement */}
-            <div className={`lg:hidden py-4 border-b border-[#F3E5AB]/5 overflow-hidden ${isLightMode ? 'bg-[#FDF8F0]/50' : 'bg-[#08120F]/50'} backdrop-blur-sm mt-2 md:mt-4 max-w-[95%] mx-auto rounded-3xl`}>
-              <div 
-                ref={carouselRef}
-                className="flex gap-4 overflow-x-auto no-scrollbar px-4 pb-1 snap-x snap-mandatory h-40 md:h-64"
-              >
-                {specials.map((item) => (
-                  <div 
-                    key={item.id} 
-                    className={`flex-shrink-0 w-64 md:w-96 h-full rounded-3xl border ${isLightMode ? 'border-[#08120F]/10' : 'border-[#F3E5AB]/10'} overflow-hidden relative snap-center group`}
-                    onClick={() => setExpandedDesc(item.id)}
-                  >
-                    <img src={item.image} className="w-full h-full object-cover opacity-100 transition-transform duration-1000 group-hover:scale-110" alt="" />
-                    <div className="absolute bottom-4 left-5 right-5">
-                      <h4 className={`text-sm font-serif font-black ${isLightMode ? 'text-[#08120F]' : 'text-[#F3E5AB]'} line-clamp-1`}>{lang === 'en' ? item.name_en : item.name_am}</h4>
-                      <p className={`text-[10px] font-black ${isLightMode ? 'text-[#08120F]/50' : 'text-[#F3E5AB]/50'}`}>{item.price} ETB</p>
-                    </div>
-                  </div>
-                ))}
+            {/* Section 2: Hero Header (Specials Carousel) */}
+            <div className={`section-2-hero-header lg:hidden my-[20px] mx-auto w-[70%] h-[25vh] flex items-center justify-center bg-cover bg-center overflow-visible ${isLightMode ? 'bg-[#FDF8F0]' : 'bg-[#08120F]'}`}>
+              <div className="w-full h-full relative">
+                <Swiper
+                  slidesPerView="auto"
+                  centeredSlides={true}
+                  spaceBetween={16}
+                  loop={true}
+                  autoplay={{
+                    delay: 2500,
+                    disableOnInteraction: false,
+                  }}
+                  modules={[Autoplay]}
+                  className="w-full h-full !overflow-visible"
+                >
+                  {specials.map((item) => (
+                    <SwiperSlide key={item.id} className="h-full w-full">
+                      <div 
+                        className={`w-full h-full rounded-2xl border ${isLightMode ? 'border-[#08120F]/10' : 'border-[#D4AF37]/30'} overflow-hidden relative group cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.6)]`}
+                        onClick={() => setExpandedDesc(item.id)}
+                      >
+                        <img src={item.image} className="w-full h-full object-cover opacity-100 transition-transform duration-1000 group-hover:scale-105" alt="" />
+                        <div className="absolute bottom-3 left-4 right-4 text-center">
+                          <h4 className={`text-xs md:text-sm font-serif font-black text-[#D4AF37] line-clamp-1 tracking-widest uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]`}>{lang === 'en' ? item.name_en : item.name_am}</h4>
+                        </div>
+                      </div>
+                    </SwiperSlide>
+                  ))}
+                </Swiper>
               </div>
             </div>
+            
+            {/* Categories Row - Sticky to the very top */}
+            <div className={`sticky top-0 z-50 ${isLightMode ? 'bg-[#FDF8F0]/95' : 'bg-[#08120F]/95'} backdrop-blur-md my-[20px]`}>
+              {/* Top Frame Divider */}
+              <div className="w-full h-[1px] bg-[#D4AF37]/40" />
 
-            {/* Categories Row - Sticky to the top (below global header) */}
-            <div className={`sticky top-[56px] md:top-[70px] z-[800] ${tm.bgHeader} backdrop-blur-xl border-b ${tm.borderMain} py-2 md:py-4 mb-2 md:mb-4`}>
-              <div className="max-w-7xl mx-auto px-4 md:px-12">
-                <div className="flex items-center gap-2 md:gap-4 w-full overflow-x-auto no-scrollbar">
-                  {["All", ...menuData.map(c => lang === 'en' ? c.category_en : c.category_am)].map((cat) => (
-                    <button
-                      key={cat}
-                      onClick={() => setActiveCategory(cat)}
-                      className={`px-6 py-2 rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest transition-all flex-shrink-0 border ${
-                        activeCategory === cat ? tm.catBgActive : tm.catBgInactive
-                      }`}
-                    >
-                      {t.categories[cat as keyof typeof t.categories] || cat}
-                    </button>
-                  ))}
+              <div className="max-w-7xl mx-auto px-4 md:px-12 py-2 md:py-3">
+                <div className="flex justify-center items-center w-full overflow-x-auto no-scrollbar gap-2 sm:gap-4 md:gap-6">
+                  {(() => {
+                    const cats = menuData.map(c => lang === 'en' ? c.category_en : c.category_am);
+                    const midIndex = Math.floor(cats.length / 2);
+                    const arranged = [...cats.slice(0, midIndex), "All", ...cats.slice(midIndex)];
+                    return arranged.map((cat) => (
+                      <button
+                        key={cat}
+                        onClick={() => setActiveCategory(cat)}
+                        className={`px-6 sm:px-8 py-2 md:py-3 rounded-full text-[10px] sm:text-xs md:text-sm font-black uppercase tracking-wider transition-all flex-shrink-0 border shadow-md ${
+                          activeCategory === cat ? tm.catBgActive : tm.catBgInactive
+                        } ${cat === 'All' ? 'mx-8 sm:mx-12 md:mx-20' : ''}`}
+                      >
+                        {t.categories[cat as keyof typeof t.categories] || cat}
+                      </button>
+                    ));
+                  })()}
                 </div>
               </div>
+              
+              {/* Bottom Frame Divider */}
+              <div className="w-full h-[1px] bg-[#D4AF37]/40" />
             </div>
 
-            <main className="max-w-7xl mx-auto px-2 md:px-12 pt-2 md:pt-4 pb-32 min-h-[70vh]">
+            <main className="max-w-7xl mx-auto px-2 md:px-12 pt-0 md:pt-2 pb-32 min-h-[70vh]">
               <div className="space-y-4 md:space-y-8">
-                {/* Section 4 Heading - Underlined and Centered with increased bottom spacing */}
-                <div className="flex flex-col items-center mb-10 pt-4">
-                  <h2 className="text-center text-xl md:text-2xl font-serif font-black text-[#F3E5AB] uppercase tracking-[0.5em] underline decoration-[#D4AF37] underline-offset-8">
+                {/* Section 4 Heading - Centered and Separated */}
+                <div className="flex flex-col items-center mb-4 md:mb-6 pt-0">
+                  <h2 className="text-center text-lg md:text-2xl font-serif font-black text-[#D4AF37] uppercase tracking-[0.5em]">
                     MENU
                   </h2>
+                  <div className="w-16 md:w-24 h-[1px] bg-[#D4AF37]/40 mt-1 md:mt-2 mb-1" />
                 </div>
                 
                 {filteredMenuData.map((section) => (
-                  <section key={section.category_en} className="scroll-mt-[100px]">
-                    {/* Branding/Category text removed per user request */}
+                  <section key={section.category_en} className="scroll-mt-[100px] relative mt-12 md:mt-16 first:mt-0">
+                    {/* Functional Header (Category Indicator) */}
+                    <div className="flex items-center gap-2 md:gap-3 mb-6 md:mb-8 relative z-20 px-4 md:px-0">
+                      <CategoryIcon name={section.category_en} className="w-4 h-4 md:w-5 md:h-5 text-[#F3E5AB]/40" />
+                      <h4 className="text-xs md:text-sm font-bold text-[#F3E5AB]/40 uppercase tracking-[0.2em] whitespace-nowrap">
+                        {lang === 'en' ? section.category_en : section.category_am}
+                      </h4>
+                      <div className="w-12 md:w-20 h-[1px] bg-[#D4AF37]/50" />
+                    </div>
 
-                    <div className="grid grid-cols-1 gap-8 md:gap-16">
+                    <div className="grid grid-cols-1 gap-12 md:gap-20 relative z-10 pt-2 md:pt-4">
                       {section.items.map((item) => (
                         <article 
                           key={item.id} 
-                          className={`relative flex items-center w-full h-[180px] md:h-[280px] group ${item.isSoldOut ? 'opacity-40 grayscale' : ''}`}
+                          className={`relative flex items-center w-full h-[180px] md:h-[280px] group mx-auto ${item.isSoldOut ? 'opacity-40 grayscale' : ''}`}
                         >
-                          {/* Circular "Out-of-Frame" Image (exactly 45% of parent width) */}
-                          <div className="absolute left-[2%] z-20 w-[45%] md:w-[35%] max-w-[180px] md:max-w-[300px] aspect-square flex items-center">
-                            <div className="w-full h-full rounded-full overflow-hidden border border-[#c5a367]/60 shadow-[0_15px_40px_rgba(0,0,0,0.8)] bg-[#08120F]">
+                          {/* Symmetrical Left Margin - Image */}
+                          <div className="absolute left-[6%] z-20 w-[42%] md:w-[32%] max-w-[180px] md:max-w-[300px] aspect-square flex items-center">
+                            <div className="w-full h-full rounded-full overflow-hidden border border-[#D4AF37]/60 shadow-[0_15px_40px_rgba(0,0,0,0.8)] bg-[#08120F]">
                               {item.image ? (
                                 <SafeImage src={item.image} alt={item.name_en} fill className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
                               ) : (
-                                <div className="w-full h-full flex items-center justify-center text-4xl md:text-6xl font-serif text-[#c5a367] opacity-40">
+                                <div className="w-full h-full flex items-center justify-center text-4xl md:text-6xl font-serif text-[#D4AF37] opacity-40">
                                   {item.name_en[0]}
                                 </div>
                               )}
                             </div>
                             {/* Badges */}
                             {(item.isSpecial || item.isNew) && (
-                              <div className="absolute top-[10%] right-[10%] bg-[#c5a367] text-black px-3 py-0.5 rounded-full text-[8px] md:text-xs font-black uppercase tracking-widest shadow-lg z-20 animate-pulse">
+                              <div className="absolute top-[10%] right-[10%] bg-[#D4AF37] text-black px-3 py-0.5 rounded-full text-[8px] md:text-xs font-black uppercase tracking-widest shadow-lg z-20 animate-pulse">
                                 {item.isSpecial ? 'Special' : 'New'}
                               </div>
                             )}
                           </div>
 
-                          {/* Description Card (Horizontal Expansion to 80% width) */}
-                          <div className="absolute right-[2%] w-[80%] md:w-[75%] h-[80%] md:h-[90%] bg-[#0a2c26] rounded-[24px] md:rounded-[40px] flex flex-col items-center justify-center pl-[28%] md:pl-[20%] pr-4 md:pr-12 shadow-[0_15px_50px_rgba(0,0,0,0.6)] border border-[#c5a367]/10 transition-all duration-500 hover:border-[#c5a367]/40 text-center">
-                            {/* Centered Information Stack: Name -> Price -> Description -> Button */}
-                            <div className="flex flex-col gap-0.5 md:gap-1 mb-1 md:mb-2 items-center">
-                              <h4 className="text-[10px] md:text-2xl font-semibold text-[#c5a367] leading-tight line-clamp-1 uppercase tracking-widest">
+                          {/* Symmetrical Right Margin - Card */}
+                          <div className="absolute right-[6%] w-[70%] md:w-[68%] h-[85%] md:h-[90%] bg-[#0a2c26] rounded-[24px] md:rounded-[40px] flex flex-col items-center justify-center pl-[36%] sm:pl-[30%] md:pl-[20%] pr-4 md:pr-10 shadow-[0_15px_50px_rgba(0,0,0,0.6)] border border-[#D4AF37]/20 transition-all duration-500 hover:border-[#D4AF37]/40 text-center">
+                            {/* Vibrant Visibility: Name -> Price -> Description */}
+                            <div className="flex flex-col gap-1 md:gap-2 mb-2 items-center w-full min-w-0">
+                              <h4 className="text-lg sm:text-xl md:text-3xl font-black text-[#D4AF37] leading-tight line-clamp-1 uppercase tracking-widest px-2 w-full">
                                 {lang === 'en' ? item.name_en : item.name_am}
                               </h4>
-                              <span className="text-[#c5a367] font-bold text-xs md:text-3xl leading-none">
+                              <span className="text-[#D4AF37] font-black text-xl sm:text-2xl md:text-4xl leading-none">
                                 {item.price} ETB
                               </span>
                             </div>
 
-                            {/* Elegant Description Text (Dynamic from Admin) */}
-                            <p className="text-[8px] md:text-sm text-[#F3E5AB]/40 line-clamp-1 md:line-clamp-2 italic font-light max-w-[90%] mb-2 md:mb-4">
+                            {/* Crisp Elegant Description Card */}
+                            <p className="text-[10px] sm:text-xs md:text-base text-[#F3E5AB]/60 line-clamp-2 italic font-medium max-w-[90%] mb-2.5 md:mb-4 px-2 overflow-hidden w-full">
                               {lang === 'en' ? item.description_en : item.description_am}
                             </p>
 
+                            {/* LINE C: Inside Food Item Cards - Full Width Divider Above ADD Button */}
+                            <div className="w-[90%] md:w-[95%] h-[1px] bg-[#D4AF37]/20 mb-2.5 md:mb-4" />
+
                             {/* Action Button (Gold Pill) */}
-                            <div className="w-fit">
+                            <div className="w-fit pb-1 relative z-10">
                               {cart[item.id] > 0 ? (
-                                <div className="flex items-center gap-2 md:gap-4 bg-[#c5a367]/10 rounded-full px-2 py-1 md:py-1.5 border border-[#c5a367]/20 backdrop-blur-sm">
-                                  <button onClick={() => removeFromCart(item.id)} className="w-6 h-6 md:w-12 md:h-12 rounded-full flex items-center justify-center text-[#c5a367] hover:bg-[#c5a367] hover:text-black transition-all text-xs">-</button>
-                                  <span className="font-black text-xs md:text-2xl text-[#c5a367] w-4 md:w-10 text-center">{cart[item.id]}</span>
-                                  <button onClick={(e) => addToCart(item.id, e)} className="w-6 h-6 md:w-12 md:h-12 rounded-full bg-[#c5a367] text-black flex items-center justify-center font-black hover:scale-105 transition-all text-xs">+</button>
+                                <div className="flex items-center gap-3 md:gap-4 bg-[#D4AF37]/10 rounded-full px-3 py-1.5 md:py-2 border border-[#D4AF37]/20 backdrop-blur-sm">
+                                  <button onClick={() => removeFromCart(item.id)} className="w-8 h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black transition-all text-sm md:text-xl font-bold">-</button>
+                                  <span className="font-black text-sm md:text-2xl text-[#D4AF37] w-6 md:w-10 text-center">{cart[item.id]}</span>
+                                  <button onClick={(e) => addToCart(item.id, e)} className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-[#D4AF37] text-black flex items-center justify-center font-black hover:scale-105 transition-all text-sm md:text-xl">+</button>
                                 </div>
                               ) : (
                                 <button 
                                   disabled={item.isSoldOut}
                                   onClick={(e) => addToCart(item.id, e)}
-                                  className="bg-[#c5a367] text-black px-4 md:px-12 py-1.5 md:py-4 rounded-full text-[9px] md:text-base font-black uppercase tracking-[0.1em] hover:scale-105 active:scale-95 transition-all shadow-[0_5px_20px_rgba(197,163,103,0.3)] disabled:opacity-50"
+                                  className="bg-[#D4AF37] text-black px-6 md:px-14 py-2 md:py-4 rounded-full text-xs md:text-lg font-black uppercase tracking-[0.1em] hover:scale-105 active:scale-95 transition-all shadow-[0_5px_20px_rgba(212,175,55,0.3)] disabled:opacity-50"
                                 >
                                   + ADD
                                 </button>
@@ -840,9 +865,9 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-t from-[#08120F] to-transparent" />
                 </div>
                 <div className={`${tm.cardBg} p-8 md:p-12 rounded-3xl border border-[#F3E5AB]/10 backdrop-blur-2xl`}>
-                  <h3 className="text-2xl md:text-3xl font-serif font-black mb-6 text-[#F3E5AB]">{t.storyTitle}</h3>
+                  <h3 className="text-2xl md:text-3xl font-serif font-black mb-6 text-[#F3E5AB]">{siteContent.storyTitle}</h3>
                   <p className="text-base md:text-lg leading-relaxed opacity-70 whitespace-pre-wrap">
-                    {t.storyText}
+                    {siteContent.storyText}
                   </p>
                   <div className="mt-8 md:mt-12 flex gap-8">
                     <div className="text-center">
@@ -904,9 +929,9 @@ export default function Home() {
                 {/* Contact Cards */}
                 <div className="lg:col-span-1 space-y-4 md:space-y-6">
                   {[
-                    { icon: MapPin, label: t.address, val: t.addressVal },
+                    { icon: MapPin, label: t.address, val: siteContent.address },
                     { icon: Clock, label: t.hours, val: t.hoursVal },
-                    { icon: Phone, label: t.phone, val: t.phoneVal }
+                    { icon: Phone, label: t.phone, val: siteContent.phone }
                   ].map((info, idx) => (
                     <div key={idx} className={`${tm.cardBg} p-6 md:p-8 rounded-3xl border border-[#F3E5AB]/10 flex items-start gap-4 md:gap-6`}>
                       <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-[#F3E5AB]/10 flex items-center justify-center flex-shrink-0">
