@@ -11,10 +11,11 @@ import { useMenu } from "@/context/MenuContext";
 import { MainHero } from "@/context/MenuContext";
 import { Sun, Moon, MapPin, Clock, Phone, ChefHat, Info, Search, SlidersHorizontal, Menu, X, Globe, Package, Calendar, ChevronLeft } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, EffectFade } from "swiper/modules";
+import { Autoplay, EffectFade, Pagination } from "swiper/modules";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import "swiper/css";
 import "swiper/css/effect-fade";
+import "swiper/css/pagination";
 
 const translations = {
   en: {
@@ -28,7 +29,7 @@ const translations = {
     gallery: "Gallery",
     events: "Events",
     contactUs: "Contact Us",
-    products: "Products (Coffee/Cake)",
+    products: "Products",
     coffee: "Coffee",
     cake: "Cake",
     checkout: "Checkout",
@@ -73,7 +74,7 @@ const translations = {
     gallery: "ጋለሪ",
     events: "ክስተቶች",
     contactUs: "አድራሻ",
-    products: "ምርቶች (ቡና/ኬክ)",
+    products: "ምርቶች",
     coffee: "ቡና",
     cake: "ኬክ",
     checkout: "ክፈል",
@@ -674,7 +675,7 @@ export default function Home() {
                       setIsProductsDropdownOpen(!isProductsDropdownOpen);
                     }
                   }}
-                  className={`text-lg font-serif font-black uppercase tracking-widest text-left transition-all py-1.5 border-b ${tm.borderMain} ${
+                  className={`text-sm font-serif font-normal uppercase tracking-widest text-left transition-all py-2 ${
                     activeSection === link.id ? 'text-[#C5A367]' : 'text-[#F5EFE0]/85 hover:text-[#C5A367]'
                   } flex justify-between items-center`}
                 >
@@ -700,8 +701,8 @@ export default function Home() {
                             window.history.replaceState(null, "", `#products`);
                           }
                         }}
-                        className={`text-left py-2 text-sm font-serif font-black uppercase tracking-widest ${
-                          activeSection === 'products' && activeProductCategory === sub.id ? 'text-[#C5A367]' : 'opacity-60'
+                        className={`text-left py-1 text-[10px] sm:text-xs font-serif font-normal uppercase tracking-widest ${
+                          activeSection === 'products' && activeProductCategory === sub.id ? 'text-[#C5A367]' : 'text-[#F5EFE0]/60'
                         }`}
                       >
                         {sub.label}
@@ -716,7 +717,7 @@ export default function Home() {
           <div className="mt-auto pt-6 border-t border-[#C5A367]/10 space-y-3">
              <button 
               onClick={() => setIsLightMode(!isLightMode)}
-              className={`flex items-center gap-3 w-full py-3 px-5 rounded-2xl border ${tm.borderMain} bg-[#0B2421] text-[#C5A367] font-black uppercase tracking-widest text-[10px]`}
+              className={`flex items-center gap-3 w-full py-3 px-5 rounded-2xl border ${tm.borderMain} bg-[#0B2421] text-[#C5A367] font-normal uppercase tracking-widest text-[9px]`}
             >
               {isLightMode ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
               <span>{isLightMode ? 'Dark Mode' : 'Light Mode'}</span>
@@ -748,17 +749,23 @@ export default function Home() {
                 {/* Modern Showstopper Hero - Full Background Curve */}
                 <motion.section 
                   style={{ scale: heroScale, opacity: heroOpacity }}
-                  className="relative h-[70vh] w-full bg-[#0B2421] overflow-hidden shadow-2xl rounded-b-[50px] md:rounded-b-[80px]"
+                  className="relative h-[70vh] w-full bg-[#0B2421] overflow-hidden shadow-2xl"
                 >
                   {directHeroes.length > 0 ? (
                     <Swiper
-                      modules={[Autoplay, EffectFade]}
+                      modules={[Autoplay, EffectFade, Pagination]}
                       effect="fade"
                       fadeEffect={{ crossFade: true }}
                       autoplay={{ delay: 6000, disableOnInteraction: false }}
+                      pagination={{ 
+                        clickable: true,
+                        el: '.hero-pagination-container',
+                        bulletClass: 'swiper-pagination-bullet',
+                        bulletActiveClass: 'swiper-pagination-bullet-active'
+                      }}
                       loop={true}
                       speed={1500}
-                      className="w-full h-full"
+                      className="w-full h-full relative"
                     >
                       {directHeroes.map((hero) => (
                         <SwiperSlide key={hero.id} className="w-full h-full">
@@ -775,13 +782,13 @@ export default function Home() {
                             <div className="absolute inset-0 bg-gradient-to-t from-[#0B2421]/90 via-black/40 to-black/30 pointer-events-none" />
                           </div>
                           
-                          {/* Centered Typography */}
-                          <div className="absolute inset-0 flex flex-col items-center justify-center z-10 px-6 text-center">
+                          {/* Typography positioned in the lower part */}
+                          <div className="absolute inset-0 flex flex-col items-center justify-end pb-[12vh] md:pb-[15vh] z-10 px-6 text-center">
                             <motion.h2 
                               initial={{ opacity: 0, y: 20 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 1, delay: 0.3 }}
-                              className="text-5xl md:text-7xl lg:text-[6rem] font-serif font-black text-[#C5A367] tracking-[0.05em] mb-4 drop-shadow-2xl text-balance"
+                              className="text-4xl md:text-6xl lg:text-[4.5rem] font-sans font-bold text-white tracking-wide mb-4 drop-shadow-2xl text-balance"
                             >
                               {hero.title}
                             </motion.h2>
@@ -789,13 +796,35 @@ export default function Home() {
                               initial={{ opacity: 0, y: 20 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 1, delay: 0.5 }}
-                              className="text-lg md:text-2xl text-[#F5EFE0] font-sans font-light tracking-widest opacity-90 max-w-2xl text-balance drop-shadow-xl"
+                              className="text-sm md:text-xl text-white font-sans font-light tracking-widest opacity-90 max-w-2xl text-balance drop-shadow-xl"
                             >
                               {hero.subtitle}
                             </motion.p>
                           </div>
                         </SwiperSlide>
                       ))}
+                      
+                      {/* Custom Pagination Container */}
+                      <div className="hero-pagination-container absolute bottom-6 md:bottom-10 left-0 right-0 z-20 flex justify-center items-center gap-2" />
+                      
+                      <style jsx global>{`
+                        .hero-pagination-container .swiper-pagination-bullet {
+                          background: rgba(245, 239, 224, 0.5);
+                          opacity: 1;
+                          width: 8px;
+                          height: 8px;
+                          border-radius: 50%;
+                          margin: 0 4px !important;
+                          transition: all 0.4s ease;
+                          cursor: pointer;
+                        }
+                        .hero-pagination-container .swiper-pagination-bullet-active {
+                          background: #C5A367 !important;
+                          width: 24px !important;
+                          border-radius: 8px !important;
+                          box-shadow: 0 0 10px rgba(197, 163, 103, 0.8);
+                        }
+                      `}</style>
                     </Swiper>
                   ) : (
                     <div className="flex flex-col items-center justify-center h-full space-y-8 relative z-10">
@@ -928,12 +957,12 @@ export default function Home() {
         {activeSection === 'menu' && (
           <div className="animate-fade-in">
             {/* Section 2: Hero Header (Specials Carousel) */}
-            <div className={`section-2-hero-header lg:hidden my-5 mx-auto w-[70%] h-[25vh] flex items-center justify-center bg-cover bg-center overflow-visible ${isLightMode ? 'bg-[#F5EFE0]' : 'bg-[#0B2421]'}`}>
+            <div className={`section-2-hero-header lg:hidden my-4 mx-auto w-[53%] h-[19vh] flex items-center justify-center bg-cover bg-center overflow-visible ${isLightMode ? 'bg-[#F5EFE0]' : 'bg-[#0B2421]'}`}>
               <div className="w-full h-full relative">
                 <Swiper
                   slidesPerView="auto"
                   centeredSlides={true}
-                  spaceBetween={16}
+                  spaceBetween={12}
                   loop={true}
                   autoplay={{
                     delay: 2500,
@@ -945,15 +974,16 @@ export default function Home() {
                   {specials.map((item) => (
                     <SwiperSlide key={item.id} className="h-full w-full">
                       <div 
-                        className={`w-full h-full rounded-2xl border ${isLightMode ? 'border-[#0B2421]/10' : 'border-[#C5A367]/30'} overflow-hidden relative group cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.6)] transition-all duration-500 hover:scale-105 hover:border-[#C5A367]/60 hover:shadow-[0_20px_40px_rgba(0,0,0,0.8)]`}
+                        className={`w-full h-full rounded-[1.25rem] border ${isLightMode ? 'border-[#0B2421]/10' : 'border-[#C5A367]/30'} overflow-hidden relative group cursor-pointer shadow-lg transition-all duration-500 hover:scale-105 hover:border-[#C5A367]/60`}
                         onClick={() => setExpandedDesc(item.id)}
                       >
-                        <img src={item.image} className="w-full h-full object-cover opacity-100 transition-transform duration-1000 group-hover:scale-105" alt="" />
-                        <div className="absolute bottom-3 left-4 right-4 text-center">
-                          <h4 className={`text-xs md:text-sm font-serif font-black text-[#C5A367] line-clamp-1 tracking-widest uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]`}>{lang === 'en' ? item.name_en : item.name_am}</h4>
+                        <img src={item.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-102" alt="" />
+                        <div className="absolute bottom-2 left-2 right-2 text-center">
+                          <h4 className={`text-[10px] md:text-xs font-serif font-black text-[#C5A367] line-clamp-1 tracking-widest uppercase drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]`}>{lang === 'en' ? item.name_en : item.name_am}</h4>
                         </div>
                       </div>
                     </SwiperSlide>
+
                   ))}
                 </Swiper>
               </div>
