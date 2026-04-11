@@ -67,9 +67,14 @@ export interface MainSiteProduct {
   _id: string;
   name: string;
   category: 'Coffee' | 'Cake';
+  subCategory?: string;
   price: number;
   description: string;
   image: string;
+  sizeWeight?: string;
+  leadTime?: string;
+  shelfLife?: string;
+  ingredients?: string;
   createdAt: Date;
 }
 
