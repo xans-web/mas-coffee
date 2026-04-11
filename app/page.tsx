@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useMenu } from "@/context/MenuContext";
 import { MainHero } from "@/context/MenuContext";
-import { Sun, Moon, MapPin, Clock, Phone, ChefHat, Info, Search, SlidersHorizontal, Menu, X, Globe, Package, Calendar, ChevronLeft } from "lucide-react";
+import { Sun, Moon, MapPin, Clock, Phone, ChefHat, Info, Search, SlidersHorizontal, Menu, X, Globe, Package, Calendar, ChevronLeft, Plus } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade, Pagination } from "swiper/modules";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
@@ -282,7 +282,7 @@ export default function Home() {
   }, [websiteContent.lookbookItems, lookbookSearch]);
 
   const [activeCategory, setActiveCategory] = useState("All");
-  const [cart, setCart] = useState<{ [key: number]: number }>({});
+  const [cart, setCart] = useState<{ [key: string | number]: number }>({});
   const [showModal, setShowModal] = useState<"cart" | null>(null);
 
   const { minPrice, maxPrice } = useMemo(() => {
@@ -299,6 +299,25 @@ export default function Home() {
       setPriceLimit(maxPrice);
     }
   }, [maxPrice]);
+
+  const cartItems = useMemo(() => {
+    const list: any[] = [];
+    menuData.forEach(cat => cat.items.forEach(item => {
+      if (cart[item.id]) list.push({ 
+        ...item, 
+        cartId: item.id, 
+        displayName: lang === 'en' ? item.name_en : item.name_am 
+      });
+    }));
+    websiteContent.mainSiteProducts.forEach(item => {
+      if (cart[item._id]) list.push({ 
+        ...item, 
+        cartId: item._id, 
+        displayName: item.name 
+      });
+    });
+    return list;
+  }, [cart, menuData, websiteContent.mainSiteProducts, lang]);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem("theme");
@@ -352,10 +371,15 @@ export default function Home() {
     cardDivider: isLightMode ? "border-[#0B2421]/10" : "border-[#C5A367]/10"
   };
 
-  const addToCart = (id: number, e?: React.MouseEvent) => {
+  const addToCart = (id: number | string, e?: React.MouseEvent) => {
     setCart(prev => ({ ...prev, [id]: (prev[id] || 0) + 1 }));
     if (e && typeof window !== "undefined") {
-      const item = menuData.flatMap(c => c.items).find(i => i.id === id);
+      // Try to find image in both menuData and websiteContent
+      const allItems = [
+        ...menuData.flatMap(c => c.items),
+        ...websiteContent.mainSiteProducts.map(p => ({ id: p._id, image: p.image }))
+      ];
+      const item = allItems.find(i => String(i.id) === String(id));
       if (item && item.image) {
         const startX = e.clientX;
         const startY = e.clientY;
@@ -391,8 +415,9 @@ export default function Home() {
   const cartTotal = useMemo(() => {
     let total = 0;
     menuData.forEach(cat => cat.items.forEach(item => { if (cart[item.id]) total += item.price * cart[item.id]; }));
+    websiteContent.mainSiteProducts.forEach(item => { if (cart[item._id]) total += item.price * cart[item._id]; });
     return total;
-  }, [cart, menuData]);
+  }, [cart, menuData, websiteContent.mainSiteProducts]);
 
   const handleLogoClick = () => {
     const newCount = logoClicks + 1;
@@ -475,7 +500,7 @@ export default function Home() {
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
                 className={`w-8 h-8 rounded-full flex items-center justify-center text-[#C5A367] transition-all active:scale-95 ${isMobileMenuOpen ? 'bg-[#C5A367] text-[#0B2421]' : ''}`}
               >
-                {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
+                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
             </div>
           </div>
@@ -780,6 +805,8 @@ export default function Home() {
                             />
                             {/* Dark Gradient Overlay for typography readability */}
                             <div className="absolute inset-0 bg-gradient-to-t from-[#0B2421]/90 via-black/40 to-black/30 pointer-events-none" />
+                            {/* Top Gradient for Navigation Visibility */}
+                            <div className="absolute top-0 left-0 right-0 h-[25%] bg-gradient-to-b from-black/95 to-transparent pointer-events-none z-10" />
                           </div>
                           
                           {/* Typography positioned in the lower part */}
@@ -788,7 +815,7 @@ export default function Home() {
                               initial={{ opacity: 0, y: 20 }}
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ duration: 1, delay: 0.3 }}
-                              className="text-4xl md:text-6xl lg:text-[4.5rem] font-sans font-bold text-white tracking-wide mb-4 drop-shadow-2xl text-balance"
+                              className="text-4xl md:text-6xl lg:text-[4.5rem] font-sans font-light text-white tracking-wide mb-4 drop-shadow-2xl text-balance"
                             >
                               {hero.title}
                             </motion.h2>
@@ -845,10 +872,10 @@ export default function Home() {
                 </motion.section>
 
                 {/* Signature Collection (Coffee & Cakes) */}
-                <section className="py-12 md:py-24 px-4 md:px-12 max-w-7xl mx-auto animate-fade-in-up">
+                <section className="py-12 md:py-24 px-6 md:px-12 max-w-7xl mx-auto animate-fade-in-up">
                   <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-5xl font-serif font-black text-[#C5A367] uppercase tracking-[0.3em] mb-4">Signature Collection</h2>
-                    <p className="text-[#C5A367]/60 text-xs md:text-sm uppercase tracking-widest font-medium">Explore our premium selection of coffee and artisanal cakes</p>
+                    <h2 className="text-3xl md:text-5xl font-serif font-black text-[#C5A367] uppercase tracking-[0.3em] mb-4">SPECIALTY COFFEE ROASTER</h2>
+                    <p className="text-[#C5A367]/60 text-xs md:text-sm uppercase tracking-widest font-medium">explore ethiopian origin coffee and artisanal cakes</p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24">
@@ -858,24 +885,32 @@ export default function Home() {
                         <div className="w-12 h-px bg-[#C5A367]/30" />
                         <h3 className="text-xl md:text-2xl font-serif font-black text-[#C5A367] uppercase tracking-widest">Premium Coffee</h3>
                       </div>
-                      <div className="space-y-8">
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:gap-x-8 md:gap-y-16">
                         {websiteContent.mainSiteProducts.filter(p => p.category === 'Coffee').length > 0 ? (
                           websiteContent.mainSiteProducts.filter(p => p.category === 'Coffee').map(product => (
-                            <div key={product._id} className="flex gap-6 group">
-                              <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden border border-[#C5A367]/20 shrink-0 shadow-xl bg-black/20">
-                                <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                            <div 
+                              key={product._id} 
+                              onClick={() => setSelectedProductView(product)}
+                              className="flex flex-col group p-2 rounded-3xl border border-[#C5A367]/30 bg-[#0B2421]/20 transition-all duration-300 active:scale-[0.98] hover:shadow-[0_0_20px_rgba(197,163,103,0.1)] cursor-pointer"
+                            >
+                              <div className="mb-3 px-1 flex flex-col">
+                                <h4 className="text-[10px] md:text-sm font-bold text-[#C5A367] uppercase tracking-widest line-clamp-1">{product.name}</h4>
+                                <span className="text-[10px] md:text-xs text-[#F5EFE0] font-medium opacity-80">{product.price} ETB</span>
                               </div>
-                              <div className="flex-1 border-b border-[#C5A367]/10 pb-4">
-                                <div className="flex justify-between items-start mb-2">
-                                  <h4 className="text-lg md:text-xl font-black text-[#F5EFE0] uppercase tracking-tight">{product.name}</h4>
-                                  <span className="text-[#C5A367] font-black">{product.price} ETB</span>
-                                </div>
-                                <p className="text-xs md:text-sm text-[#F5EFE0]/50 italic leading-relaxed line-clamp-2">{product.description}</p>
+                              <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#0B2421] border border-[#C5A367]/10">
+                                <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                {/* Quick Add Button */}
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); addToCart(product._id, e); }}
+                                  className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-[#C5A367] flex items-center justify-center text-[#0B2421] shadow-lg hover:scale-110 active:scale-95 transition-all z-10"
+                                >
+                                  <Plus className="w-5 h-5" />
+                                </button>
                               </div>
                             </div>
                           ))
                         ) : (
-                          <p className="text-[#F5EFE0]/20 italic text-sm">Our coffee collection is being curated...</p>
+                          <p className="text-[#F5EFE0]/20 italic text-sm col-span-full">Our coffee collection is being curated...</p>
                         )}
                       </div>
                     </div>
@@ -886,24 +921,32 @@ export default function Home() {
                         <div className="w-12 h-px bg-[#C5A367]/30" />
                         <h3 className="text-xl md:text-2xl font-serif font-black text-[#C5A367] uppercase tracking-widest">Artisanal Cakes</h3>
                       </div>
-                      <div className="space-y-8">
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-10 md:gap-x-8 md:gap-y-16">
                         {websiteContent.mainSiteProducts.filter(p => p.category === 'Cake').length > 0 ? (
                           websiteContent.mainSiteProducts.filter(p => p.category === 'Cake').map(product => (
-                            <div key={product._id} className="flex gap-6 group">
-                              <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden border border-[#C5A367]/20 shrink-0 shadow-xl bg-black/20">
-                                <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                            <div 
+                              key={product._id} 
+                              onClick={() => setSelectedProductView(product)}
+                              className="flex flex-col group p-2 rounded-3xl border border-[#C5A367]/30 bg-[#0B2421]/20 transition-all duration-300 active:scale-[0.98] hover:shadow-[0_0_20px_rgba(197,163,103,0.1)] cursor-pointer"
+                            >
+                              <div className="mb-3 px-1 flex flex-col">
+                                <h4 className="text-[10px] md:text-sm font-bold text-[#C5A367] uppercase tracking-widest line-clamp-1">{product.name}</h4>
+                                <span className="text-[10px] md:text-xs text-[#F5EFE0] font-medium opacity-80">{product.price} ETB</span>
                               </div>
-                              <div className="flex-1 border-b border-[#C5A367]/10 pb-4">
-                                <div className="flex justify-between items-start mb-2">
-                                  <h4 className="text-lg md:text-xl font-black text-[#F5EFE0] uppercase tracking-tight">{product.name}</h4>
-                                  <span className="text-[#C5A367] font-black">{product.price} ETB</span>
-                                </div>
-                                <p className="text-xs md:text-sm text-[#F5EFE0]/50 italic leading-relaxed line-clamp-2">{product.description}</p>
+                              <div className="relative aspect-square rounded-2xl overflow-hidden bg-[#0B2421] border border-[#C5A367]/10">
+                                <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                {/* Quick Add Button */}
+                                <button 
+                                  onClick={(e) => { e.stopPropagation(); addToCart(product._id, e); }}
+                                  className="absolute bottom-2 right-2 w-8 h-8 rounded-full bg-[#C5A367] flex items-center justify-center text-[#0B2421] shadow-lg hover:scale-110 active:scale-95 transition-all z-10"
+                                >
+                                  <Plus className="w-5 h-5" />
+                                </button>
                               </div>
                             </div>
                           ))
                         ) : (
-                          <p className="text-[#F5EFE0]/20 italic text-sm">Our artisanal cakes are being prepared...</p>
+                          <p className="text-[#F5EFE0]/20 italic text-sm col-span-full">Our artisanal cakes are being prepared...</p>
                         )}
                       </div>
                     </div>
@@ -1541,19 +1584,19 @@ export default function Home() {
           </div>
           
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
-            {menuData.flatMap(c => c.items).filter(i => cart[i.id]).map(item => (
-              <div key={item.id} className="flex items-center gap-4">
+            {cartItems.map(item => (
+              <div key={item.cartId} className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-2xl overflow-hidden border border-[#C5A367]/10 shrink-0">
                   <img src={item.image} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <h4 className={`text-lg font-serif font-black mb-1 truncate ${tm.textApp}`}>{lang === 'en' ? item.name_en : item.name_am}</h4>
+                  <h4 className={`text-lg font-serif font-black mb-1 truncate ${tm.textApp}`}>{item.displayName}</h4>
                   <p className="font-black text-[#C5A367] opacity-60 text-sm">{item.price} ETB</p>
                 </div>
                 <div className="flex items-center gap-2 bg-[#C5A367]/10 rounded-full px-2 py-1">
-                  <button onClick={() => removeFromCart(item.id)} className={`w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#C5A367] hover:text-[#0B2421] transition-all hover:scale-110 ${tm.textApp}`}>-</button>
-                  <span className={`font-black text-sm ${tm.textApp}`}>{cart[item.id]}</span>
-                  <button onClick={() => addToCart(item.id)} className="w-8 h-8 rounded-full bg-[#C5A367] text-[#0B2421] flex items-center justify-center font-black transition-all hover:scale-110">+</button>
+                  <button onClick={() => removeFromCart(item.cartId)} className={`w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#C5A367] hover:text-[#0B2421] transition-all hover:scale-110 ${tm.textApp}`}>-</button>
+                  <span className={`font-black text-sm ${tm.textApp}`}>{cart[item.cartId]}</span>
+                  <button onClick={() => addToCart(item.cartId)} className="w-8 h-8 rounded-full bg-[#C5A367] text-[#0B2421] flex items-center justify-center font-black transition-all hover:scale-110">+</button>
                 </div>
               </div>
             ))}
@@ -1571,44 +1614,118 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Desktop Cart Modal */}
-      {showModal === "cart" && (
-        <div className="hidden lg:flex fixed inset-0 z-2000 items-center justify-center px-4">
-          <div className="absolute inset-0 bg-[#0B2421]/60 backdrop-blur-xl" onClick={() => setShowModal(null)} />
-          <div className={`${tm.modalBg} relative z-10 w-full max-w-2xl max-h-[85vh] rounded-3xl flex flex-col overflow-hidden animate-fade-in-up`}>
-            <div className="p-8 border-b border-[#C5A367]/10 flex items-center justify-between">
-              <h2 className="text-3xl font-serif font-black uppercase tracking-widest text-[#C5A367]">My Order</h2>
-              <button onClick={() => setShowModal(null)} className="opacity-40 hover:opacity-100">
+      {/* Product Quick View Modal (Website Products) */}
+      {selectedProductView && selectedProductView._id && (
+        <div className="fixed inset-0 z-2000 flex items-end lg:items-center justify-center">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-xl" onClick={() => setSelectedProductView(null)} />
+          <div className="relative w-full max-w-2xl bg-[#0B2421] rounded-t-[2.5rem] lg:rounded-[2.5rem] flex flex-col max-h-[92vh] lg:max-h-[85vh] overflow-hidden animate-slide-up shadow-2xl border border-[#C5A367]/20">
+            {/* Modal Header */}
+            <div className="absolute top-6 right-6 z-20">
+              <button 
+                onClick={() => setSelectedProductView(null)}
+                className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white hover:bg-[#C5A367] transition-all"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto no-scrollbar">
+              {/* Image Area */}
+              <div className="relative aspect-[4/3] w-full bg-black/20">
+                <img src={selectedProductView.image} className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#0B2421] via-transparent to-transparent " />
+              </div>
+
+              {/* Content Area */}
+              <div className="px-6 lg:px-10 pb-10 -mt-10 relative z-10">
+                <div className="bg-[#0B2421] rounded-t-3xl pt-8">
+                  <div className="flex justify-between items-start mb-6">
+                    <div>
+                      <h3 className="text-3xl lg:text-4xl font-serif font-black text-[#C5A367] uppercase tracking-wider mb-2">{selectedProductView.name}</h3>
+                      <p className="text-[#F5EFE0] text-xl font-bold">{selectedProductView.price} ETB</p>
+                    </div>
+                  </div>
+
+                  <p className="text-[#F5EFE0]/70 text-base leading-relaxed mb-10 italic">
+                    {selectedProductView.description}
+                  </p>
+
+                  {/* Specs Grid */}
+                  <div className="grid grid-cols-2 gap-6 mb-10 p-6 rounded-3xl bg-black/20 border border-[#C5A367]/10">
+                    <div className="space-y-1">
+                      <span className="text-[10px] uppercase tracking-widest text-[#C5A367] opacity-60">Lead Time</span>
+                      <p className="text-sm font-bold text-[#F5EFE0]">{selectedProductView.leadTime || 'Immediate'}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[10px] uppercase tracking-widest text-[#C5A367] opacity-60">Size / Weight</span>
+                      <p className="text-sm font-bold text-[#F5EFE0]">{selectedProductView.sizeWeight || 'Standard'}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[10px] uppercase tracking-widest text-[#C5A367] opacity-60">Shelf Life</span>
+                      <p className="text-sm font-bold text-[#F5EFE0]">{selectedProductView.shelfLife || 'Fresh'}</p>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-[10px] uppercase tracking-widest text-[#C5A367] opacity-60">Ingredients</span>
+                      <p className="text-sm font-bold text-[#F5EFE0] line-clamp-2" title={selectedProductView.ingredients}>
+                        {selectedProductView.ingredients || 'Secret Recipe'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Bottom CTA */}
+            <div className="p-6 lg:p-8 bg-[#0B2421] border-t border-[#C5A367]/10">
+              <button 
+                onClick={(e) => { addToCart(selectedProductView._id, e); setSelectedProductView(null); }}
+                className="w-full py-5 rounded-2xl bg-[#C5A367] text-[#0B2421] font-black uppercase tracking-[0.3em] text-xs shadow-xl active:scale-95 transition-all"
+              >
+                Add to Cart • {selectedProductView.price} ETB
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Existing Menu Item Modal (selectedProductView with id instead of _id) */}
+      {selectedProductView && selectedProductView.id && (
+        <div className="fixed inset-0 z-2000 flex items-end lg:items-center justify-center">
+          <div className="absolute inset-0 bg-black/60 backdrop-blur-xl" onClick={() => setSelectedProductView(null)} />
+          <div className={`relative w-full max-w-2xl ${tm.modalBg} rounded-t-3xl lg:rounded-3xl flex flex-col max-h-[92vh] lg:max-h-[85vh] overflow-hidden animate-slide-up shadow-2xl`}>
+            <div className="absolute top-6 right-6 z-10">
+              <button onClick={() => setSelectedProductView(null)} className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center text-white">
                 <X className="w-6 h-6" />
               </button>
             </div>
             
-            <div className="flex-1 overflow-y-auto p-8 space-y-8">
-              {menuData.flatMap(c => c.items).filter(i => cart[i.id]).map(item => (
-                <div key={item.id} className="flex items-center gap-6">
-                  <div className="w-20 h-20 rounded-2xl overflow-hidden border border-[#C5A367]/10 shrink-0">
-                    <img src={item.image} className="w-full h-full object-cover" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-xl font-serif font-black mb-1 truncate">{lang === 'en' ? item.name_en : item.name_am}</h4>
-                    <p className="font-black text-[#C5A367] opacity-60">{item.price} ETB</p>
-                  </div>
-                  <div className="flex items-center gap-4 bg-[#C5A367]/10 rounded-full px-4 py-2">
-                    <button onClick={() => removeFromCart(item.id)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#C5A367] hover:text-[#0B2421] transition-all hover:scale-110">-</button>
-                    <span className="font-black">{cart[item.id]}</span>
-                    <button onClick={() => addToCart(item.id)} className="w-8 h-8 rounded-full bg-[#C5A367] text-[#0B2421] flex items-center justify-center font-black transition-all hover:scale-110">+</button>
+            <div className="flex-1 overflow-y-auto no-scrollbar">
+              <div className="relative aspect-[4/3] w-full">
+                <img src={selectedProductView.image} className="w-full h-full object-cover" />
+                <div className={`absolute inset-0 bg-gradient-to-t ${isLightMode ? 'from-white via-transparent to-transparent' : 'from-[#0B2421] via-transparent to-transparent'}`} />
+              </div>
+              <div className="px-8 pb-10 -mt-8 relative z-10">
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <h3 className="text-3xl font-serif font-black mb-1">{lang === 'en' ? selectedProductView.name_en : selectedProductView.name_am}</h3>
+                    <p className="text-[#C5A367] text-2xl font-black">{selectedProductView.price} ETB</p>
                   </div>
                 </div>
-              ))}
-            </div>
-
-            <div className="p-8 bg-[#0B2421]/50 border-t border-[#C5A367]/10">
-              <div className="flex justify-between items-center mb-8">
-                <span className="text-[10px] font-black uppercase tracking-[0.5em] opacity-40">Total Amount</span>
-                <span className="text-4xl font-serif font-black text-[#C5A367]">{cartTotal.toFixed(0)} ETB</span>
+                <p className={`text-lg italic leading-relaxed mb-8 ${tm.textMuted}`}>
+                  {lang === 'en' ? selectedProductView.description_en : selectedProductView.description_am}
+                </p>
+                <div className={`flex items-center gap-6 p-6 rounded-2xl ${isLightMode ? 'bg-[#0B2421]/5' : 'bg-[#C5A367]/5'} border border-[#C5A367]/10`}>
+                  <p className="text-xs font-black uppercase tracking-widest opacity-40">Ready to serve</p>
+                </div>
               </div>
-              <button className="w-full bg-[#C5A367] text-[#0B2421] py-6 rounded-3xl font-black uppercase tracking-[0.3em] text-sm shadow-2xl hover:scale-[1.02] transition-all">
-                Complete Checkout
+            </div>
+            
+            <div className={`p-8 border-t ${tm.borderMain} ${tm.modalBg}`}>
+              <button 
+                onClick={(e) => { addToCart(selectedProductView.id, e); setSelectedProductView(null); }}
+                className="w-full py-5 rounded-2xl bg-[#C5A367] text-[#0B2421] font-black uppercase tracking-[0.3em] text-xs shadow-xl active:scale-95 transition-all"
+              >
+                Add to Cart
               </button>
             </div>
           </div>
