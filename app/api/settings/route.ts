@@ -1,3 +1,5 @@
+import fs from 'fs';
+import path from 'path';
 import { NextResponse } from 'next/server';
 import connectToDatabase from '@/lib/db';
 import { Settings } from '@/lib/models';
@@ -27,7 +29,16 @@ export async function GET() {
       ...publicSettings,
       phoneNumber: publicSettings.phoneNumber || publicSettings.phone || ''
     };
-    return NextResponse.json(normalized, {
+
+    let logo = normalized.logo || '/logo.svg';
+    if (logo === '/logo.png') {
+      const onDisk = path.join(process.cwd(), 'public', 'logo.png');
+      if (!fs.existsSync(onDisk)) {
+        logo = '/logo.svg';
+      }
+    }
+
+    return NextResponse.json({ ...normalized, logo }, {
       headers: {
         'Cache-Control': 'no-store, max-age=0, must-revalidate',
       },

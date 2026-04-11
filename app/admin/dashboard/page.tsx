@@ -6,11 +6,17 @@ import { useMenu } from "@/context/MenuContext";
 import { MenuItem } from "@/lib/menu-data";
 import { Sun, Moon, Upload, Link, Trash2, Printer, Layout, Menu as MenuIcon, Image, Bell, Mail, Plus, X, ChevronRight, ChevronLeft, Globe } from "lucide-react";
 
+import AdminSidebar from "@/components/admin/Sidebar";
+import { useSearchParams } from "next/navigation";
+
 type Module = "menu" | "website";
 type Tab = "dashboard" | "menu" | "categories" | "settings";
 type WebsiteTab = "hero" | "lookbook" | "announcements" | "inquiries";
 
 export default function AdminDashboard() {
+  const searchParams = useSearchParams();
+  const initialTab = (searchParams.get("tab") as Tab) || "dashboard";
+
   const { 
     menuData, 
     siteContent,
@@ -31,10 +37,15 @@ export default function AdminDashboard() {
     refreshData
   } = useMenu();
   const [activeModule, setActiveModule] = useState<Module>("menu");
-  const [activeTab, setActiveTab] = useState<Tab>("dashboard");
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab") as Tab;
+    if (tab && ["dashboard", "menu", "categories", "settings"].includes(tab)) {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
   const [activeWebsiteTab, setActiveWebsiteTab] = useState<WebsiteTab>("hero");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   // Existing states needed
   const [searchQuery, setSearchQuery] = useState("");
   // SELECTED ITEMS REMOVED TO ELIMINATE BULK CORRUPTION
@@ -134,31 +145,31 @@ export default function AdminDashboard() {
     modalOverlay: "bg-black/40",
     modalBg: "bg-white shadow-2xl border border-[#D4AF37]/30"
   } : {
-    bgApp: "bg-[#000000]",
-    textApp: "text-white",
-    bgSidebar: "bg-[#000000]",
-    borderMain: "border-[#D4AF37]/30",
-    textAcc: "text-[#D4AF37]",
-    bgStats: "bg-zinc-900 border-[#D4AF37]/20",
-    textStats: "text-[#D4AF37]",
-    tableBg: "bg-zinc-900 border-[#D4AF37]/20",
-    tableHeader: "bg-zinc-950 text-[#D4AF37]",
-    tableRowHover: "hover:bg-zinc-950",
-    tableRowActive: "bg-zinc-950/70",
-    activeTab: "bg-[#D4AF37] text-black shadow-[0_0_15px_rgba(212,175,55,0.3)]",
-    inactiveTab: "text-white/60 hover:bg-zinc-900 hover:text-white",
-    formBg: "bg-zinc-900/50 border-[#D4AF37]/20 shadow-xl",
-    inputBg: "bg-black border-zinc-800 text-white",
-    sidebarBtnHover: "hover:bg-zinc-900",
-    sidebarBorder: "border-[#D4AF37]/20",
-    bulkMarkActive: "border-[#D4AF37] text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black",
-    bulkMarkInactive: "border-zinc-700 text-zinc-500 hover:bg-zinc-800",
-    deleteBtn: "text-zinc-600 hover:text-red-500",
-    tableText: "text-white",
-    tableSubtext: "text-zinc-500",
-    textMuted: "text-white/40",
-    modalOverlay: "bg-black/80",
-    modalBg: "bg-zinc-950 shadow-[0_0_50px_rgba(212,175,55,0.15)] border border-[#D4AF37]/30"
+    bgApp: "bg-[#0B2421]",
+    textApp: "text-[#F5EFE0]",
+    bgSidebar: "bg-[#0B2421]",
+    borderMain: "border-[#C5A367]/30",
+    textAcc: "text-[#C5A367]",
+    bgStats: "bg-[#0B2421] border-[#C5A367]/20",
+    textStats: "text-[#C5A367]",
+    tableBg: "bg-[#0B2421] border-[#C5A367]/20",
+    tableHeader: "bg-[#C5A367]/10 text-[#C5A367]",
+    tableRowHover: "hover:bg-[#C5A367]/5",
+    tableRowActive: "bg-[#C5A367]/10",
+    activeTab: "bg-[#C5A367] text-[#0B2421] shadow-[0_0_15px_rgba(197,163,103,0.3)]",
+    inactiveTab: "text-[#F5EFE0]/60 hover:bg-[#C5A367]/10 hover:text-[#C5A367]",
+    formBg: "bg-[#0B2421]/95 border-[#C5A367]/20 shadow-xl",
+    inputBg: "bg-[#0B2421] border-[#C5A367]/20 text-[#F5EFE0]",
+    sidebarBtnHover: "hover:bg-[#C5A367]/10",
+    sidebarBorder: "border-[#C5A367]/20",
+    bulkMarkActive: "border-[#C5A367] text-[#C5A367] hover:bg-[#C5A367] hover:text-[#0B2421]",
+    bulkMarkInactive: "border-[#C5A367]/30 text-[#F5EFE0]/40 hover:bg-[#C5A367]/10",
+    deleteBtn: "text-[#F5EFE0]/40 hover:text-red-500",
+    tableText: "text-[#F5EFE0]",
+    tableSubtext: "text-[#F5EFE0]/60",
+    textMuted: "text-[#F5EFE0]/40",
+    modalOverlay: "bg-[#0B2421]/90",
+    modalBg: "bg-[#0B2421] shadow-[0_0_50px_rgba(197,163,103,0.15)] border border-[#C5A367]/30"
   };
 
   // Real-time polling for analytics (10 seconds)
@@ -347,205 +358,17 @@ export default function AdminDashboard() {
   return (
     <div className={`min-h-screen ${tm.bgApp} ${tm.textApp} flex font-sans selection:bg-[#D4AF37]/30 transition-colors duration-500`}>
       
-      {/* Mobile Top Bar */}
-      <div className={`lg:hidden fixed top-0 left-0 right-0 h-[70px] ${tm.bgSidebar} border-b ${tm.sidebarBorder} z-[1100] flex items-center justify-between px-4 shadow-md transition-colors duration-500`}>
-        <h1 className="text-lg font-serif text-[#D4AF37] uppercase tracking-widest font-black truncate max-w-[140px]">
-          {activeTab === "dashboard" ? "Dashboard" : activeTab === "menu" ? "Manage Menu" : activeTab === "categories" ? "Categories" : "Settings"}
-        </h1>
-        <div className="flex items-center gap-2">
-          {hasPendingChanges && (
-            <button
-              onClick={handleSaveAll}
-              disabled={isSaving}
-              className="px-4 py-2 bg-[#D4AF37] text-black text-[10px] font-black uppercase tracking-widest rounded-full shadow-md active:scale-95 transition-all flex items-center gap-1.5 animate-pulse"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" /></svg>
-              DONE
-            </button>
-          )}
-          <button 
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className={`p-3 ${tm.textAcc} focus:outline-none h-11 w-11 flex items-center justify-center`}
-          >
-            {isMobileMenuOpen ? (
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
-            ) : (
-              <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M4 6h16M4 12h16M4 18h16" /></svg>
-            )}
-          </button>
-        </div>
-      </div>
-      {/* Mobile Overlay Menu */}
-      {isMobileMenuOpen && (
-        <div className={`lg:hidden fixed inset-0 z-[1050] ${tm.bgSidebar} flex flex-col items-center justify-center p-8 transition-colors duration-500`}>
-          <div className="flex flex-col gap-4 w-full max-w-sm">
-            {/* Module Switcher (Mobile) */}
-            <div className="flex gap-2 p-1 rounded-xl bg-zinc-950/50 border border-[#D4AF37]/20 mb-4">
-              <button
-                onClick={() => setActiveModule("menu")}
-                className={`flex-1 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${activeModule === "menu" ? "bg-[#D4AF37] text-black shadow-lg" : "text-zinc-500"}`}
-              >
-                <MenuIcon className="w-4 h-4" /> Menu
-              </button>
-              <button
-                onClick={() => setActiveModule("website")}
-                className={`flex-1 py-3 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${activeModule === "website" ? "bg-[#D4AF37] text-black shadow-lg" : "text-zinc-500"}`}
-              >
-                <Globe className="w-4 h-4" /> Website
-              </button>
-            </div>
-
-            {activeModule === "menu" ? (
-              [
-                { id: "dashboard", label: "Dashboard", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
-                { id: "menu", label: "Menu Items", icon: "M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" },
-                { id: "categories", label: "Categories", icon: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" },
-                { id: "settings", label: "Settings", icon: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z" }
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => { setActiveTab(tab.id as Tab); setIsMobileMenuOpen(false); }}
-                  className={`flex items-center gap-6 px-8 py-4 rounded-2xl transition-all h-16 shadow-lg ${activeTab === tab.id ? tm.activeTab : tm.inactiveTab}`}
-                >
-                  <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d={tab.icon}/></svg>
-                  <span className="font-black uppercase tracking-[0.2em] text-sm">{tab.label}</span>
-                </button>
-              ))
-            ) : (
-              [
-                { id: "hero", label: "Hero Manager", icon: Image },
-                { id: "lookbook", label: "Lookbook (Gallery)", icon: Layout },
-                { id: "announcements", label: "Announcements", icon: Bell },
-                { id: "inquiries", label: "Inquiries", icon: Mail }
-              ].map(tab => (
-                <button
-                  key={tab.id}
-                  onClick={() => { setActiveWebsiteTab(tab.id as WebsiteTab); setIsMobileMenuOpen(false); }}
-                  className={`flex items-center gap-6 px-8 py-4 rounded-2xl transition-all h-16 shadow-lg ${activeWebsiteTab === tab.id ? tm.activeTab : tm.inactiveTab}`}
-                >
-                  <tab.icon className="w-6 h-6 flex-shrink-0" />
-                  <span className="font-black uppercase tracking-[0.2em] text-sm">{tab.label}</span>
-                </button>
-              ))
-            )}
-            <button 
-              onClick={() => { localStorage.removeItem("admin_authenticated"); router.push("/admin"); }} 
-              className={`flex items-center gap-6 px-8 py-4 mt-2 rounded-2xl text-red-400 h-16 border border-red-500/30 ${isLightMode ? 'bg-red-50' : 'bg-red-500/10'}`}
-            >
-              <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-              <span className="font-black uppercase tracking-[0.2em] text-sm">Logout</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Sidebar - Desktop Only */}
-      <aside className={`hidden lg:flex fixed inset-y-0 left-0 ${tm.bgSidebar} border-r ${tm.sidebarBorder} shadow-sm transition-all duration-300 z-50 flex-col ${isSidebarOpen ? 'w-64' : 'w-20'}`}>
-        <div className={`h-[70px] flex items-center justify-between px-4 border-b ${tm.sidebarBorder} gap-2`}>
-          {isSidebarOpen && <h1 className="text-xl font-serif text-[#D4AF37] uppercase tracking-widest truncate flex-1">Admin Panel</h1>}
-          {/* Global DONE / Save All Button */}
-          {hasPendingChanges && (
-            <button
-              onClick={handleSaveAll}
-              disabled={isSaving}
-              title="Save all pending changes"
-              className="px-3 py-1.5 bg-[#D4AF37] text-black text-[9px] font-black uppercase tracking-widest rounded-full shadow-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-1.5 animate-pulse flex-shrink-0"
-            >
-              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M5 13l4 4L19 7" /></svg>
-              {isSidebarOpen ? 'SAVE ALL' : ''}
-            </button>
-          )}
-          <div className="flex items-center gap-1">
-            <button 
-              onClick={() => setIsLightMode(!isLightMode)}
-              className={`p-2 ${tm.sidebarBtnHover} text-[#D4AF37] rounded-full transition-colors`}
-              title="Toggle Theme"
-            >
-              {isLightMode ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
-            </button>
-            <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} className={`p-2 text-[#D4AF37] ${tm.sidebarBtnHover} rounded-full transition-colors flex-shrink-0`}>
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
-        </div>
-        
-        {/* Module Switcher (Portal Logic) */}
-        <div className={`p-3 border-b ${tm.sidebarBorder}`}>
-          <div className={`flex ${isSidebarOpen ? 'flex-row' : 'flex-col'} gap-2 p-1 rounded-xl bg-zinc-950/50 border ${tm.sidebarBorder}`}>
-            <button
-              onClick={() => setActiveModule("menu")}
-              className={`flex-1 py-2 px-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${activeModule === "menu" ? "bg-[#D4AF37] text-black shadow-lg" : "text-zinc-500 hover:text-white"}`}
-              title="Digital Menu Manager"
-            >
-              <MenuIcon className="w-3.5 h-3.5" />
-              {isSidebarOpen && "Menu"}
-            </button>
-            <button
-              onClick={() => setActiveModule("website")}
-              className={`flex-1 py-2 px-2 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all flex items-center justify-center gap-2 ${activeModule === "website" ? "bg-[#D4AF37] text-black shadow-lg" : "text-zinc-500 hover:text-white"}`}
-              title="Main Website Manager"
-            >
-              <Globe className="w-3.5 h-3.5" />
-              {isSidebarOpen && "Website"}
-            </button>
-          </div>
-        </div>
-
-        <nav className="flex-1 py-6 flex flex-col gap-2 px-3">
-          {activeModule === "menu" ? (
-            [
-              { id: "dashboard", label: "Dashboard", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
-              { id: "menu", label: "Menu Items", icon: "M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" },
-              { id: "categories", label: "Categories", icon: "M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" },
-              { id: "settings", label: "Settings", icon: "M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065zM15 12a3 3 0 11-6 0 3 3 0 016 0z" }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as Tab)}
-                className={`flex items-center gap-4 px-4 py-3 rounded-lg transition-all ${activeTab === tab.id ? tm.activeTab : tm.inactiveTab}`}
-                title={tab.label}
-              >
-                <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={tab.icon}/></svg>
-                {isSidebarOpen && <span className="font-bold uppercase tracking-widest text-xs truncate">{tab.label}</span>}
-              </button>
-            ))
-          ) : (
-            [
-              { id: "hero", label: "Hero Manager", icon: Image },
-              { id: "lookbook", label: "Lookbook (Gallery)", icon: Layout },
-              { id: "announcements", label: "Announcements", icon: Bell },
-              { id: "inquiries", label: "Inquiries", icon: Mail }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveWebsiteTab(tab.id as WebsiteTab)}
-                className={`flex items-center gap-4 px-4 py-3 rounded-lg transition-all ${activeWebsiteTab === tab.id ? tm.activeTab : tm.inactiveTab}`}
-                title={tab.label}
-              >
-                <tab.icon className="w-6 h-6 flex-shrink-0" />
-                {isSidebarOpen && <span className="font-bold uppercase tracking-widest text-xs truncate">{tab.label}</span>}
-              </button>
-            ))
-          )}
-        </nav>
-        
-        <div className={`p-4 border-t ${tm.sidebarBorder}`}>
-          <button onClick={() => { localStorage.removeItem("admin_authenticated"); router.push("/admin"); }} className={`flex items-center gap-4 px-4 py-3 w-full rounded-lg text-red-400 ${isLightMode ? 'hover:bg-red-50 hover:text-red-500' : 'hover:bg-red-500/10 hover:text-red-500'} transition-colors`}>
-            <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-            {isSidebarOpen && <span className="font-bold uppercase tracking-widest text-xs">Logout</span>}
-          </button>
-          <button onClick={() => router.push("/")} className={`flex items-center gap-4 px-4 py-3 mt-2 w-full rounded-lg transition-colors ${tm.inactiveTab}`}>
-            <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
-            {isSidebarOpen && <span className="font-bold uppercase tracking-widest text-[10px]">Store</span>}
-          </button>
-        </div>
-      </aside>
+      {/* Sidebar - Desktop & Mobile (Consolidated) */}
+      <AdminSidebar 
+        activeTab={activeTab} 
+        onTabChange={(tab) => setActiveTab(tab as Tab)} 
+        isLightMode={isLightMode} 
+        toggleTheme={() => setIsLightMode(!isLightMode)} 
+      />
 
       {/* === FIXED DONE BANNER (appears when pending changes exist) === */}
       {hasPendingChanges && (
-        <div className="fixed top-0 left-0 right-0 z-[1200] flex items-center justify-between px-4 md:px-8 h-[50px] bg-[#D4AF37] shadow-[0_4px_24px_rgba(212,175,55,0.5)] animate-slide-down">
+        <div className="fixed top-0 left-0 right-0 z-1200 flex items-center justify-between px-4 md:px-8 h-12.5 bg-[#D4AF37] shadow-[0_4px_24px_rgba(212,175,55,0.5)] animate-slide-down">
           <div className="flex items-center gap-2">
             <span className="text-[10px] md:text-xs font-black uppercase tracking-[0.25em] text-black">
               {Object.keys(pendingEdits).length > 0 && `${Object.keys(pendingEdits).length} item${Object.keys(pendingEdits).length > 1 ? 's' : ''} edited`}
@@ -565,8 +388,8 @@ export default function AdminDashboard() {
       )}
 
       {/* Main Content Area */}
-      <main className={`flex-1 transition-all duration-300 min-h-[100vh] lg:${isSidebarOpen ? 'ml-64' : 'ml-20'} ${
-        hasPendingChanges ? 'pt-[120px] lg:pt-[50px]' : 'pt-[70px] lg:pt-0'
+      <main className={`flex-1 transition-all duration-300 min-h-screen ${
+        hasPendingChanges ? 'pt-30 lg:pt-12.5' : 'pt-17.5 lg:pt-0'
       }`}>
         <div className="p-4 md:p-8 lg:p-12 max-w-7xl mx-auto">
           
@@ -768,7 +591,7 @@ export default function AdminDashboard() {
                                 </div>
                                 <div className="flex flex-col">
                                   <span className="text-[9px] font-black uppercase tracking-widest text-[#D4AF37]">Active Selection</span>
-                                  <span className="text-[8px] font-mono text-zinc-500 truncate max-w-[120px]">{newItem.image}</span>
+                                  <span className="text-[8px] font-mono text-zinc-500 truncate max-w-30">{newItem.image}</span>
                                 </div>
                               </div>
                               <button 
@@ -812,7 +635,7 @@ export default function AdminDashboard() {
               )}
 
               {/* Tools row (Sticky Search on Mobile) */}
-              <div className={`sticky top-[70px] lg:static z-[900] ${tm.bgApp} py-2 lg:py-0`}>
+              <div className={`sticky top-17.5 lg:static z-900 ${tm.bgApp} py-2 lg:py-0`}>
                 <div className={`flex flex-col lg:flex-row gap-4 md:gap-6 border ${tm.sidebarBorder} ${tm.sidebarBtnHover} shadow-lg p-4 rounded-xl items-center ${isLightMode ? 'bg-white' : 'bg-black/50'} backdrop-blur-md`}>
                   <div className="relative group flex-1 w-full">
                     <input 
@@ -848,7 +671,7 @@ export default function AdminDashboard() {
 
                     <div className="flex gap-6 mb-4">
                       {/* Item Image & Actions */}
-                      <div className="flex flex-col gap-3 flex-shrink-0">
+                      <div className="flex flex-col gap-3 shrink-0">
                         <div className="relative w-24 h-24 group">
                           {item.image ? (
                             <img src={item.image} className="w-full h-full object-cover rounded-2xl border-2 border-[#D4AF37]/30 shadow-lg" />
@@ -898,7 +721,7 @@ export default function AdminDashboard() {
                                 } transition-colors`}
                                 placeholder="Menu name..."
                               />
-                              <p className={`${tm.tableSubtext} text-[10px] uppercase tracking-[0.1em] font-black opacity-60`}>{item.categoryName}</p>
+                              <p className={`${tm.tableSubtext} text-[10px] uppercase tracking-widest font-black opacity-60`}>{item.categoryName}</p>
                             </div>
 
                             <div className="flex items-center gap-2 mt-2">
@@ -947,7 +770,7 @@ export default function AdminDashboard() {
                             onChange={() => handleToggleNow(item.id, { isSoldOut: !item.isSoldOut })}
                           />
                           <div className={`w-12 h-6 rounded-full border ${tm.sidebarBorder} relative transition-colors ${!item.isSoldOut ? 'bg-[#D4AF37]' : (isLightMode ? 'bg-gray-200' : 'bg-zinc-800')}`}>
-                            <div className={`w-4 h-4 rounded-full absolute top-[3px] transition-transform ${!item.isSoldOut ? 'translate-x-7 bg-white' : 'translate-x-1 bg-white'}`}></div>
+                            <div className={`w-4 h-4 rounded-full absolute top-0.75 transition-transform ${!item.isSoldOut ? 'translate-x-7 bg-white' : 'translate-x-1 bg-white'}`}></div>
                           </div>
                           <span className="ml-2 text-[10px] uppercase tracking-widest text-[#D4AF37] font-black">
                             {!item.isSoldOut ? "Active" : "Inactive"}
@@ -1101,7 +924,7 @@ export default function AdminDashboard() {
                                     onChange={() => handleToggleNow(item.id, { isSoldOut: !item.isSoldOut })}
                                   />
                                   <div className={`w-10 h-5 rounded-full transition-colors border ${tm.sidebarBorder} relative ${!item.isSoldOut ? 'bg-[#D4AF37]' : (isLightMode ? 'bg-gray-200' : 'bg-zinc-800')}`}>
-                                    <div className={`w-3 h-3 rounded-full absolute top-[3px] transition-transform ${!item.isSoldOut ? 'translate-x-[22px] bg-white' : 'translate-x-1 bg-white'}`}></div>
+                                    <div className={`w-3 h-3 rounded-full absolute top-0.75 transition-transform ${!item.isSoldOut ? 'translate-x-5.5 bg-white' : 'translate-x-1 bg-white'}`}></div>
                                   </div>
                                 </label>
                                 <span className="text-[8px] uppercase tracking-widest text-[#D4AF37] mt-1 block font-bold">
@@ -1168,7 +991,7 @@ export default function AdminDashboard() {
                 <div className="space-y-4">
                   {menuData.map(cat => (
                     <div key={cat.id} className={`flex items-center justify-between border ${tm.sidebarBorder} ${tm.sidebarBtnHover} p-4 rounded-lg`}>
-                      <div className="flex-grow">
+                      <div className="grow">
                         <input 
                           type="text" 
                           value={cat.category_en}
@@ -1229,8 +1052,8 @@ export default function AdminDashboard() {
                     <div className="md:col-span-2">
                        <label className={`block text-[10px] uppercase tracking-widest ${tm.textAcc} font-bold mb-2`}>Hotel Logo</label>
                        <div className="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
-                          <div className="w-24 h-24 relative border border-[#D4AF37]/30 rounded-lg overflow-hidden bg-black flex-shrink-0">
-                            <img src={siteContent.logo || "/logo.png"} alt="Current Logo" className="w-full h-full object-cover" />
+                          <div className="w-24 h-24 relative border border-[#D4AF37]/30 rounded-lg overflow-hidden bg-black shrink-0">
+                            <img src={siteContent.logo || "/logo.svg"} alt="Current Logo" className="w-full h-full object-cover" />
                           </div>
                           <div className="flex-1">
                             <input 
@@ -1319,7 +1142,7 @@ export default function AdminDashboard() {
                 {/* Security Settings */}
                 <div className={`${tm.formBg} p-8 rounded-2xl space-y-6`}>
                   <h3 className={`text-xl font-serif text-red-500 uppercase tracking-widest border-b border-red-500/20 pb-3 flex items-center gap-3`}>
-                    <svg className="w-6 h-6 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                    <svg className="w-6 h-6 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                     Security Settings
                   </h3>
                   <form onSubmit={handlePasswordChange} className="space-y-4">
@@ -1591,19 +1414,19 @@ export default function AdminDashboard() {
 
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                   {websiteContent.lookbookItems.map((item) => (
-                    <div key={item.id} className={`${tm.tableBg} rounded-2xl overflow-hidden border ${tm.sidebarBorder} group transition-all hover:shadow-2xl`}>
+                    <div key={item._id} className={`${tm.tableBg} rounded-2xl overflow-hidden border ${tm.sidebarBorder} group transition-all hover:shadow-2xl`}>
                       <div className="relative aspect-square">
                         <img src={item.image} className="w-full h-full object-cover" />
                         <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                          <button onClick={async () => { if(confirm(`Delete "${item.name}"?`)) { await updateLookbookItem('delete', { id: item.id }); triggerSuccess(); }}} className="p-3 bg-red-500 text-white rounded-full hover:scale-110 transition-transform"><Trash2 className="w-5 h-5" /></button>
+                          <button onClick={async () => { if(confirm(`Delete "${item.title}"?`)) { await updateLookbookItem('delete', { id: item._id }); triggerSuccess(); }}} className="p-3 bg-red-500 text-white rounded-full hover:scale-110 transition-transform"><Trash2 className="w-5 h-5" /></button>
                         </div>
                       </div>
                       <div className="p-4">
-                        <h3 className={`text-sm font-bold ${tm.tableText} truncate`}>{item.name}</h3>
+                        <h3 className={`text-sm font-bold ${tm.tableText} truncate`}>{item.title}</h3>
                         <div className="flex items-center justify-between mt-1">
-                          <span className={`text-[10px] font-black text-[#D4AF37]`}>{item.price ? `${item.price} ETB` : "Inquiry only"}</span>
+                          <span className={`text-[10px] font-black text-[#D4AF37]`}>Gallery</span>
                           <span className={`text-[9px] px-2 py-0.5 rounded bg-zinc-800 text-zinc-400 uppercase tracking-widest`}>
-                            {websiteContent.lookbookCategories.find(c => c.id === item.category)?.name || item.category}
+                            Lookbook
                           </span>
                         </div>
                       </div>
@@ -1720,7 +1543,7 @@ export default function AdminDashboard() {
 
       {/* Global Saving Overlay */}
       {isSaving && (
-        <div className={`fixed inset-0 z-[2000] ${tm.modalOverlay} backdrop-blur-sm flex items-center justify-center cursor-wait`}>
+        <div className={`fixed inset-0 z-2000 ${tm.modalOverlay} backdrop-blur-sm flex items-center justify-center cursor-wait`}>
           <div className={`${tm.modalBg} px-10 py-6 rounded-xl flex items-center gap-6 shadow-2xl`}>
             <div className="w-8 h-8 border-4 border-[#D4AF37]/20 border-t-[#D4AF37] rounded-full animate-spin" />
             <p className={`${tm.tableText} font-serif uppercase tracking-[0.3em] text-sm`}>Processing all changes...</p>
@@ -1730,7 +1553,7 @@ export default function AdminDashboard() {
 
       {/* Global Success Toast */}
       {showSuccess && (
-        <div className={`fixed bottom-8 right-8 z-[2000] ${tm.bgSidebar} px-8 py-4 border-l-4 border-[#D4AF37] shadow-2xl rounded-r animate-fade-in-up`}>
+        <div className={`fixed bottom-8 right-8 z-2000 ${tm.bgSidebar} px-8 py-4 border-l-4 border-[#D4AF37] shadow-2xl rounded-r animate-fade-in-up`}>
           <p className={`${tm.textAcc} font-black uppercase tracking-[0.2em] text-xs flex items-center gap-3`}>
             <svg className="w-5 h-5 text-[#D4AF37]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
             All changes synced successfully!
@@ -1740,7 +1563,7 @@ export default function AdminDashboard() {
 
       {/* Mini Status Toast */}
       {showStatusToast && (
-        <div className={`fixed bottom-6 inset-x-0 mx-auto w-max z-[2000] bg-[#D4AF37] text-black px-6 py-2 rounded-full shadow-lg animate-fade-in-up flex items-center gap-2`}>
+        <div className={`fixed bottom-6 inset-x-0 mx-auto w-max z-2000 bg-[#D4AF37] text-black px-6 py-2 rounded-full shadow-lg animate-fade-in-up flex items-center gap-2`}>
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
           <span className="font-black uppercase tracking-widest text-[10px]">Status Updated</span>
         </div>

@@ -24,18 +24,25 @@ export interface MainHero {
   order: number;
 }
 
+export interface MainSiteEvent {
+  _id: string;
+  name: string;
+  date: string;
+  description: string;
+  image: string;
+  createdAt: Date;
+}
+
 export interface LookbookCategory {
   id: string;
   name: string;
 }
 
 export interface LookbookItem {
-  id: number;
-  name: string;
-  price: string;
+  _id: string;
+  title: string;
   image: string;
-  category: string;
-  description: string;
+  createdAt: Date;
 }
 
 export interface Announcement {
@@ -56,6 +63,29 @@ export interface Inquiry {
   createdAt: Date;
 }
 
+export interface MainSiteProduct {
+  _id: string;
+  name: string;
+  category: 'Coffee' | 'Cake';
+  price: number;
+  description: string;
+  image: string;
+  createdAt: Date;
+}
+
+export interface SubCategory {
+  _id: string;
+  name: string;
+  parentSection: 'Coffee' | 'Cake';
+  coverImage: string;
+  createdAt: Date;
+}
+
+export interface SiteSettings {
+  mapLatitude: string;
+  mapLongitude: string;
+}
+
 interface MenuContextType {
   menuData: MenuSection[];
   siteContent: SiteContent;
@@ -63,8 +93,12 @@ interface MenuContextType {
     heroes: MainHero[];
     lookbookCategories: LookbookCategory[];
     lookbookItems: LookbookItem[];
+    events: MainSiteEvent[];
     announcements: Announcement[];
     inquiries: Inquiry[];
+    mainSiteProducts: MainSiteProduct[];
+    subCategories: SubCategory[];
+    siteSettings: SiteSettings;
   };
   updateMenuItem: (itemId: number, updates: Partial<MenuItem>) => Promise<boolean>;
   bulkUpdateItems: (itemIds: number[], updates: Partial<MenuItem>) => Promise<boolean>;
@@ -97,7 +131,7 @@ const initialSiteContent: SiteContent = {
   address: "Mas Coffee Plaza, Addis Ababa, Ethiopia",
   phone: "+251 911 234 567",
   email: "info@mascoffee.com",
-  logo: "/logo.png"
+  logo: "/logo.svg"
 };
 
 export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -108,8 +142,12 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
     heroes: [] as MainHero[],
     lookbookCategories: [] as LookbookCategory[],
     lookbookItems: [] as LookbookItem[],
+    events: [] as MainSiteEvent[],
     announcements: [] as Announcement[],
     inquiries: [] as Inquiry[],
+    mainSiteProducts: [] as MainSiteProduct[],
+    subCategories: [] as SubCategory[],
+    siteSettings: { mapLatitude: "9.0227", mapLongitude: "38.7460" } as SiteSettings,
   });
   const [language, setLanguageState] = useState<'en' | 'am'>('en');
 
@@ -133,24 +171,32 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const refreshData = useCallback(async () => {
     try {
       const timestamp = new Date().getTime();
-      const [menuRes, settingsRes, heroRes, lookCatRes, lookItemRes, annRes, inqRes] = await Promise.all([
+      const [menuRes, settingsRes, heroRes, lookCatRes, lookItemRes, annRes, inqRes, productsRes, eventsRes, webSettingsRes, subCatRes] = await Promise.all([
         fetch(`/api/menu?t=${timestamp}`, { cache: 'no-store' }),
         fetch(`/api/settings?t=${timestamp}`, { cache: 'no-store' }),
         fetch(`/api/website/hero?t=${timestamp}`, { cache: 'no-store' }),
         fetch(`/api/website/lookbook/categories?t=${timestamp}`, { cache: 'no-store' }),
         fetch(`/api/website/lookbook/items?t=${timestamp}`, { cache: 'no-store' }),
         fetch(`/api/website/announcements?t=${timestamp}`, { cache: 'no-store' }),
-        fetch(`/api/website/inquiries?t=${timestamp}`, { cache: 'no-store' })
+        fetch(`/api/website/inquiries?t=${timestamp}`, { cache: 'no-store' }),
+        fetch(`/api/website/products?t=${timestamp}`, { cache: 'no-store' }),
+        fetch(`/api/website/events?t=${timestamp}`, { cache: 'no-store' }),
+        fetch(`/api/website/settings?t=${timestamp}`, { cache: 'no-store' }),
+        fetch(`/api/website/subcategories?t=${timestamp}`, { cache: 'no-store' })
       ]);
 
-      const [menuData, settingsData, heroData, lookCatData, lookItemData, annData, inqData] = await Promise.all([
+      const [menuData, settingsData, heroData, lookCatData, lookItemData, annData, inqData, productsData, eventsData, webSettingsData, subCatData] = await Promise.all([
         menuRes.json(),
         settingsRes.json(),
         heroRes.json(),
         lookCatRes.json(),
         lookItemRes.json(),
         annRes.json(),
-        inqRes.json()
+        inqRes.json(),
+        productsRes.json(),
+        eventsRes.json(),
+        webSettingsRes.json(),
+        subCatRes.json()
       ]);
 
       if (Array.isArray(menuData)) setMenuData(menuData);
@@ -160,8 +206,12 @@ export const MenuProvider: React.FC<{ children: React.ReactNode }> = ({ children
         heroes: Array.isArray(heroData) ? heroData : [],
         lookbookCategories: Array.isArray(lookCatData) ? lookCatData : [],
         lookbookItems: Array.isArray(lookItemData) ? lookItemData : [],
+        events: Array.isArray(eventsData) ? eventsData : [],
         announcements: Array.isArray(annData) ? annData : [],
         inquiries: Array.isArray(inqData) ? inqData : [],
+        mainSiteProducts: Array.isArray(productsData) ? productsData : [],
+        subCategories: Array.isArray(subCatData) ? subCatData : [],
+        siteSettings: webSettingsData && !webSettingsData.error ? webSettingsData : { mapLatitude: "9.0227", mapLongitude: "38.7460" },
       });
     } catch (err) {
       console.error("Failed to refresh data", err);

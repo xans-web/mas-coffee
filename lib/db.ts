@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 
+/** Atlas URI with credentials — set `MONGODB_URI` in `.env.local` (e.g. mongodb+srv://user:password@...). */
 const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {

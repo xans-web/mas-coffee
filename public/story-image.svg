@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" fill="none" aria-hidden="true">
+  <defs>
+    <linearGradient id="storyBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B2421"/>
+      <stop offset="100%" stop-color="#143d35"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="1000" fill="url(#storyBg)"/>
+  <ellipse cx="400" cy="380" rx="220" ry="200" fill="#C5A367" fill-opacity="0.12"/>
+  <path d="M280 520c0-80 50-140 120-140s120 60 120 140v180H280V520z" stroke="#C5A367" stroke-width="4" fill="none" stroke-linejoin="round"/>
+  <path d="M340 460h120v60H340v-60zm20-100h80v40h-80v-40z" fill="#C5A367" fill-opacity="0.35"/>
+  <text x="400" y="880" text-anchor="middle" fill="#C5A367" fill-opacity="0.45" font-family="Georgia, serif" font-size="28" letter-spacing="0.2em">OUR STORY</text>
+</svg>

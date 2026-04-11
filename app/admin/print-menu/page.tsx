@@ -124,7 +124,7 @@ export default function PrintMenuPage() {
           {/* ── HOTEL NAME BAR ── */}
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-1.5">
-              <img src={settings?.logo || "/logo.png"} alt="Logo" className="w-7 h-7 object-contain grayscale" />
+              <img src={settings?.logo || "/logo.svg"} alt="Logo" className="w-7 h-7 object-contain grayscale" />
               <h1 className="text-[11pt] font-black tracking-tighter text-black uppercase leading-none">
                 {settings?.hotelName || "ABAY HOTEL"}
               </h1>
@@ -208,7 +208,7 @@ export default function PrintMenuPage() {
           {/* Page 2 Header */}
           <div className="flex items-center justify-between mb-3 pb-2 border-b-2 border-black">
             <div className="flex items-center gap-2">
-              <img src={settings?.logo || "/logo.png"} alt="Logo" className="w-7 h-7 object-contain grayscale" />
+              <img src={settings?.logo || "/logo.svg"} alt="Logo" className="w-7 h-7 object-contain grayscale" />
               <h2 className="text-[11pt] font-black tracking-tighter text-black uppercase leading-none">
                 {settings?.hotelName || "ABAY HOTEL"}
               </h2>

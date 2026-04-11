@@ -8,10 +8,13 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState, useMemo, useEffect, useRef } from "react";
 import { useMenu } from "@/context/MenuContext";
-import { Sun, Moon, MapPin, Clock, Phone, ChefHat, Info, Search, SlidersHorizontal, Menu, X, Globe } from "lucide-react";
+import { MainHero } from "@/context/MenuContext";
+import { Sun, Moon, MapPin, Clock, Phone, ChefHat, Info, Search, SlidersHorizontal, Menu, X, Globe, Package, Calendar, ChevronLeft } from "lucide-react";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay } from "swiper/modules";
+import { Autoplay, EffectFade } from "swiper/modules";
+import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 import "swiper/css";
+import "swiper/css/effect-fade";
 
 const translations = {
   en: {
@@ -19,10 +22,15 @@ const translations = {
     subtitle: "Where Every Sip Tells a Story",
     search: "Search...",
     specials: "Chef's Recommendations",
-    menu: "MENU",
+    menu: "Cafe Menu",
     home: "Home",
-    ourStory: "Our Story",
-    contact: "Contact",
+    aboutUs: "About Us",
+    gallery: "Gallery",
+    events: "Events",
+    contactUs: "Contact Us",
+    products: "Products (Coffee/Cake)",
+    coffee: "Coffee",
+    cake: "Cake",
     checkout: "Checkout",
     cancel: "Cancel",
     total: "Total",
@@ -59,10 +67,15 @@ const translations = {
     subtitle: "እያንዳንዱ ጠብታ ታሪክ አለው",
     search: "ፈልግ...",
     specials: "የሼፍ ምርጫዎች",
-    menu: "ሜኑ",
+    menu: "ካፌ ሜኑ",
     home: "መነሻ",
-    ourStory: "ታሪካችን",
-    contact: "አድራሻ",
+    aboutUs: "ስለ እኛ",
+    gallery: "ጋለሪ",
+    events: "ክስተቶች",
+    contactUs: "አድራሻ",
+    products: "ምርቶች (ቡና/ኬክ)",
+    coffee: "ቡና",
+    cake: "ኬክ",
     checkout: "ክፈል",
     cancel: "አጥፋ",
     total: "ጠቅላላ",
@@ -109,6 +122,9 @@ const CategoryIcon = ({ name, className = "w-4 h-4" }: { name: string, className
   }
 };
 
+const PUBLIC_LOGO = "/logo.svg";
+const PUBLIC_STORY_IMAGE = "/story-image.svg";
+
 const SafeImage = ({ src, alt, fill, ...props }: any) => {
   const [imgSrc, setImgSrc] = useState<string | null>(null);
 
@@ -116,7 +132,7 @@ const SafeImage = ({ src, alt, fill, ...props }: any) => {
     setImgSrc(src);
   }, [src]);
 
-  if (!imgSrc) return <div className="w-full h-full bg-[#F3E5AB]/5 animate-pulse" />;
+  if (!imgSrc) return <div className="w-full h-full bg-[#C5A367]/5 animate-pulse" />;
 
   return (
     <img 
@@ -129,6 +145,10 @@ const SafeImage = ({ src, alt, fill, ...props }: any) => {
 
 export default function Home() {
   const router = useRouter();
+  const { scrollY } = useScroll();
+  const heroScale = useTransform(scrollY, [0, 500], [1, 0.95]);
+  const heroOpacity = useTransform(scrollY, [0, 500], [1, 0]);
+  
   const { menuData, siteContent, websiteContent, refreshData, language: lang, setLanguage: setLang } = useMenu();
   const [isLightMode, setIsLightMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -136,13 +156,49 @@ export default function Home() {
   const [showPriceFilter, setShowPriceFilter] = useState(false);
   const [showSearchInput, setShowSearchInput] = useState(false);
   const [expandedDesc, setExpandedDesc] = useState<number | null>(null);
-  const [activeSection, setActiveSection] = useState<"home" | "menu" | "story" | "specials" | "contact">("home");
+  const [activeSection, setActiveSection] = useState<"home" | "menu" | "about" | "gallery" | "events" | "contact" | "products">("home");
+  const [activeProductCategory, setActiveProductCategory] = useState<"coffee" | "cake" | null>(null);
+  const [activeSubCategory, setActiveSubCategory] = useState<string | null>(null);
+  const [selectedProductView, setSelectedProductView] = useState<any | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isProductsDropdownOpen, setIsProductsDropdownOpen] = useState(false);
+
+  const [directHeroes, setDirectHeroes] = useState<MainHero[]>([]);
 
   // Website Manager Frontend States
   const [currentHeroIndex, setCurrentHeroIndex] = useState(0);
   const [activeLookbookCategory, setActiveLookbookCategory] = useState("All");
   const [lookbookSearch, setLookbookSearch] = useState("");
+  
+  // Contact Form State
+  const [contactForm, setContactForm] = useState({ name: "", email: "", phone: "", subject: "", message: "" });
+  const [isSubmittingInquiry, setIsSubmittingInquiry] = useState(false);
+
+  const handleInquirySubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmittingInquiry) return;
+    
+    setIsSubmittingInquiry(true);
+    try {
+      const res = await fetch('/api/website/submit-inquiry', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(contactForm)
+      });
+      
+      if (res.ok) {
+        alert("Thank you! Your message has been received.");
+        setContactForm({ name: "", email: "", phone: "", subject: "", message: "" });
+      } else {
+        alert("Failed to send message. Please try again.");
+      }
+    } catch (err) {
+      console.error("Inquiry Submit Error:", err);
+      alert("Something went wrong. Please try again later.");
+    } finally {
+      setIsSubmittingInquiry(false);
+    }
+  };
   
   const [flyingItems, setFlyingItems] = useState<{ id: string, image: string, startX: number, startY: number, endX: number, endY: number, active: boolean }[]>([]);
   const [cartPulse, setCartPulse] = useState(false);
@@ -158,6 +214,17 @@ export default function Home() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'pageView' })
     }).catch(console.error);
+  }, []);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const raw = window.location.hash.replace(/^#/, "").toLowerCase();
+    const allowed: Array<"home" | "menu" | "about" | "gallery" | "events" | "contact" | "products"> = [
+      "home", "menu", "products", "about", "gallery", "events", "contact",
+    ];
+    if (raw && allowed.includes(raw as (typeof allowed)[number])) {
+      setActiveSection(raw as typeof activeSection);
+    }
   }, []);
 
   useEffect(() => {
@@ -191,14 +258,27 @@ export default function Home() {
     }
   }, [activeSection, websiteContent.heroes.length]);
 
+  useEffect(() => {
+    const fetchHeroes = async () => {
+      try {
+        const res = await fetch('/api/website/hero');
+        if (res.ok) {
+          const data = await res.json();
+          setDirectHeroes(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch heroes', error);
+      }
+    };
+    fetchHeroes();
+  }, []);
+
   const filteredLookbookItems = useMemo(() => {
     return websiteContent.lookbookItems.filter(item => {
-      const matchesCategory = activeLookbookCategory === "All" || item.category === activeLookbookCategory;
-      const matchesSearch = item.name.toLowerCase().includes(lookbookSearch.toLowerCase()) || 
-                           item.description.toLowerCase().includes(lookbookSearch.toLowerCase());
-      return matchesCategory && matchesSearch;
+      const matchesSearch = (item.title || "").toLowerCase().includes(lookbookSearch.toLowerCase());
+      return matchesSearch;
     });
-  }, [websiteContent.lookbookItems, activeLookbookCategory, lookbookSearch]);
+  }, [websiteContent.lookbookItems, lookbookSearch]);
 
   const [activeCategory, setActiveCategory] = useState("All");
   const [cart, setCart] = useState<{ [key: number]: number }>({});
@@ -246,29 +326,29 @@ export default function Home() {
   // Loading State
   const isWebsiteLoading = websiteContent.heroes.length === 0 && websiteContent.lookbookItems.length === 0;
 
-  // Theme variables - Midnight Forest Luxury Theme
+  // Theme variables - Updated Brand Theme
   const tm = {
-    bgApp: isLightMode ? "bg-[#FDF8F0]" : "bg-[#08120F]",
-    textApp: isLightMode ? "text-[#08120F]" : "text-[#F3E5AB]",
-    bgHeader: isLightMode ? "bg-[#FDF8F0]/95" : "bg-[#08120F]/95",
-    borderMain: isLightMode ? "border-[#08120F]/10" : "border-[#F3E5AB]/10",
-    textAcc: "text-[#F3E5AB]",
-    textMuted: isLightMode ? "text-[#08120F]/60" : "text-[#F3E5AB]/60",
-    searchBg: isLightMode ? "bg-[#FDF8F0]/80" : "bg-[#08120F]/80",
-    searchIcon: isLightMode ? "text-[#08120F]" : "text-[#F3E5AB]",
-    switchBtn: isLightMode ? "bg-[#FDF8F0] border-[#08120F]/10 text-[#08120F]" : "bg-[#08120F] border-[#F3E5AB]/10 text-[#F3E5AB]",
-    catBgActive: "bg-[#F3E5AB] text-[#08120F] shadow-[0_0_20px_rgba(243,229,171,0.4)] scale-105 border-[#F3E5AB]",
-    catBgInactive: isLightMode ? "bg-[#FDF8F0]/80 text-[#08120F]/70 border-[#08120F]/10 hover:border-[#08120F]/40 hover:scale-105" : "bg-[#08120F]/80 text-[#F3E5AB]/70 border-[#F3E5AB]/10 hover:border-[#F3E5AB]/40 hover:scale-105",
-    cardBg: isLightMode ? "bg-[#FDF8F0]/80 backdrop-blur-md border-[#08120F]/10 shadow-xl" : "bg-[#08120F]/80 backdrop-blur-md border-[#F3E5AB]/10 shadow-xl",
-    modalOverlay: "bg-[#08120F]/60 backdrop-blur-sm",
-    modalBg: isLightMode ? "bg-[#FDF8F0] backdrop-blur-xl border border-[#08120F]/10" : "bg-[#08120F] backdrop-blur-xl border border-[#F3E5AB]/10",
+    bgApp: isLightMode ? "bg-[#F5EFE0]" : "bg-[#0B2421]",
+    textApp: isLightMode ? "text-[#0B2421]" : "text-[#F5EFE0]",
+    bgHeader: isLightMode ? "bg-[#F5EFE0]/95" : "bg-[#0B2421]/95",
+    borderMain: isLightMode ? "border-[#0B2421]/10" : "border-[#C5A367]/10",
+    textAcc: "text-[#C5A367]",
+    textMuted: isLightMode ? "text-[#0B2421]/60" : "text-[#F5EFE0]/60",
+    searchBg: isLightMode ? "bg-[#F5EFE0]/80" : "bg-[#0B2421]/80",
+    searchIcon: isLightMode ? "text-[#0B2421]" : "text-[#C5A367]",
+    switchBtn: isLightMode ? "bg-[#F5EFE0] border-[#0B2421]/10 text-[#0B2421]" : "bg-[#0B2421] border-[#C5A367]/10 text-[#F5EFE0]",
+    catBgActive: "bg-[#C5A367] text-[#0B2421] shadow-[0_0_20px_rgba(197,163,103,0.4)] scale-105 border-[#C5A367]",
+    catBgInactive: isLightMode ? "bg-[#F5EFE0]/80 text-[#0B2421]/70 border-[#0B2421]/10 hover:border-[#0B2421]/40 hover:scale-105" : "bg-[#0B2421]/80 text-[#F5EFE0]/70 border-[#C5A367]/10 hover:border-[#C5A367]/40 hover:scale-105",
+    cardBg: isLightMode ? "bg-[#F5EFE0]/80 backdrop-blur-md border-[#0B2421]/10 shadow-xl" : "bg-[#0B2421]/80 backdrop-blur-md border-[#C5A367]/10 shadow-xl",
+    modalOverlay: "bg-[#0B2421]/60 backdrop-blur-sm",
+    modalBg: isLightMode ? "bg-[#F5EFE0] backdrop-blur-xl border border-[#0B2421]/10" : "bg-[#0B2421] backdrop-blur-xl border border-[#C5A367]/10",
     // Food card specifics
-    cardFrameBg: isLightMode ? "bg-[#FDF8F0]/85 backdrop-blur-md" : "bg-[#08120F]/85 backdrop-blur-md",
-    cardFrameBorder: isLightMode ? "border-[#08120F]/10" : "border-[#F3E5AB]/10",
-    cardTitleColor: isLightMode ? "text-[#08120F]" : "text-[#F3E5AB]",
-    cardDescColor: isLightMode ? "text-[#08120F]/70" : "text-[#F3E5AB]/70",
-    cardPriceColor: isLightMode ? "text-[#08120F]" : "text-[#F3E5AB]",
-    cardDivider: isLightMode ? "border-[#08120F]/10" : "border-[#F3E5AB]/10"
+    cardFrameBg: isLightMode ? "bg-[#F5EFE0]/85 backdrop-blur-md" : "bg-[#0B2421]/85 backdrop-blur-md",
+    cardFrameBorder: isLightMode ? "border-[#0B2421]/10" : "border-[#C5A367]/10",
+    cardTitleColor: isLightMode ? "text-[#0B2421]" : "text-[#C5A367]",
+    cardDescColor: isLightMode ? "text-[#0B2421]/70" : "text-[#F5EFE0]/70",
+    cardPriceColor: isLightMode ? "text-[#0B2421]" : "text-[#C5A367]",
+    cardDivider: isLightMode ? "border-[#0B2421]/10" : "border-[#C5A367]/10"
   };
 
   const addToCart = (id: number, e?: React.MouseEvent) => {
@@ -340,42 +420,50 @@ export default function Home() {
   }, [searchQuery, priceLimit, activeCategory, lang, menuData]);
 
   return (
-    <div className={`min-h-screen ${tm.bgApp} ${tm.textApp} transition-colors duration-500 font-sans selection:bg-[#F3E5AB] selection:text-[#08120F] overflow-x-hidden touch-pan-y`}>
+    <div className={`min-h-screen ${tm.bgApp} ${tm.textApp} transition-colors duration-500 font-sans selection:bg-[#C5A367] selection:text-[#0B2421] overflow-x-hidden touch-pan-y`}>
       <div className={`fixed inset-0 ${tm.bgApp} tilet-pattern -z-20 transition-colors duration-500 opacity-20`} />
       
       {/* Global Header - Strictly Fixed */}
-      <header className={`fixed top-0 left-0 right-0 z-[1000] ${activeSection === 'home' ? 'bg-transparent border-none' : `${tm.bgHeader} backdrop-blur-xl border-b ${tm.borderMain}`} px-4 md:px-12 w-full h-[56px] md:h-[70px] flex items-center transition-all duration-500`}>
+      <header className={`fixed top-0 left-0 right-0 z-1000 ${activeSection === 'home' ? 'bg-transparent border-none' : `${tm.bgHeader} backdrop-blur-xl border-b ${tm.borderMain}`} px-4 md:px-12 w-full h-14 md:h-17.5 flex items-center transition-all duration-500`}>
         <div className="max-w-7xl mx-auto flex items-center justify-between w-full relative">
           
           {/* Mobile Header Row (Visible only on mobile/tablet < 768px) */}
           <div className="flex lg:hidden items-center justify-between w-full h-full gap-2">
             {/* Left: Logo & Company Name (Hidden on Home Page) */}
-            <div className={`flex items-center gap-1.5 flex-shrink-0 cursor-pointer ${activeSection === 'home' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} onClick={handleLogoClick}>
-              <div className="w-7 h-7 relative rounded-lg overflow-hidden border border-[#F3E5AB]/20">
-                <img src={siteContent.logo || "/logo.png"} alt="Logo" className="w-full h-full object-cover" />
+            <div className={`flex items-center gap-1.5 shrink-0 cursor-pointer ${activeSection === 'home' ? 'opacity-0 pointer-events-none' : 'opacity-100'}`} onClick={handleLogoClick}>
+              <div className="w-7 h-7 relative rounded-lg overflow-hidden border border-[#C5A367]/20">
+                <img
+                  src={siteContent.logo || PUBLIC_LOGO}
+                  alt="Logo"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const el = e.currentTarget;
+                    if (!el.src.endsWith(PUBLIC_LOGO)) el.src = PUBLIC_LOGO;
+                  }}
+                />
               </div>
-              <h1 className="text-[10px] font-serif font-black tracking-tighter uppercase text-[#F3E5AB] whitespace-nowrap">Mas Coffee</h1>
+              <h1 className="text-[10px] font-serif font-black tracking-tighter uppercase text-[#C5A367] whitespace-nowrap">Mas Coffee</h1>
             </div>
 
             {/* Icons Group: Search, Filter, Lang, Hamburger */}
-            <div className="flex items-center gap-1 flex-grow justify-end">
+            <div className="flex items-center gap-1 grow justify-end">
               {/* Other Icons (Hidden on Home Page) */}
               <div className={`flex items-center gap-1 ${activeSection === 'home' ? 'hidden' : 'flex'}`}>
                 <button 
                   onClick={() => setShowSearchInput(!showSearchInput)}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-95 ${showSearchInput ? 'bg-[#F3E5AB] text-[#08120F]' : 'text-[#F3E5AB]'}`}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-95 ${showSearchInput ? 'bg-[#C5A367] text-[#0B2421]' : 'text-[#C5A367]'}`}
                 >
                   <Search className="w-3.5 h-3.5" />
                 </button>
                 <button 
                   onClick={() => setShowPriceFilter(!showPriceFilter)}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-[#F3E5AB] transition-all active:scale-95 ${showPriceFilter ? 'bg-[#F3E5AB] text-[#08120F]' : ''}`}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-[#C5A367] transition-all active:scale-95 ${showPriceFilter ? 'bg-[#C5A367] text-[#0B2421]' : ''}`}
                 >
                   <SlidersHorizontal className="w-3.5 h-3.5" />
                 </button>
                 <button 
                   onClick={() => setLang(lang === 'en' ? 'am' : 'en')}
-                  className={`w-8 h-8 rounded-full border border-[#F3E5AB]/10 flex items-center justify-center text-[9px] font-bold text-[#F3E5AB] transition-all active:scale-95`}
+                  className={`w-8 h-8 rounded-full border border-[#C5A367]/10 flex items-center justify-center text-[9px] font-bold text-[#C5A367] transition-all active:scale-95`}
                 >
                   {lang === 'en' ? 'አማ' : 'EN'}
                 </button>
@@ -384,7 +472,7 @@ export default function Home() {
               {/* Hamburger Menu Icon (Always Visible) */}
               <button 
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-[#F3E5AB] transition-all active:scale-95 ${isMobileMenuOpen ? 'bg-[#F3E5AB] text-[#08120F]' : ''}`}
+                className={`w-8 h-8 rounded-full flex items-center justify-center text-[#C5A367] transition-all active:scale-95 ${isMobileMenuOpen ? 'bg-[#C5A367] text-[#0B2421]' : ''}`}
               >
                 {isMobileMenuOpen ? <X className="w-4 h-4" /> : <Menu className="w-4 h-4" />}
               </button>
@@ -395,12 +483,20 @@ export default function Home() {
           <div className="hidden lg:flex items-center justify-between w-full">
             {/* Logo */}
             <div className="flex items-center gap-3 md:gap-6 cursor-pointer group" onClick={handleLogoClick}>
-              <div className="w-10 h-10 md:w-14 md:h-14 relative rounded-xl overflow-hidden border border-[#F3E5AB]/30 shadow-2xl transition-transform group-hover:scale-105">
-                <img src={siteContent.logo || "/logo.png"} alt="Logo" className="w-full h-full object-cover" />
+              <div className="w-10 h-10 md:w-14 md:h-14 relative rounded-xl overflow-hidden border border-[#C5A367]/30 shadow-2xl transition-transform group-hover:scale-105">
+                <img
+                  src={siteContent.logo || PUBLIC_LOGO}
+                  alt="Logo"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const el = e.currentTarget;
+                    if (!el.src.endsWith(PUBLIC_LOGO)) el.src = PUBLIC_LOGO;
+                  }}
+                />
               </div>
               <div className="hidden sm:flex flex-col">
-                <h1 className="text-xl md:text-2xl font-serif font-black tracking-tighter uppercase text-[#F3E5AB]">Mas Coffee</h1>
-                <p className={`text-[10px] uppercase tracking-[0.3em] font-medium opacity-60`}>Midnight Forest Experience</p>
+                <h1 className="text-xl md:text-2xl font-serif font-black tracking-tighter uppercase text-[#C5A367]">Mas Coffee</h1>
+                <p className={`text-[10px] uppercase tracking-[0.3em] font-medium opacity-60`}>Premium Coffee Experience</p>
               </div>
             </div>
 
@@ -409,22 +505,59 @@ export default function Home() {
               {[
                 { id: 'home', label: t.home },
                 { id: 'menu', label: t.menu },
-                { id: 'specials', label: t.specials },
-                { id: 'story', label: t.ourStory },
-                { id: 'contact', label: t.contact }
+                { id: 'products', label: t.products, dropdown: [
+                  { id: 'coffee', label: t.coffee },
+                  { id: 'cake', label: t.cake }
+                ]},
+                { id: 'about', label: t.aboutUs },
+                { id: 'gallery', label: t.gallery },
+                { id: 'events', label: t.events },
+                { id: 'contact', label: t.contactUs }
               ].map((link) => (
-                <button
-                  key={link.id}
-                  onClick={() => setActiveSection(link.id as any)}
-                  className={`text-xs font-black uppercase tracking-[0.2em] transition-all relative py-2 ${
-                    activeSection === link.id ? 'text-[#F3E5AB]' : 'opacity-40 hover:opacity-100'
-                  }`}
-                >
-                  {link.label}
-                  {activeSection === link.id && (
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#F3E5AB] rounded-full animate-scale-x" />
+                <div key={link.id} className="relative group">
+                  <button
+                    onClick={() => {
+                      if (!link.dropdown) {
+                        setActiveSection(link.id as any);
+                        setActiveProductCategory(null);
+                        if (typeof window !== "undefined") {
+                          window.history.replaceState(null, "", `#${link.id}`);
+                        }
+                      }
+                    }}
+                    className={`text-xs font-serif font-black uppercase tracking-[0.2em] transition-all relative py-2 ${
+                      activeSection === link.id ? 'text-[#C5A367]' : 'text-[#F5EFE0]/70 hover:text-[#C5A367]'
+                    }`}
+                  >
+                    {link.label}
+                    {activeSection === link.id && (
+                      <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#C5A367] rounded-full animate-scale-x" />
+                    )}
+                  </button>
+                  
+                  {link.dropdown && (
+                    <div className="absolute top-full left-0 mt-2 w-48 bg-[#0B2421] border border-[#C5A367]/20 rounded-xl py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all shadow-2xl z-1100">
+                      {link.dropdown.map(sub => (
+                        <button
+                          key={sub.id}
+                          onClick={() => {
+                            setActiveSection('products');
+                            setActiveProductCategory(sub.id as any);
+                            setActiveSubCategory(null);
+                            if (typeof window !== "undefined") {
+                              window.history.replaceState(null, "", `#products`);
+                            }
+                          }}
+                          className={`w-full text-left px-6 py-3 text-[10px] font-black uppercase tracking-widest hover:bg-[#C5A367]/10 transition-colors ${
+                            activeSection === 'products' && activeProductCategory === sub.id ? 'text-[#C5A367]' : 'text-[#F5EFE0]/60'
+                          }`}
+                        >
+                          {sub.label}
+                        </button>
+                      ))}
+                    </div>
                   )}
-                </button>
+                </div>
               ))}
             </nav>
 
@@ -432,13 +565,13 @@ export default function Home() {
             <div className="flex items-center gap-2 md:gap-4">
               <button 
                 onClick={() => setLang(lang === 'en' ? 'am' : 'en')}
-                className={`w-9 h-9 md:w-11 md:h-11 rounded-full border ${tm.borderMain} flex items-center justify-center text-[10px] md:text-xs font-bold transition-all hover:bg-[#F3E5AB] hover:text-[#08120F] active:scale-95 ${tm.switchBtn}`}
+                className={`w-9 h-9 md:w-11 md:h-11 rounded-full border ${tm.borderMain} flex items-center justify-center text-[10px] md:text-xs font-bold transition-all hover:bg-[#C5A367] hover:text-[#0B2421] active:scale-95 ${tm.switchBtn}`}
               >
                 {lang === 'en' ? 'አማ' : 'EN'}
               </button>
               <button 
                 onClick={() => setIsLightMode(!isLightMode)}
-                className={`w-9 h-9 md:w-11 md:h-11 rounded-full border ${tm.borderMain} flex items-center justify-center transition-all hover:bg-[#F3E5AB] hover:text-[#08120F] active:scale-95 ${tm.switchBtn}`}
+                className={`w-9 h-9 md:w-11 md:h-11 rounded-full border ${tm.borderMain} flex items-center justify-center transition-all hover:bg-[#C5A367] hover:text-[#0B2421] active:scale-95 ${tm.switchBtn}`}
               >
                 {isLightMode ? <Moon className="w-4 h-4 md:w-5 md:h-5" /> : <Sun className="w-4 h-4 md:w-5 md:h-5" />}
               </button>
@@ -448,7 +581,7 @@ export default function Home() {
 
         {/* Mobile Search Input Overlay */}
         {showSearchInput && (
-          <div className="lg:hidden absolute top-[56px] left-0 w-full p-3 bg-[#08120F] border-b border-[#F3E5AB]/10 animate-fade-in z-[900]">
+          <div className="lg:hidden absolute top-14 left-0 w-full p-3 bg-[#0B2421] border-b border-[#C5A367]/10 animate-fade-in z-900">
             <div className="relative">
               <input 
                 autoFocus
@@ -456,11 +589,11 @@ export default function Home() {
                 placeholder={t.search} 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className={`w-full ${tm.searchBg} border border-[#F3E5AB]/30 rounded-full py-2 px-10 focus:outline-none focus:border-[#F3E5AB] transition-all text-xs text-[#F3E5AB]`}
+                className={`w-full ${tm.searchBg} border border-[#C5A367]/30 rounded-full py-2 px-10 focus:outline-none focus:border-[#C5A367] transition-all text-xs text-[#F5EFE0]`}
               />
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#F3E5AB]/50" />
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[#C5A367]/50" />
               <button onClick={() => { setSearchQuery(""); setShowSearchInput(false); }} className="absolute right-4 top-1/2 -translate-y-1/2">
-                <X className="w-3.5 h-3.5 text-[#F3E5AB]/50" />
+                <X className="w-3.5 h-3.5 text-[#C5A367]/50" />
               </button>
             </div>
           </div>
@@ -468,10 +601,10 @@ export default function Home() {
 
         {/* Mobile Price Filter Overlay */}
         {showPriceFilter && (
-          <div className="lg:hidden absolute top-[56px] left-0 w-full p-4 bg-[#08120F] border-b border-[#F3E5AB]/10 animate-fade-in z-[900]">
+          <div className="lg:hidden absolute top-14 left-0 w-full p-4 bg-[#0B2421] border-b border-[#C5A367]/10 animate-fade-in z-900">
             <div className="flex items-center justify-between mb-3">
               <span className="text-[9px] font-black uppercase tracking-widest opacity-40">Price Limit</span>
-              <span className="font-serif font-black text-[#F3E5AB] text-sm">{priceLimit} ETB</span>
+              <span className="font-serif font-black text-[#C5A367] text-sm">{priceLimit} ETB</span>
             </div>
             <input 
               type="range" 
@@ -479,7 +612,7 @@ export default function Home() {
               max={maxPrice} 
               value={priceLimit}
               onChange={(e) => setPriceLimit(Number(e.target.value))}
-              className="w-full h-1 bg-[#F3E5AB]/10 rounded-full appearance-none accent-[#F3E5AB]"
+              className="w-full h-1 bg-[#C5A367]/10 rounded-full appearance-none accent-[#C5A367]"
             />
           </div>
         )}
@@ -487,21 +620,29 @@ export default function Home() {
 
       {/* Mobile Hamburger Menu Overlay (Right Slide-In) */}
       <div 
-        className={`fixed inset-0 z-[1500] lg:hidden transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        className={`fixed inset-0 z-1500 lg:hidden transition-opacity duration-300 ${isMobileMenuOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
       >
-        <div className="absolute inset-0 bg-[#08120F]/60 backdrop-blur-md" onClick={() => setIsMobileMenuOpen(false)} />
+        <div className="absolute inset-0 bg-[#0B2421]/60 backdrop-blur-md" onClick={() => setIsMobileMenuOpen(false)} />
         <div 
-          className={`absolute top-0 right-0 h-full w-[80%] max-w-sm ${tm.modalBg} shadow-2xl transition-transform duration-300 ease-in-out flex flex-col p-6 md:p-12 ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
+          className={`absolute top-0 right-0 h-full w-[80%] max-w-sm bg-[#0B2421] shadow-2xl transition-transform duration-300 ease-in-out flex flex-col p-6 md:p-12 ${isMobileMenuOpen ? 'translate-x-0' : 'translate-x-full'}`}
           style={{ willChange: 'transform' }}
         >
           <div className="flex justify-between items-center mb-8">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 relative rounded-xl overflow-hidden border border-[#F3E5AB]/20">
-                <img src={siteContent.logo || "/logo.png"} alt="Logo" className="w-full h-full object-cover" />
+              <div className="w-8 h-8 relative rounded-xl overflow-hidden border border-[#C5A367]/20">
+                <img
+                  src={siteContent.logo || PUBLIC_LOGO}
+                  alt="Logo"
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    const el = e.currentTarget;
+                    if (!el.src.endsWith(PUBLIC_LOGO)) el.src = PUBLIC_LOGO;
+                  }}
+                />
               </div>
-              <h2 className={`text-lg font-serif font-black ${tm.textApp}`}>Mas Coffee</h2>
+              <h2 className={`text-lg font-serif font-black text-[#C5A367]`}>Mas Coffee</h2>
             </div>
-            <button onClick={() => setIsMobileMenuOpen(false)} className={`w-8 h-8 rounded-full border ${tm.borderMain} flex items-center justify-center ${tm.textApp}`}>
+            <button onClick={() => setIsMobileMenuOpen(false)} className={`w-8 h-8 rounded-full border border-[#C5A367]/20 flex items-center justify-center text-[#C5A367]`}>
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -510,33 +651,79 @@ export default function Home() {
             {[
               { id: 'home', label: t.home },
               { id: 'menu', label: t.menu },
-              { id: 'specials', label: t.specials },
-              { id: 'story', label: t.ourStory },
-              { id: 'contact', label: t.contact }
+              { id: 'products', label: t.products, dropdown: [
+                { id: 'coffee', label: t.coffee },
+                { id: 'cake', label: t.cake }
+              ]},
+              { id: 'about', label: t.aboutUs },
+              { id: 'gallery', label: t.gallery },
+              { id: 'events', label: t.events },
+              { id: 'contact', label: t.contactUs }
             ].map((link) => (
-              <button
-                key={link.id}
-                onClick={() => { setActiveSection(link.id as any); setIsMobileMenuOpen(false); }}
-                className={`text-lg font-serif font-black uppercase tracking-widest text-left transition-all py-1.5 border-b ${tm.borderMain} ${
-                  activeSection === link.id ? 'text-[#F3E5AB]' : tm.textMuted
-                }`}
-              >
-                {link.label}
-              </button>
+              <div key={link.id} className="flex flex-col">
+                <button
+                  onClick={() => {
+                    if (!link.dropdown) {
+                      setActiveSection(link.id as any);
+                      setActiveProductCategory(null);
+                      setIsMobileMenuOpen(false);
+                      if (typeof window !== "undefined") {
+                        window.history.replaceState(null, "", `#${link.id}`);
+                      }
+                    } else {
+                      setIsProductsDropdownOpen(!isProductsDropdownOpen);
+                    }
+                  }}
+                  className={`text-lg font-serif font-black uppercase tracking-widest text-left transition-all py-1.5 border-b ${tm.borderMain} ${
+                    activeSection === link.id ? 'text-[#C5A367]' : 'text-[#F5EFE0]/85 hover:text-[#C5A367]'
+                  } flex justify-between items-center`}
+                >
+                  {link.label}
+                  {link.dropdown && (
+                    <span className={`transition-transform duration-300 ${isProductsDropdownOpen ? 'rotate-180' : ''}`}>
+                      ▼
+                    </span>
+                  )}
+                </button>
+                
+                {link.dropdown && isProductsDropdownOpen && (
+                  <div className="flex flex-col pl-6 mt-2 gap-2 animate-fade-in">
+                    {link.dropdown.map(sub => (
+                      <button
+                        key={sub.id}
+                        onClick={() => {
+                          setActiveSection('products');
+                          setActiveProductCategory(sub.id as any);
+                          setActiveSubCategory(null);
+                          setIsMobileMenuOpen(false);
+                          if (typeof window !== "undefined") {
+                            window.history.replaceState(null, "", `#products`);
+                          }
+                        }}
+                        className={`text-left py-2 text-sm font-serif font-black uppercase tracking-widest ${
+                          activeSection === 'products' && activeProductCategory === sub.id ? 'text-[#C5A367]' : 'opacity-60'
+                        }`}
+                      >
+                        {sub.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </nav>
 
-          <div className="mt-auto pt-6 border-t border-[#F3E5AB]/10 space-y-3">
+          <div className="mt-auto pt-6 border-t border-[#C5A367]/10 space-y-3">
              <button 
               onClick={() => setIsLightMode(!isLightMode)}
-              className={`flex items-center gap-3 w-full py-3 px-5 rounded-2xl border ${tm.borderMain} ${tm.textApp} font-black uppercase tracking-widest text-[10px]`}
+              className={`flex items-center gap-3 w-full py-3 px-5 rounded-2xl border ${tm.borderMain} bg-[#0B2421] text-[#C5A367] font-black uppercase tracking-widest text-[10px]`}
             >
               {isLightMode ? <Moon className="w-3.5 h-3.5" /> : <Sun className="w-3.5 h-3.5" />}
               <span>{isLightMode ? 'Dark Mode' : 'Light Mode'}</span>
             </button>
             <button 
               onClick={() => setLang(lang === 'en' ? 'am' : 'en')}
-              className={`flex items-center gap-3 w-full py-3 px-5 rounded-2xl border ${tm.borderMain} ${tm.textApp} font-black uppercase tracking-widest text-[10px]`}
+              className={`flex items-center gap-3 w-full py-3 px-5 rounded-2xl border ${tm.borderMain} bg-[#0B2421] text-[#C5A367] font-black uppercase tracking-widest text-[10px]`}
             >
               <Globe className="w-3.5 h-3.5" />
               <span>{lang === 'en' ? 'Switch to Amharic' : 'ወደ እንግሊዝኛ ቀይር'}</span>
@@ -546,140 +733,182 @@ export default function Home() {
       </div>
 
       {/* Sections - Offset by header height (Removed offset for Home Section) */}
-      <div className={`relative overflow-hidden ${activeSection === 'home' ? 'pt-0' : 'pt-[56px] md:pt-[70px]'} transition-all duration-500`}>
+      <div className={`relative overflow-hidden ${activeSection === 'home' ? 'pt-0' : 'pt-14 md:pt-17.5'} transition-all duration-500`}>
         
         {/* Home Section (Dynamic Hero & Lookbook) */}
         {activeSection === 'home' && (
           <div className="animate-fade-in">
             {isWebsiteLoading ? (
               <div className="h-[calc(100vh-56px)] md:h-[calc(100vh-70px)] flex flex-col items-center justify-center space-y-8">
-                <div className="w-20 h-20 border-2 border-[#F3E5AB]/20 border-t-[#F3E5AB] rounded-full animate-spin" />
-                <p className="text-[#F3E5AB] font-serif italic uppercase tracking-widest opacity-40">Loading Luxury Experience...</p>
+                <div className="w-20 h-20 border-2 border-[#C5A367]/20 border-t-[#C5A367] rounded-full animate-spin" />
+                <p className="text-[#C5A367] font-serif italic uppercase tracking-widest opacity-40">Loading Premium Experience...</p>
               </div>
             ) : (
               <>
-                {/* Hero Slider */}
-                <section className="relative h-[55vh] md:h-[70vh] overflow-hidden">
-                  {websiteContent.heroes.length > 0 ? (
-                    websiteContent.heroes.map((hero, idx) => (
-                      <div
-                        key={hero.id}
-                        className={`absolute inset-0 transition-all duration-1000 ease-in-out ${idx === currentHeroIndex ? 'opacity-100 scale-100 z-10' : 'opacity-0 scale-110 z-0'}`}
-                      >
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10" />
-                        <img src={hero.image} className="w-full h-full object-cover" alt={hero.title} />
-                        <div className="absolute inset-0 z-20 flex flex-col items-center justify-end text-center px-4 pb-16 md:pb-24">
-                          <h2 className="text-3xl md:text-6xl font-serif font-black mb-4 tracking-[0.15em] uppercase text-white drop-shadow-2xl max-w-5xl">
-                            {hero.title}
-                          </h2>
-                          <p className="max-w-2xl text-xs md:text-base text-[#F3E5AB] font-medium mb-0 drop-shadow-lg opacity-90 tracking-[0.2em] uppercase leading-relaxed [word-spacing:0.3em]">
-                            {hero.subtitle}
-                          </p>
-                        </div>
-                      </div>
-                    ))
-                  ) : (
-                    <div className="h-full flex flex-col items-center justify-end text-center px-4 pb-16 md:pb-24 relative">
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-10" />
-                      <div className="absolute inset-0 -z-10 overflow-hidden">
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400px] h-[400px] bg-[#F3E5AB]/10 rounded-full blur-[80px]" />
-                      </div>
-                      <h2 className="text-3xl md:text-6xl font-serif font-black mb-4 tracking-[0.15em] animate-fade-in-up text-white drop-shadow-2xl uppercase">
-                        Mas Coffee: <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#F3E5AB] to-[#FDF8F0]">Where Every Sip Tells a Story</span>
-                      </h2>
-                      <p className="max-w-2xl text-xs md:text-base text-[#F3E5AB] opacity-90 mb-0 animate-fade-in-up delay-200 tracking-[0.2em] uppercase leading-relaxed [word-spacing:0.3em]">
-                        Immerse yourself in the luxury of Ethiopian coffee culture. A sensory journey through the highlands, delivered with elegance.
-                      </p>
-                    </div>
-                  )}
-                  
-                  {/* Slider Dots */}
-                  {websiteContent.heroes.length > 1 && (
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2">
-                      {websiteContent.heroes.map((_, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => setCurrentHeroIndex(idx)}
-                          className={`w-2 h-2 rounded-full transition-all ${idx === currentHeroIndex ? 'bg-[#F3E5AB] w-8' : 'bg-white/30 hover:bg-white/50'}`}
-                        />
+                {/* Modern Showstopper Hero - Full Background Curve */}
+                <motion.section 
+                  style={{ scale: heroScale, opacity: heroOpacity }}
+                  className="relative h-[70vh] w-full bg-[#0B2421] overflow-hidden shadow-2xl rounded-b-[50px] md:rounded-b-[80px]"
+                >
+                  {directHeroes.length > 0 ? (
+                    <Swiper
+                      modules={[Autoplay, EffectFade]}
+                      effect="fade"
+                      fadeEffect={{ crossFade: true }}
+                      autoplay={{ delay: 6000, disableOnInteraction: false }}
+                      loop={true}
+                      speed={1500}
+                      className="w-full h-full"
+                    >
+                      {directHeroes.map((hero) => (
+                        <SwiperSlide key={hero.id} className="w-full h-full">
+                          <div className="absolute inset-0 w-full h-full">
+                            {/* Subtle Continuous Ken Burns Zoom per slide */}
+                            <motion.img 
+                              animate={{ scale: [1.02, 1.08, 1.02] }} 
+                              transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
+                              src={hero.image} 
+                              alt={hero.title} 
+                              className="w-full h-full object-cover" 
+                            />
+                            {/* Dark Gradient Overlay for typography readability */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#0B2421]/90 via-black/40 to-black/30 pointer-events-none" />
+                          </div>
+                          
+                          {/* Centered Typography */}
+                          <div className="absolute inset-0 flex flex-col items-center justify-center z-10 px-6 text-center">
+                            <motion.h2 
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 1, delay: 0.3 }}
+                              className="text-5xl md:text-7xl lg:text-[6rem] font-serif font-black text-[#C5A367] tracking-[0.05em] mb-4 drop-shadow-2xl text-balance"
+                            >
+                              {hero.title}
+                            </motion.h2>
+                            <motion.p 
+                              initial={{ opacity: 0, y: 20 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 1, delay: 0.5 }}
+                              className="text-lg md:text-2xl text-[#F5EFE0] font-sans font-light tracking-widest opacity-90 max-w-2xl text-balance drop-shadow-xl"
+                            >
+                              {hero.subtitle}
+                            </motion.p>
+                          </div>
+                        </SwiperSlide>
                       ))}
+                    </Swiper>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full space-y-8 relative z-10">
+                      <div className="absolute inset-0 w-full h-full bg-[#08120F]">
+                         <div className="absolute inset-0 bg-gradient-to-t from-[#0B2421] to-transparent pointer-events-none" />
+                      </div>
+                      <div className="relative flex flex-col items-center">
+                         <span className="text-6xl md:text-8xl opacity-50 mb-8 animate-pulse text-[#C5A367]">☕</span>
+                         <h2 className="text-4xl md:text-7xl font-serif font-black text-[#C5A367] tracking-[0.05em] mb-4 drop-shadow-2xl">
+                           Mas Coffee
+                         </h2>
+                         <p className="text-base md:text-xl text-[#F5EFE0] font-sans font-light tracking-widest opacity-80">
+                           Where Every Sip Tells a Story
+                         </p>
+                      </div>
                     </div>
                   )}
+                </motion.section>
+
+                {/* Signature Collection (Coffee & Cakes) */}
+                <section className="py-12 md:py-24 px-4 md:px-12 max-w-7xl mx-auto animate-fade-in-up">
+                  <div className="text-center mb-16">
+                    <h2 className="text-3xl md:text-5xl font-serif font-black text-[#C5A367] uppercase tracking-[0.3em] mb-4">Signature Collection</h2>
+                    <p className="text-[#C5A367]/60 text-xs md:text-sm uppercase tracking-widest font-medium">Explore our premium selection of coffee and artisanal cakes</p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24">
+                    {/* Coffee Section */}
+                    <div className="space-y-10">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-px bg-[#C5A367]/30" />
+                        <h3 className="text-xl md:text-2xl font-serif font-black text-[#C5A367] uppercase tracking-widest">Premium Coffee</h3>
+                      </div>
+                      <div className="space-y-8">
+                        {websiteContent.mainSiteProducts.filter(p => p.category === 'Coffee').length > 0 ? (
+                          websiteContent.mainSiteProducts.filter(p => p.category === 'Coffee').map(product => (
+                            <div key={product._id} className="flex gap-6 group">
+                              <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden border border-[#C5A367]/20 shrink-0 shadow-xl bg-black/20">
+                                <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                              </div>
+                              <div className="flex-1 border-b border-[#C5A367]/10 pb-4">
+                                <div className="flex justify-between items-start mb-2">
+                                  <h4 className="text-lg md:text-xl font-black text-[#F5EFE0] uppercase tracking-tight">{product.name}</h4>
+                                  <span className="text-[#C5A367] font-black">{product.price} ETB</span>
+                                </div>
+                                <p className="text-xs md:text-sm text-[#F5EFE0]/50 italic leading-relaxed line-clamp-2">{product.description}</p>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-[#F5EFE0]/20 italic text-sm">Our coffee collection is being curated...</p>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Cakes Section */}
+                    <div className="space-y-10">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-px bg-[#C5A367]/30" />
+                        <h3 className="text-xl md:text-2xl font-serif font-black text-[#C5A367] uppercase tracking-widest">Artisanal Cakes</h3>
+                      </div>
+                      <div className="space-y-8">
+                        {websiteContent.mainSiteProducts.filter(p => p.category === 'Cake').length > 0 ? (
+                          websiteContent.mainSiteProducts.filter(p => p.category === 'Cake').map(product => (
+                            <div key={product._id} className="flex gap-6 group">
+                              <div className="w-24 h-24 md:w-32 md:h-32 rounded-2xl overflow-hidden border border-[#C5A367]/20 shrink-0 shadow-xl bg-black/20">
+                                <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                              </div>
+                              <div className="flex-1 border-b border-[#C5A367]/10 pb-4">
+                                <div className="flex justify-between items-start mb-2">
+                                  <h4 className="text-lg md:text-xl font-black text-[#F5EFE0] uppercase tracking-tight">{product.name}</h4>
+                                  <span className="text-[#C5A367] font-black">{product.price} ETB</span>
+                                </div>
+                                <p className="text-xs md:text-sm text-[#F5EFE0]/50 italic leading-relaxed line-clamp-2">{product.description}</p>
+                              </div>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-[#F5EFE0]/20 italic text-sm">Our artisanal cakes are being prepared...</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
                 </section>
 
                 {/* Divider line */}
-                <div className="w-full h-px bg-[#F3E5AB]/20" />
+                <div className="w-full h-px bg-[#C5A367]/20" />
 
                 {/* Lookbook (Gallery) Section */}
                 <section className="py-6 md:py-10 px-4 md:px-12 max-w-7xl mx-auto space-y-6">
-                  {/* Branding text removed per user request */}
-
-                  {/* Lookbook Filters - Sticky Navigation */}
-              <div className={`sticky top-[56px] md:top-[70px] z-[800] ${tm.bgHeader} backdrop-blur-xl border-b ${tm.borderMain} py-2 md:py-4 mb-4`}>
-                <div className="max-w-7xl mx-auto px-4 md:px-12">
-                  <div className="flex items-center justify-start md:justify-center gap-3 md:gap-4 w-full overflow-x-auto no-scrollbar">
-                    <button
-                      onClick={() => setActiveLookbookCategory("All")}
-                      className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all border flex-shrink-0 ${
-                        activeLookbookCategory === "All" 
-                        ? 'bg-[#F3E5AB] text-[#08120F] shadow-[0_0_20px_rgba(243,229,171,0.4)] scale-105 border-[#F3E5AB]' 
-                        : 'border-[#F3E5AB]/20 opacity-40 hover:opacity-100 hover:border-[#F3E5AB]/40 hover:scale-105'
-                      }`}
-                    >
-                      All Gallery
-                    </button>
-                    {websiteContent.lookbookCategories.map(cat => (
-                      <button
-                        key={cat.id}
-                        onClick={() => setActiveLookbookCategory(cat.id)}
-                        className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all border flex-shrink-0 ${
-                          activeLookbookCategory === cat.id 
-                          ? 'bg-[#F3E5AB] text-[#08120F] shadow-[0_0_20px_rgba(243,229,171,0.4)] scale-105 border-[#F3E5AB]' 
-                          : 'border-[#F3E5AB]/20 opacity-40 hover:opacity-100 hover:border-[#F3E5AB]/40 hover:scale-105'
-                        }`}
-                      >
-                        {cat.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
                   {/* Lookbook List - Full Width & Vertical Scroll */}
                   <div className="w-full max-h-[85vh] overflow-y-auto no-scrollbar space-y-12 py-10 px-4 md:px-12">
                     {filteredLookbookItems.map((item, idx) => (
                       <div 
-                        key={item.id} 
-                        className="group relative w-full h-[50vh] md:h-[60vh] bg-[#08120F] rounded-[32px] md:rounded-[56px] border border-[#F3E5AB]/10 shadow-2xl overflow-hidden transition-all duration-500 hover:border-[#F3E5AB]/30"
+                        key={item._id} 
+                        className="group relative w-full h-[50vh] md:h-[60vh] bg-[#0B2421] rounded-4xl md:rounded-[56px] border border-[#C5A367]/10 shadow-2xl overflow-hidden transition-all duration-500 hover:border-[#C5A367]/30"
                       >
                         {/* Image Layer - 100% Width & Height Cover */}
                         <div className="absolute inset-0 z-0">
                           <img 
                             src={item.image} 
                             className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
-                            alt={item.name} 
+                            alt={item.title} 
                           />
                           {/* Dark Overlay for Text Readability */}
-                          <div className="absolute inset-0 bg-gradient-to-t from-[#08120F] via-[#08120F]/20 to-transparent opacity-80" />
+                          <div className="absolute inset-0 bg-linear-to-t from-[#0B2421] via-[#0B2421]/20 to-transparent opacity-80" />
                         </div>
 
                         {/* Card Body Content - Positioned at bottom */}
                         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 z-10 flex flex-col items-start text-left">
-                          <span className="text-[8px] md:text-[10px] font-black text-[#F3E5AB] uppercase tracking-[0.4em] mb-2 md:mb-3">
-                            {websiteContent.lookbookCategories.find(c => c.id === item.category)?.name || "Collection"}
-                          </span>
-                          <h3 className="text-xl md:text-4xl font-serif font-black text-[#F3E5AB] mb-2 md:mb-4 tracking-tight drop-shadow-2xl">
-                            {item.name}
+                          <h3 className="text-xl md:text-4xl font-serif font-black text-[#C5A367] mb-2 md:mb-4 tracking-tight drop-shadow-2xl">
+                            {item.title}
                           </h3>
-                          <div className="flex items-center gap-4">
-                            {item.price && (
-                              <span className="text-base md:text-2xl font-black text-[#F3E5AB] tracking-widest drop-shadow-lg">{item.price} ETB</span>
-                            )}
-                          </div>
-                          <p className="hidden lg:block text-xs md:text-sm text-[#F3E5AB]/80 mt-4 italic font-light max-w-2xl drop-shadow-lg leading-relaxed line-clamp-2">
-                            {item.description}
-                          </p>
                         </div>
                       </div>
                     ))}
@@ -699,7 +928,7 @@ export default function Home() {
         {activeSection === 'menu' && (
           <div className="animate-fade-in">
             {/* Section 2: Hero Header (Specials Carousel) */}
-            <div className={`section-2-hero-header lg:hidden my-[20px] mx-auto w-[70%] h-[25vh] flex items-center justify-center bg-cover bg-center overflow-visible ${isLightMode ? 'bg-[#FDF8F0]' : 'bg-[#08120F]'}`}>
+            <div className={`section-2-hero-header lg:hidden my-5 mx-auto w-[70%] h-[25vh] flex items-center justify-center bg-cover bg-center overflow-visible ${isLightMode ? 'bg-[#F5EFE0]' : 'bg-[#0B2421]'}`}>
               <div className="w-full h-full relative">
                 <Swiper
                   slidesPerView="auto"
@@ -711,17 +940,17 @@ export default function Home() {
                     disableOnInteraction: false,
                   }}
                   modules={[Autoplay]}
-                  className="w-full h-full !overflow-visible"
+                  className="w-full h-full overflow-visible!"
                 >
                   {specials.map((item) => (
                     <SwiperSlide key={item.id} className="h-full w-full">
                       <div 
-                        className={`w-full h-full rounded-2xl border ${isLightMode ? 'border-[#08120F]/10' : 'border-[#D4AF37]/30'} overflow-hidden relative group cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.6)] transition-all duration-500 hover:scale-105 hover:border-[#D4AF37]/60 hover:shadow-[0_20px_40px_rgba(0,0,0,0.8)]`}
+                        className={`w-full h-full rounded-2xl border ${isLightMode ? 'border-[#0B2421]/10' : 'border-[#C5A367]/30'} overflow-hidden relative group cursor-pointer shadow-[0_10px_30px_rgba(0,0,0,0.6)] transition-all duration-500 hover:scale-105 hover:border-[#C5A367]/60 hover:shadow-[0_20px_40px_rgba(0,0,0,0.8)]`}
                         onClick={() => setExpandedDesc(item.id)}
                       >
                         <img src={item.image} className="w-full h-full object-cover opacity-100 transition-transform duration-1000 group-hover:scale-105" alt="" />
                         <div className="absolute bottom-3 left-4 right-4 text-center">
-                          <h4 className={`text-xs md:text-sm font-serif font-black text-[#D4AF37] line-clamp-1 tracking-widest uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]`}>{lang === 'en' ? item.name_en : item.name_am}</h4>
+                          <h4 className={`text-xs md:text-sm font-serif font-black text-[#C5A367] line-clamp-1 tracking-widest uppercase drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]`}>{lang === 'en' ? item.name_en : item.name_am}</h4>
                         </div>
                       </div>
                     </SwiperSlide>
@@ -731,9 +960,9 @@ export default function Home() {
             </div>
             
             {/* Categories Row - Sticky to the very top */}
-            <div className={`sticky top-0 z-50 ${isLightMode ? 'bg-[#FDF8F0]/95' : 'bg-[#08120F]/95'} backdrop-blur-md my-[20px]`}>
+            <div className={`sticky top-0 z-50 ${isLightMode ? 'bg-[#F5EFE0]/95' : 'bg-[#0B2421]/95'} backdrop-blur-md my-5`}>
               {/* Top Frame Divider */}
-              <div className="w-full h-[1px] bg-[#D4AF37]/40" />
+              <div className="w-full h-px bg-[#C5A367]/40" />
 
               <div className="max-w-7xl mx-auto px-4 md:px-12 py-2 md:py-3">
                 <div className="flex justify-center items-center w-full overflow-x-auto no-scrollbar gap-2 sm:gap-4 md:gap-6">
@@ -745,7 +974,7 @@ export default function Home() {
                       <button
                         key={cat}
                         onClick={() => setActiveCategory(cat)}
-                        className={`px-6 sm:px-8 py-2 md:py-3 rounded-full text-[10px] sm:text-xs md:text-sm font-black uppercase tracking-wider transition-all flex-shrink-0 border shadow-md ${
+                        className={`px-6 sm:px-8 py-2 md:py-3 rounded-full text-[10px] sm:text-xs md:text-sm font-black uppercase tracking-wider transition-all shrink-0 border shadow-md ${
                           activeCategory === cat ? tm.catBgActive : tm.catBgInactive
                         } ${cat === 'All' ? 'mx-8 sm:mx-12 md:mx-20' : ''}`}
                       >
@@ -757,88 +986,88 @@ export default function Home() {
               </div>
               
               {/* Bottom Frame Divider */}
-              <div className="w-full h-[1px] bg-[#D4AF37]/40" />
+              <div className="w-full h-px bg-[#C5A367]/40" />
             </div>
 
             <main className="max-w-7xl mx-auto px-2 md:px-12 pt-0 md:pt-2 pb-32 min-h-[70vh]">
               <div className="space-y-4 md:space-y-8">
                 {/* Section 4 Heading - Centered and Separated */}
                 <div className="flex flex-col items-center mb-4 md:mb-6 pt-0">
-                  <h2 className="text-center text-lg md:text-2xl font-serif font-black text-[#D4AF37] uppercase tracking-[0.5em]">
+                  <h2 className="text-center text-lg md:text-2xl font-serif font-black text-[#C5A367] uppercase tracking-[0.5em]">
                     MENU
                   </h2>
-                  <div className="w-16 md:w-24 h-[1px] bg-[#D4AF37]/40 mt-1 md:mt-2 mb-1" />
+                  <div className="w-16 md:w-24 h-px bg-[#C5A367]/40 mt-1 md:mt-2 mb-1" />
                 </div>
                 
                 {filteredMenuData.map((section) => (
-                  <section key={section.category_en} className="scroll-mt-[100px] relative mt-12 md:mt-16 first:mt-0">
+                  <section key={section.category_en} className="scroll-mt-25 relative mt-12 md:mt-16 first:mt-0">
                     {/* Functional Header (Category Indicator) */}
                     <div className="flex items-center gap-2 md:gap-3 mb-6 md:mb-8 relative z-20 px-4 md:px-0">
-                      <CategoryIcon name={section.category_en} className="w-4 h-4 md:w-5 md:h-5 text-[#F3E5AB]/40" />
-                      <h4 className="text-xs md:text-sm font-bold text-[#F3E5AB]/40 uppercase tracking-[0.2em] whitespace-nowrap">
+                      <CategoryIcon name={section.category_en} className="w-4 h-4 md:w-5 md:h-5 text-[#C5A367]/40" />
+                      <h4 className="text-xs md:text-sm font-bold text-[#C5A367]/40 uppercase tracking-[0.2em] whitespace-nowrap">
                         {lang === 'en' ? section.category_en : section.category_am}
                       </h4>
-                      <div className="w-12 md:w-20 h-[1px] bg-[#D4AF37]/50" />
+                      <div className="w-12 md:w-20 h-px bg-[#C5A367]/50" />
                     </div>
 
                     <div className="grid grid-cols-1 gap-12 md:gap-20 relative z-10 pt-2 md:pt-4">
                       {section.items.map((item) => (
                         <article 
                           key={item.id} 
-                          className={`relative flex items-center w-full h-[180px] md:h-[280px] group mx-auto ${item.isSoldOut ? 'opacity-40 grayscale' : ''}`}
+                          className={`relative flex items-center w-full h-45 md:h-70 group mx-auto ${item.isSoldOut ? 'opacity-40 grayscale' : ''}`}
                         >
                           {/* Symmetrical Left Margin - Image */}
-                          <div className="absolute left-[6%] z-20 w-[42%] md:w-[32%] max-w-[180px] md:max-w-[300px] aspect-square flex items-center">
-                            <div className="w-full h-full rounded-full overflow-hidden border border-[#D4AF37]/60 shadow-[0_15px_40px_rgba(0,0,0,0.8)] bg-[#08120F]">
+                          <div className="absolute left-[6%] z-20 w-[42%] md:w-[32%] max-w-45 md:max-w-75 aspect-square flex items-center">
+                            <div className="w-full h-full rounded-full overflow-hidden border border-[#C5A367]/60 shadow-[0_15px_40px_rgba(0,0,0,0.8)] bg-[#0B2421]">
                               {item.image ? (
                                 <SafeImage src={item.image} alt={item.name_en} fill className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" />
                               ) : (
-                                <div className="w-full h-full flex items-center justify-center text-4xl md:text-6xl font-serif text-[#D4AF37] opacity-40">
+                                <div className="w-full h-full flex items-center justify-center text-4xl md:text-6xl font-serif text-[#C5A367] opacity-40">
                                   {item.name_en[0]}
                                 </div>
                               )}
                             </div>
                             {/* Badges */}
                             {(item.isSpecial || item.isNew) && (
-                              <div className="absolute top-[10%] right-[10%] bg-[#D4AF37] text-black px-3 py-0.5 rounded-full text-[8px] md:text-xs font-black uppercase tracking-widest shadow-lg z-20 animate-pulse">
+                              <div className="absolute top-[10%] right-[10%] bg-[#C5A367] text-[#0B2421] px-3 py-0.5 rounded-full text-[8px] md:text-xs font-black uppercase tracking-widest shadow-lg z-20 animate-pulse">
                                 {item.isSpecial ? 'Special' : 'New'}
                               </div>
                             )}
                           </div>
 
                           {/* Symmetrical Right Margin - Card */}
-                          <div className="absolute right-[6%] w-[70%] md:w-[68%] h-[85%] md:h-[90%] bg-[#0a2c26] rounded-[24px] md:rounded-[40px] flex flex-col items-center justify-center pl-[36%] sm:pl-[30%] md:pl-[20%] pr-4 md:pr-10 shadow-[0_15px_50px_rgba(0,0,0,0.6)] border border-[#D4AF37]/20 transition-all duration-500 hover:border-[#D4AF37]/40 hover:shadow-[0_20px_60px_rgba(0,0,0,0.8)] hover:scale-[1.01] text-center">
+                          <div className="absolute right-[6%] w-[70%] md:w-[68%] h-[85%] md:h-[90%] bg-[#0B2421]/95 backdrop-blur-md rounded-3xl md:rounded-[40px] flex flex-col items-center justify-center pl-[36%] sm:pl-[30%] md:pl-[20%] pr-4 md:pr-10 shadow-[0_15px_50px_rgba(0,0,0,0.6)] border border-[#C5A367]/30 transition-all duration-500 hover:border-[#C5A367]/60 hover:shadow-[0_20px_60px_rgba(0,0,0,0.8)] hover:scale-[1.01] text-center">
                             {/* Vibrant Visibility: Name -> Price -> Description */}
                             <div className="flex flex-col gap-1 md:gap-2 mb-2 items-center w-full min-w-0">
-                              <h4 className="text-lg sm:text-xl md:text-3xl font-black text-[#D4AF37] leading-tight line-clamp-1 uppercase tracking-widest px-2 w-full">
+                              <h4 className="text-lg sm:text-xl md:text-3xl font-black text-[#C5A367] leading-tight line-clamp-1 uppercase tracking-widest px-2 w-full">
                                 {lang === 'en' ? item.name_en : item.name_am}
                               </h4>
-                              <span className="text-[#D4AF37] font-black text-xl sm:text-2xl md:text-4xl leading-none">
+                              <span className="text-[#C5A367] font-black text-xl sm:text-2xl md:text-4xl leading-none">
                                 {item.price} ETB
                               </span>
                             </div>
 
                             {/* Crisp Elegant Description Card */}
-                            <p className="text-[10px] sm:text-xs md:text-base text-[#F3E5AB]/60 line-clamp-2 italic font-medium max-w-[90%] mb-2.5 md:mb-4 px-2 overflow-hidden w-full">
+                            <p className="text-[10px] sm:text-xs md:text-base text-[#F5EFE0]/70 line-clamp-2 italic font-medium max-w-[90%] mb-2.5 md:mb-4 px-2 overflow-hidden w-full">
                               {lang === 'en' ? item.description_en : item.description_am}
                             </p>
 
                             {/* LINE C: Inside Food Item Cards - Full Width Divider Above ADD Button */}
-                            <div className="w-[90%] md:w-[95%] h-[1px] bg-[#D4AF37]/20 mb-2.5 md:mb-4" />
+                            <div className="w-[90%] md:w-[95%] h-px bg-[#C5A367]/30 mb-2.5 md:mb-4" />
 
                             {/* Action Button (Gold Pill) */}
                             <div className="w-fit pb-1 relative z-10">
                               {cart[item.id] > 0 ? (
-                                <div className="flex items-center gap-3 md:gap-4 bg-[#D4AF37]/10 rounded-full px-3 py-1.5 md:py-2 border border-[#D4AF37]/20 backdrop-blur-sm">
-                                  <button onClick={() => removeFromCart(item.id)} className="w-8 h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center text-[#D4AF37] hover:bg-[#D4AF37] hover:text-black transition-all text-sm md:text-xl font-bold">-</button>
-                                  <span className="font-black text-sm md:text-2xl text-[#D4AF37] w-6 md:w-10 text-center">{cart[item.id]}</span>
-                                  <button onClick={(e) => addToCart(item.id, e)} className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-[#D4AF37] text-black flex items-center justify-center font-black hover:scale-105 transition-all text-sm md:text-xl">+</button>
+                                <div className="flex items-center gap-3 md:gap-4 bg-[#C5A367]/10 rounded-full px-3 py-1.5 md:py-2 border border-[#C5A367]/20 backdrop-blur-sm">
+                                  <button onClick={() => removeFromCart(item.id)} className="w-8 h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center text-[#C5A367] hover:bg-[#C5A367] hover:text-[#0B2421] transition-all text-sm md:text-xl font-bold">-</button>
+                                  <span className="font-black text-sm md:text-2xl text-[#C5A367] w-6 md:w-10 text-center">{cart[item.id]}</span>
+                                  <button onClick={(e) => addToCart(item.id, e)} className="w-8 h-8 md:w-12 md:h-12 rounded-full bg-[#C5A367] text-[#0B2421] flex items-center justify-center font-black hover:scale-105 transition-all text-sm md:text-xl">+</button>
                                 </div>
                               ) : (
                                 <button 
                                   disabled={item.isSoldOut}
                                   onClick={(e) => addToCart(item.id, e)}
-                                  className="bg-[#D4AF37] text-black px-6 md:px-14 py-2 md:py-4 rounded-full text-xs md:text-lg font-black uppercase tracking-[0.1em] hover:scale-105 active:scale-95 transition-all shadow-[0_5px_20px_rgba(212,175,55,0.3)] disabled:opacity-50"
+                                  className="bg-[#C5A367] text-[#0B2421] px-6 md:px-14 py-2 md:py-4 rounded-full text-xs md:text-lg font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-[0_5px_20px_rgba(197,163,103,0.3)] disabled:opacity-50"
                                 >
                                   + ADD
                                 </button>
@@ -855,32 +1084,42 @@ export default function Home() {
           </div>
         )}
 
-        {/* Our Story Section */}
-        {activeSection === 'story' && (
-          <section className="min-h-[calc(100vh-80px)] py-20 px-4 md:px-12 animate-fade-in">
+        {/* About Us Section */}
+        {activeSection === 'about' && (
+          <section className="min-h-[calc(100vh-80px)] py-20 px-6 md:px-12 animate-fade-in">
             <div className="max-w-5xl mx-auto">
               <div className="text-center mb-12 md:mb-20">
-                <h2 className="text-3xl md:text-6xl font-serif font-black uppercase tracking-widest mb-4">{t.ourStory}</h2>
-                <div className="w-16 md:w-24 h-1 bg-[#F3E5AB] mx-auto rounded-full" />
+                <h2 className="text-3xl md:text-6xl font-serif font-black uppercase tracking-widest mb-4">{t.aboutUs}</h2>
+                <div className="w-16 md:w-24 h-1 bg-[#C5A367] mx-auto rounded-full" />
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8 md:gap-12 items-center">
-                <div className="relative h-[400px] md:h-[500px] rounded-3xl overflow-hidden border border-[#F3E5AB]/20 shadow-2xl">
-                  <img src="/story-image.jpg" alt="Our Story" className="w-full h-full object-cover opacity-80" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#08120F] to-transparent" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-center">
+                <div className="relative mx-auto w-[80%] max-w-sm aspect-square rounded-full overflow-hidden border border-[#C5A367]/20 shadow-2xl bg-[#0B2421] md:mx-0 md:rounded-[40px] md:aspect-[4/5]">
+                  <img
+                    src={PUBLIC_STORY_IMAGE}
+                    alt=""
+                    className="w-full h-full object-cover opacity-80"
+                    onError={(e) => {
+                      const el = e.currentTarget;
+                      if (!el.src.endsWith(PUBLIC_LOGO)) el.src = PUBLIC_LOGO;
+                    }}
+                  />
+                  <div className="absolute inset-0 bg-linear-to-t from-[#0B2421] to-transparent pointer-events-none" aria-hidden />
                 </div>
-                <div className={`${tm.cardBg} p-8 md:p-12 rounded-3xl border border-[#F3E5AB]/10 backdrop-blur-2xl`}>
-                  <h3 className="text-2xl md:text-3xl font-serif font-black mb-6 text-[#F3E5AB]">{siteContent.storyTitle}</h3>
+
+                <div className={`${tm.cardBg} p-8 md:p-12 rounded-3xl border border-[#C5A367]/10 backdrop-blur-2xl`}>
+                  <h3 className="text-2xl md:text-3xl font-serif font-black mb-6 text-[#C5A367]">{siteContent.storyTitle}</h3>
                   <p className="text-base md:text-lg leading-relaxed opacity-70 whitespace-pre-wrap">
                     {siteContent.storyText}
                   </p>
-                  <div className="mt-8 md:mt-12 flex gap-8">
+
+                  <div className="mt-8 md:mt-12 flex flex-col gap-6 md:flex-row md:gap-8">
                     <div className="text-center">
-                      <div className="text-2xl md:text-3xl font-serif font-black text-[#F3E5AB]">25+</div>
+                      <div className="text-2xl md:text-3xl font-serif font-black text-[#C5A367]">25+</div>
                       <div className="text-[8px] md:text-[10px] uppercase tracking-widest opacity-40">Years of Heritage</div>
                     </div>
                     <div className="text-center">
-                      <div className="text-2xl md:text-3xl font-serif font-black text-[#F3E5AB]">100%</div>
+                      <div className="text-2xl md:text-3xl font-serif font-black text-[#C5A367]">100%</div>
                       <div className="text-[8px] md:text-[10px] uppercase tracking-widest opacity-40">Organic Beans</div>
                     </div>
                   </div>
@@ -890,29 +1129,33 @@ export default function Home() {
           </section>
         )}
 
-        {/* Specials Section */}
-        {activeSection === 'specials' && (
+        {/* Gallery (Lookbook) Section */}
+        {activeSection === 'gallery' && (
           <section className="min-h-[calc(100vh-80px)] py-20 px-4 md:px-12 animate-fade-in">
             <div className="max-w-7xl mx-auto">
               <div className="text-center mb-12 md:mb-20">
-                <h2 className="text-3xl md:text-6xl font-serif font-black uppercase tracking-widest mb-4">{t.specials}</h2>
-                <div className="w-16 md:w-24 h-1 bg-[#F3E5AB] mx-auto rounded-full" />
+                <h2 className="text-3xl md:text-6xl font-serif font-black uppercase tracking-widest mb-4">{t.gallery}</h2>
+                <div className="w-16 md:w-24 h-1 bg-[#C5A367] mx-auto rounded-full" />
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {specials.map((item) => (
-                  <div key={item.id} className={`${tm.cardBg} rounded-3xl border border-[#F3E5AB]/10 overflow-hidden group hover:border-[#F3E5AB]/40 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl`}>
-                    <div className="h-56 md:h-64 relative overflow-hidden">
-                      {item.image ? <img src={item.image} className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" /> : <div className="w-full h-full bg-[#F3E5AB]/5" />}
-                      <div className="absolute top-4 left-4 bg-[#F3E5AB] text-[#08120F] px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-widest">Chef's Choice</div>
+              <div className="w-full max-h-[85vh] overflow-y-auto no-scrollbar space-y-12 py-10">
+                {websiteContent.lookbookItems.map((item) => (
+                  <div 
+                    key={item._id} 
+                    className="group relative w-full h-[50vh] md:h-[60vh] bg-[#0B2421] rounded-4xl md:rounded-[56px] border border-[#C5A367]/10 shadow-2xl overflow-hidden transition-all duration-500 hover:border-[#C5A367]/30"
+                  >
+                    <div className="absolute inset-0 z-0">
+                      <img 
+                        src={item.image} 
+                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110" 
+                        alt={item.title} 
+                      />
+                      <div className="absolute inset-0 bg-linear-to-t from-[#0B2421] via-[#0B2421]/20 to-transparent opacity-80" />
                     </div>
-                    <div className="p-6 md:p-8">
-                      <h4 className="text-xl md:text-2xl font-serif font-black mb-2">{lang === 'en' ? item.name_en : item.name_am}</h4>
-                      <p className="text-xs md:text-sm opacity-60 mb-6 line-clamp-3">{lang === 'en' ? item.description_en : item.description_am}</p>
-                      <div className="flex items-center justify-between">
-                        <span className="text-lg md:text-xl font-black text-[#F3E5AB]">{item.price} ETB</span>
-                        <button onClick={(e) => addToCart(item.id, e)} className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#F3E5AB] text-[#08120F] flex items-center justify-center font-black hover:scale-110 transition-transform shadow-xl">+</button>
-                      </div>
+                    <div className="absolute bottom-0 left-0 right-0 p-6 md:p-12 z-10 flex flex-col items-start text-left">
+                      <h3 className="text-xl md:text-4xl font-serif font-black text-[#C5A367] mb-2 md:mb-4 tracking-tight drop-shadow-2xl">
+                        {item.title}
+                      </h3>
                     </div>
                   </div>
                 ))}
@@ -921,13 +1164,218 @@ export default function Home() {
           </section>
         )}
 
-        {/* Contact Section */}
+        {/* Events Section */}
+        {activeSection === 'events' && (
+          <section className="min-h-[calc(100vh-80px)] py-20 px-4 md:px-12 animate-fade-in">
+            <div className="max-w-7xl mx-auto">
+              <div className="text-center mb-12 md:mb-20">
+                <h2 className="text-3xl md:text-6xl font-serif font-black uppercase tracking-widest mb-4">{t.events}</h2>
+                <div className="w-16 md:w-24 h-1 bg-[#C5A367] mx-auto rounded-full" />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                {websiteContent.events.map((event) => (
+                  <div key={event._id} className="group bg-[#0B2421] border border-[#C5A367]/20 rounded-3xl overflow-hidden shadow-2xl transition-all hover:border-[#C5A367]/40">
+                    <div className="aspect-video relative overflow-hidden">
+                      <img src={event.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt={event.name} />
+                      <div className="absolute inset-0 bg-linear-to-t from-[#0B2421] via-transparent to-transparent opacity-60" />
+                      <div className="absolute bottom-6 left-6 right-6">
+                        <div className="flex items-center gap-2 mb-2">
+                          <Clock className="w-3.5 h-3.5 text-[#C5A367]" />
+                          <span className="text-[10px] font-black text-[#C5A367] uppercase tracking-widest">{event.date}</span>
+                        </div>
+                        <h3 className="text-2xl font-serif font-black text-white uppercase tracking-wider">{event.name}</h3>
+                      </div>
+                    </div>
+                    <div className="p-6">
+                      <p className="text-sm text-[#F5EFE0]/60 italic font-serif line-clamp-3 leading-relaxed">
+                        {event.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* Products Section */}
+        {activeSection === 'products' && (
+          <section className="min-h-[calc(100vh-80px)] py-20 px-4 md:px-12 animate-fade-in relative">
+            <div className="max-w-7xl mx-auto">
+              <div className="text-center mb-12 md:mb-20 animate-fade-in-up">
+                <h2 className="text-3xl md:text-6xl font-serif font-black uppercase tracking-widest mb-4">
+                  {activeSubCategory ? activeSubCategory : (activeProductCategory === 'coffee' ? t.coffee : t.cake)}
+                </h2>
+                <div className="w-16 md:w-24 h-1 bg-[#C5A367] mx-auto rounded-full" />
+                {activeSubCategory && (
+                  <button 
+                    onClick={() => setActiveSubCategory(null)}
+                    className="mt-6 text-xs md:text-sm font-black text-[#C5A367] uppercase tracking-widest hover:text-[#F3E5AB] transition-colors inline-flex items-center gap-2 border border-[#C5A367]/30 px-6 py-2.5 rounded-full hover:bg-[#C5A367]/10"
+                  >
+                    <ChevronLeft className="w-4 h-4" /> Back to Categories
+                  </button>
+                )}
+              </div>
+
+              {!activeSubCategory ? (
+                // Level 1: Sub-Categories Drill Down
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+                  {websiteContent.subCategories
+                    .filter(sc => sc.parentSection.toLowerCase() === activeProductCategory)
+                    .map(sc => (
+                      <div 
+                        key={sc._id} 
+                        onClick={() => setActiveSubCategory(sc.name)}
+                        className="group bg-[#0B2421] border border-[#C5A367]/20 rounded-3xl overflow-hidden shadow-xl hover:border-[#C5A367]/60 cursor-pointer transition-all hover:scale-[1.03] animate-fade-in-up mx-auto w-[85%] sm:w-full"
+                      >
+                        <div className="aspect-[4/3] w-full relative overflow-hidden bg-[#08120f]">
+                          <img src={sc.coverImage} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={sc.name} />
+                          <div className="absolute inset-0 bg-gradient-to-t from-[#0B2421] via-transparent to-transparent opacity-90" />
+                          <div className="absolute bottom-6 left-0 right-0 text-center px-4">
+                            <h3 className="text-xl md:text-2xl font-serif font-black text-[#C5A367] uppercase tracking-wider drop-shadow-2xl">{sc.name}</h3>
+                          </div>
+                        </div>
+                      </div>
+                  ))}
+                  {websiteContent.subCategories.filter(sc => sc.parentSection.toLowerCase() === activeProductCategory).length === 0 && (
+                    <div className="col-span-full py-12 text-center text-[#F5EFE0]/40 italic font-serif text-xl border border-[#C5A367]/10 rounded-2xl bg-[#0B2421]/50">
+                      Categories are being updated.
+                    </div>
+                  )}
+                </div>
+              ) : (
+                // Level 2: Products List
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 animate-fade-in-up">
+                  {websiteContent.mainSiteProducts
+                    .filter(p => p.category.toLowerCase() === activeProductCategory && p.subCategory === activeSubCategory)
+                    .map((product) => (
+                      <div 
+                        key={product._id} 
+                        onClick={() => setSelectedProductView(product)}
+                        className="flex flex-col md:flex-row gap-6 group cursor-pointer bg-[#0B2421] border border-[#C5A367]/10 p-5 md:p-6 rounded-3xl hover:border-[#C5A367]/40 transition-all hover:shadow-2xl w-[90%] md:w-full mx-auto hover:bg-[#C5A367]/5"
+                      >
+                        <div className="w-full aspect-square md:w-32 md:h-32 rounded-2xl overflow-hidden border border-[#C5A367]/20 shrink-0 shadow-xl bg-black/20">
+                          <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                        </div>
+                        <div className="flex-1 flex flex-col justify-center">
+                          <div className="flex flex-col md:flex-row justify-between items-start mb-3 md:mb-2 gap-2">
+                            <h4 className="text-xl md:text-xl font-serif font-black text-[#F5EFE0] uppercase tracking-tight">{product.name}</h4>
+                            <span className="text-[#C5A367] font-black shrink-0 text-lg md:text-base">{product.price} ETB</span>
+                          </div>
+                          <p className="text-sm text-[#F5EFE0]/50 italic leading-relaxed line-clamp-2 md:line-clamp-3 mb-3">{product.description}</p>
+                          {(product.sizeWeight || product.leadTime) && (
+                             <div className="flex flex-wrap gap-2 mt-auto">
+                                {product.sizeWeight && <span className="text-[10px] font-black text-[#0B2421] bg-[#C5A367] px-3 py-1 rounded-full uppercase">{product.sizeWeight}</span>}
+                                {product.leadTime && <span className="text-[10px] font-black text-[#C5A367] bg-[#C5A367]/10 border border-[#C5A367]/20 px-3 py-1 rounded-full uppercase truncate max-w-[200px]">{product.leadTime}</span>}
+                             </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    {websiteContent.mainSiteProducts.filter(p => p.category.toLowerCase() === activeProductCategory && p.subCategory === activeSubCategory).length === 0 && (
+                      <div className="col-span-full py-12 text-center text-[#F5EFE0]/40 italic font-serif text-xl border border-[#C5A367]/10 rounded-2xl bg-[#0B2421]/50">
+                        Products are coming soon...
+                      </div>
+                    )}
+                </div>
+              )}
+            </div>
+            
+            {/* Detailed Product Modal */}
+            {selectedProductView && (
+              <div className="fixed inset-0 z-[2500] flex items-center justify-center p-4 md:p-6">
+                <div className="absolute inset-0 bg-[#08120F]/95 backdrop-blur-md" onClick={() => setSelectedProductView(null)} />
+                <div className="relative z-10 w-full max-w-2xl bg-[#0B2421] border border-[#C5A367]/30 rounded-[32px] md:rounded-[40px] shadow-[0_20px_60px_rgba(0,0,0,0.8)] overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]">
+                  <button onClick={() => setSelectedProductView(null)} className="absolute top-4 right-4 md:top-6 md:right-6 z-20 w-10 h-10 bg-black/50 text-[#C5A367] rounded-full flex items-center justify-center backdrop-blur-md hover:scale-110 hover:bg-[#C5A367] hover:text-[#0B2421] transition-all border border-[#C5A367]/30 shadow-lg">
+                    <X className="w-5 h-5" />
+                  </button>
+                  
+                  <div className="overflow-y-auto w-full flex-1">
+                    <div className="w-[85%] md:w-[75%] mx-auto mt-8 md:mt-10 aspect-square rounded-3xl md:rounded-[32px] overflow-hidden border border-[#C5A367]/20 shadow-[0_15px_40px_rgba(0,0,0,0.6)] relative">
+                      <img src={selectedProductView.image} className="w-full h-full object-cover" alt={selectedProductView.name} />
+                      <div className="absolute inset-0 bg-gradient-to-t from-[#0B2421] to-transparent opacity-80" />
+                      <div className="absolute bottom-4 left-4 right-4 md:bottom-6 md:left-6 md:right-6 flex flex-col md:flex-row md:items-end justify-between gap-3">
+                        <span className="bg-[#0B2421]/90 backdrop-blur-md text-[#C5A367] border border-[#C5A367]/30 text-[10px] md:text-xs font-black uppercase tracking-widest px-4 py-2 rounded-full w-fit">
+                          {selectedProductView.subCategory}
+                        </span>
+                        <span className="text-3xl md:text-4xl font-black text-[#F5EFE0] drop-shadow-2xl">{selectedProductView.price} ETB</span>
+                      </div>
+                    </div>
+
+                    <div className="p-6 md:p-10 text-center md:text-left">
+                      <h3 className="text-2xl md:text-4xl font-serif font-black text-[#C5A367] uppercase tracking-[0.2em] mb-4 leading-tight">{selectedProductView.name}</h3>
+                      <p className="text-sm md:text-base text-[#F5EFE0]/70 italic leading-relaxed mb-8 md:mb-10 max-w-prose mx-auto md:mx-0">{selectedProductView.description}</p>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                        {selectedProductView.sizeWeight && (
+                          <div className="bg-[#C5A367]/5 border border-[#C5A367]/10 p-4 md:p-5 rounded-2xl flex items-center gap-4 hover:border-[#C5A367]/30 transition-colors">
+                            <div className="bg-[#C5A367]/10 p-2 rounded-xl shrink-0">
+                                <Package className="w-5 h-5 text-[#C5A367]" />
+                            </div>
+                            <div className="flex flex-col items-start">
+                              <span className="text-[10px] text-[#C5A367]/60 font-black uppercase tracking-widest mb-1 mt-0">Size/Weight</span>
+                              <span className="text-sm md:text-base font-bold text-[#F5EFE0] leading-none uppercase">{selectedProductView.sizeWeight}</span>
+                            </div>
+                          </div>
+                        )}
+                        {selectedProductView.leadTime && (
+                          <div className="bg-[#C5A367]/5 border border-[#C5A367]/10 p-4 md:p-5 rounded-2xl flex items-center gap-4 hover:border-[#C5A367]/30 transition-colors">
+                            <div className="bg-[#C5A367]/10 p-2 rounded-xl shrink-0">
+                                <Clock className="w-5 h-5 text-[#C5A367]" />
+                            </div>
+                            <div className="flex flex-col items-start">
+                              <span className="text-[10px] text-[#C5A367]/60 font-black uppercase tracking-widest mb-1 mt-0">Pre-Order Time</span>
+                              <span className="text-sm md:text-base font-bold text-[#F5EFE0] leading-none uppercase">{selectedProductView.leadTime}</span>
+                            </div>
+                          </div>
+                        )}
+                        {selectedProductView.shelfLife && (
+                          <div className="bg-[#C5A367]/5 border border-[#C5A367]/10 p-4 md:p-5 rounded-2xl flex items-center gap-4 hover:border-[#C5A367]/30 transition-colors">
+                            <div className="bg-[#C5A367]/10 p-2 rounded-xl shrink-0">
+                                <Calendar className="w-5 h-5 text-[#C5A367]" />
+                            </div>
+                            <div className="flex flex-col items-start">
+                              <span className="text-[10px] text-[#C5A367]/60 font-black uppercase tracking-widest mb-1 mt-0">Shelf Life</span>
+                              <span className="text-sm md:text-base font-bold text-[#F5EFE0] leading-none uppercase">{selectedProductView.shelfLife}</span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {selectedProductView.ingredients && (
+                        <div className="bg-[#08120f] border border-[#C5A367]/20 p-6 md:p-8 rounded-3xl mb-4 text-left">
+                          <h4 className="text-xs md:text-sm font-black text-[#C5A367] uppercase tracking-[0.2em] mb-4 flex items-center gap-3">
+                             <div className="w-4 md:w-6 h-px bg-[#C5A367]/40" /> Ingredients
+                          </h4>
+                          <p className="text-sm md:text-base text-[#F5EFE0]/60 italic leading-relaxed whitespace-pre-wrap">{selectedProductView.ingredients}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="p-6 md:p-8 border-t border-[#C5A367]/10 bg-[#08120F]/80 backdrop-blur-3xl shrink-0">
+                    <a 
+                      href={`tel:+251911234567`}
+                      className="w-full min-h-[64px] bg-[#C5A367] text-[#0B2421] rounded-2xl flex items-center justify-center gap-4 font-black uppercase tracking-[0.3em] text-sm shadow-[0_10px_30px_rgba(197,163,103,0.3)] hover:scale-[1.02] hover:bg-[#F3E5AB] transition-all"
+                    >
+                      <Phone className="w-5 h-5" />
+                      Click to Call
+                    </a>
+                  </div>
+                </div>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Contact Us Section */}
         {activeSection === 'contact' && (
           <section className="min-h-[calc(100vh-80px)] py-20 px-4 md:px-12 animate-fade-in">
             <div className="max-w-7xl mx-auto">
               <div className="text-center mb-12 md:mb-20">
-                <h2 className="text-3xl md:text-6xl font-serif font-black uppercase tracking-widest mb-4">{t.contact}</h2>
-                <div className="w-16 md:w-24 h-1 bg-[#F3E5AB] mx-auto rounded-full" />
+                <h2 className="text-3xl md:text-6xl font-serif font-black uppercase tracking-widest mb-4">{t.contactUs}</h2>
+                <div className="w-16 md:w-24 h-1 bg-[#C5A367] mx-auto rounded-full" />
               </div>
 
               <div className="grid lg:grid-cols-3 gap-8 md:gap-12">
@@ -938,9 +1386,9 @@ export default function Home() {
                     { icon: Clock, label: t.hours, val: t.hoursVal },
                     { icon: Phone, label: t.phone, val: siteContent.phone }
                   ].map((info, idx) => (
-                    <div key={idx} className={`${tm.cardBg} p-6 md:p-8 rounded-3xl border border-[#F3E5AB]/10 flex items-start gap-4 md:gap-6 transition-all duration-500 hover:border-[#F3E5AB]/30 hover:shadow-xl hover:scale-[1.02]`}>
-                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-[#F3E5AB]/10 flex items-center justify-center flex-shrink-0">
-                        <info.icon className="w-5 h-5 md:w-6 md:h-6 text-[#F3E5AB]" />
+                    <div key={idx} className={`${tm.cardBg} p-6 md:p-8 rounded-3xl border border-[#C5A367]/10 flex items-start gap-4 md:gap-6 transition-all duration-500 hover:border-[#C5A367]/30 hover:shadow-xl hover:scale-[1.02]`}>
+                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-2xl bg-[#C5A367]/10 flex items-center justify-center shrink-0">
+                        <info.icon className="w-5 h-5 md:w-6 md:h-6 text-[#C5A367]" />
                       </div>
                       <div>
                         <p className="text-[8px] md:text-[10px] font-black uppercase tracking-widest opacity-40 mb-1">{info.label}</p>
@@ -948,21 +1396,63 @@ export default function Home() {
                       </div>
                     </div>
                   ))}
-                  <button className="w-full bg-[#F3E5AB] text-[#08120F] py-5 md:py-6 rounded-3xl font-black uppercase tracking-[0.3em] text-xs md:text-sm shadow-2xl hover:scale-[1.02] transition-all">
-                    {t.callToOrder}
-                  </button>
+                  
+                  {/* Contact Form */}
+                  <div className={`${tm.cardBg} p-8 rounded-3xl border border-[#C5A367]/10 shadow-2xl mt-8`}>
+                    <h3 className="text-xl font-serif font-black text-[#C5A367] uppercase tracking-widest mb-6">Send a Message</h3>
+                    <form onSubmit={handleInquirySubmit} className="space-y-4">
+                      <input 
+                        required
+                        type="text" 
+                        placeholder="Your Name" 
+                        value={contactForm.name}
+                        onChange={(e) => setContactForm(p => ({ ...p, name: e.target.value }))}
+                        className="w-full bg-[#0B2421]/50 border border-[#C5A367]/20 rounded-xl px-4 py-3 text-sm focus:border-[#C5A367] outline-none transition-all"
+                      />
+                      <input 
+                        required
+                        type="email" 
+                        placeholder="Email Address" 
+                        value={contactForm.email}
+                        onChange={(e) => setContactForm(p => ({ ...p, email: e.target.value }))}
+                        className="w-full bg-[#0B2421]/50 border border-[#C5A367]/20 rounded-xl px-4 py-3 text-sm focus:border-[#C5A367] outline-none transition-all"
+                      />
+                      <textarea 
+                        required
+                        placeholder="Your Message" 
+                        rows={4}
+                        value={contactForm.message}
+                        onChange={(e) => setContactForm(p => ({ ...p, message: e.target.value }))}
+                        className="w-full bg-[#0B2421]/50 border border-[#C5A367]/20 rounded-xl px-4 py-3 text-sm focus:border-[#C5A367] outline-none transition-all resize-none"
+                      />
+                      <button 
+                        disabled={isSubmittingInquiry}
+                        className="w-full bg-[#C5A367] text-[#0B2421] py-4 rounded-xl font-black uppercase tracking-widest text-xs hover:bg-[#F3E5AB] transition-all disabled:opacity-50"
+                      >
+                        {isSubmittingInquiry ? "Sending..." : "Submit Inquiry"}
+                      </button>
+                    </form>
+                  </div>
                 </div>
 
-                {/* Google Maps Placeholder */}
-                <div className="lg:col-span-2 relative h-[400px] md:h-[600px] rounded-3xl overflow-hidden border border-[#F3E5AB]/20 bg-[#08120F] group">
-                  <div className="absolute inset-0 flex flex-col items-center justify-center opacity-20 transition-opacity group-hover:opacity-40">
-                    <MapPin className="w-16 h-16 md:w-24 md:h-24 mb-6" />
-                    <p className="font-serif text-xl md:text-2xl uppercase tracking-[0.5em]">Map View</p>
-                  </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#08120F] via-transparent to-transparent" />
-                  <div className="absolute bottom-8 left-8 md:bottom-12 md:left-12">
-                    <h4 className="text-2xl md:text-3xl font-serif font-black text-[#F3E5AB] mb-2">Mas Coffee Plaza</h4>
-                    <p className="text-sm md:text-base opacity-60">The heart of luxury coffee in Addis Ababa</p>
+                {/* Dynamic Map Integration */}
+                <div className="lg:col-span-2 relative h-100 md:h-175 rounded-[40px] overflow-hidden border border-[#C5A367]/20 bg-[#0B2421] group shadow-2xl">
+                  {/* Using OpenStreetMap iframe for dynamic functionality without API keys */}
+                  <iframe 
+                    width="100%" 
+                    height="100%" 
+                    frameBorder="0" 
+                    scrolling="no" 
+                    marginHeight={0} 
+                    marginWidth={0} 
+                    style={{ border: 0, filter: 'grayscale(1) invert(0.9) contrast(1.2) brightness(0.8)' }}
+                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${parseFloat(websiteContent.siteSettings.mapLongitude || "38.7460")-0.01}%2C${parseFloat(websiteContent.siteSettings.mapLatitude || "9.0227")-0.01}%2C${parseFloat(websiteContent.siteSettings.mapLongitude || "38.7460")+0.01}%2C${parseFloat(websiteContent.siteSettings.mapLatitude || "9.0227")+0.01}&layer=mapnik&marker=${websiteContent.siteSettings.mapLatitude || "9.0227"}%2C${websiteContent.siteSettings.mapLongitude || "38.7460"}`}
+                  ></iframe>
+
+                  <div className="absolute inset-0 bg-linear-to-t from-[#0B2421] via-[#0B2421]/20 to-transparent pointer-events-none" />
+                  <div className="absolute bottom-8 left-8 md:bottom-12 md:left-12 pointer-events-none">
+                    <h4 className="text-2xl md:text-4xl font-serif font-black text-[#C5A367] mb-2 uppercase tracking-tighter">Mas Coffee Plaza</h4>
+                    <p className="text-xs md:text-sm text-[#C5A367]/60 font-black uppercase tracking-[0.3em]">The heart of luxury coffee in Addis Ababa</p>
                   </div>
                 </div>
               </div>
@@ -976,13 +1466,13 @@ export default function Home() {
         const found = menuData.flatMap(s => s.items).find(i => i.id === expandedDesc);
         if (!found) return null;
         return (
-          <div className="fixed inset-0 z-[2000] flex items-center justify-center px-4" onClick={() => setExpandedDesc(null)}>
-            <div className="absolute inset-0 bg-[#08120F]/95 backdrop-blur-md" />
+          <div className="fixed inset-0 z-2000 flex items-center justify-center px-4" onClick={() => setExpandedDesc(null)}>
+          <div className="absolute inset-0 bg-[#0B2421]/95 backdrop-blur-md" />
             <div className={`${tm.modalBg} relative z-10 p-8 max-w-lg w-full rounded-3xl shadow-2xl animate-fade-in-up`} onClick={(e) => e.stopPropagation()}>
               <button onClick={() => setExpandedDesc(null)} className="absolute top-6 right-6 opacity-40 hover:opacity-100 hover:scale-110 transition-all">
                 <X className="w-6 h-6" />
               </button>
-              <h3 className="text-2xl md:text-3xl font-serif font-black mb-2 text-[#F3E5AB]">{lang === 'en' ? found.name_en : found.name_am}</h3>
+              <h3 className="text-2xl md:text-3xl font-serif font-black mb-2 text-[#C5A367]">{lang === 'en' ? found.name_en : found.name_am}</h3>
               <p className="text-lg md:text-xl font-black mb-6 md:mb-8 opacity-60">{found.price} ETB</p>
               <p className="text-base md:text-lg leading-relaxed italic opacity-80">{lang === 'en' ? found.description_en : found.description_am}</p>
             </div>
@@ -991,11 +1481,11 @@ export default function Home() {
       })()}
 
       {/* Floating Cart Button */}
-      <div className={`fixed bottom-8 left-0 right-0 px-6 z-[950] pointer-events-none transition-all duration-700 ${cartItemCount > 0 ? 'translate-y-0 opacity-100' : 'translate-y-24 opacity-0'}`}>
+      <div className={`fixed bottom-8 left-0 right-0 px-6 z-950 pointer-events-none transition-all duration-700 ${cartItemCount > 0 ? 'translate-y-0 opacity-100' : 'translate-y-24 opacity-0'}`}>
         <button 
           id="cart-btn"
           onClick={() => setShowModal("cart")}
-          className={`mx-auto bg-[#F3E5AB] text-[#08120F] px-8 md:px-12 py-4 md:py-5 rounded-full font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-xs md:text-sm shadow-2xl hover:scale-105 active:scale-95 flex items-center gap-4 pointer-events-auto relative overflow-hidden group ${cartPulse ? 'scale-110' : ''}`}
+          className={`mx-auto bg-[#C5A367] text-[#0B2421] px-8 md:px-12 py-4 md:py-5 rounded-full font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-xs md:text-sm shadow-2xl hover:scale-105 active:scale-95 flex items-center gap-4 pointer-events-auto relative overflow-hidden group ${cartPulse ? 'scale-110' : ''}`}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
           <span>View Order ({cartTotal.toFixed(0)} ETB)</span>
@@ -1003,15 +1493,15 @@ export default function Home() {
       </div>
 
       {/* Cart Modal (Bottom Slide-Up Drawer) */}
-      <div className={`fixed inset-0 z-[2000] lg:hidden transition-opacity duration-300 ${showModal === "cart" ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-        <div className="absolute inset-0 bg-[#08120F]/60 backdrop-blur-md" onClick={() => setShowModal(null)} />
+      <div className={`fixed inset-0 z-2000 lg:hidden transition-opacity duration-300 ${showModal === "cart" ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        <div className="absolute inset-0 bg-[#0B2421]/60 backdrop-blur-md" onClick={() => setShowModal(null)} />
         <div 
           className={`absolute bottom-0 left-0 w-full ${tm.modalBg} rounded-t-[40px] flex flex-col overflow-hidden transition-transform duration-500 ease-in-out ${showModal === "cart" ? 'translate-y-0' : 'translate-y-full'}`}
           style={{ maxHeight: '90vh', willChange: 'transform' }}
         >
           {/* Drag Handle / Close Header */}
-          <div className="pt-4 pb-2 flex flex-col items-center gap-4 border-b border-[#F3E5AB]/10">
-            <div className="w-12 h-1.5 bg-[#F3E5AB]/20 rounded-full" onClick={() => setShowModal(null)} />
+          <div className="pt-4 pb-2 flex flex-col items-center gap-4 border-b border-[#C5A367]/10">
+            <div className="w-12 h-1.5 bg-[#C5A367]/20 rounded-full" onClick={() => setShowModal(null)} />
             <div className="w-full px-8 flex items-center justify-between">
               <h2 className={`text-2xl font-serif font-black uppercase tracking-widest ${tm.textApp}`}>My Order</h2>
               <button onClick={() => setShowModal(null)} className={`w-10 h-10 rounded-full border ${tm.borderMain} flex items-center justify-center ${tm.textApp}`}>
@@ -1023,28 +1513,28 @@ export default function Home() {
           <div className="flex-1 overflow-y-auto p-6 space-y-6">
             {menuData.flatMap(c => c.items).filter(i => cart[i.id]).map(item => (
               <div key={item.id} className="flex items-center gap-4">
-                <div className="w-16 h-16 rounded-2xl overflow-hidden border border-[#F3E5AB]/10 flex-shrink-0">
+                <div className="w-16 h-16 rounded-2xl overflow-hidden border border-[#C5A367]/10 shrink-0">
                   <img src={item.image} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className={`text-lg font-serif font-black mb-1 truncate ${tm.textApp}`}>{lang === 'en' ? item.name_en : item.name_am}</h4>
-                  <p className="font-black text-[#F3E5AB] opacity-60 text-sm">{item.price} ETB</p>
+                  <p className="font-black text-[#C5A367] opacity-60 text-sm">{item.price} ETB</p>
                 </div>
-                <div className="flex items-center gap-2 bg-[#F3E5AB]/10 rounded-full px-2 py-1">
-                  <button onClick={() => removeFromCart(item.id)} className={`w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#F3E5AB] hover:text-[#08120F] transition-all hover:scale-110 ${tm.textApp}`}>-</button>
+                <div className="flex items-center gap-2 bg-[#C5A367]/10 rounded-full px-2 py-1">
+                  <button onClick={() => removeFromCart(item.id)} className={`w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#C5A367] hover:text-[#0B2421] transition-all hover:scale-110 ${tm.textApp}`}>-</button>
                   <span className={`font-black text-sm ${tm.textApp}`}>{cart[item.id]}</span>
-                  <button onClick={() => addToCart(item.id)} className="w-8 h-8 rounded-full bg-[#F3E5AB] text-[#08120F] flex items-center justify-center font-black transition-all hover:scale-110">+</button>
+                  <button onClick={() => addToCart(item.id)} className="w-8 h-8 rounded-full bg-[#C5A367] text-[#0B2421] flex items-center justify-center font-black transition-all hover:scale-110">+</button>
                 </div>
               </div>
             ))}
           </div>
 
-          <div className={`p-8 bg-[#08120F]/50 border-t ${tm.borderMain}`}>
+          <div className={`p-8 bg-[#0B2421]/50 border-t ${tm.borderMain}`}>
             <div className="flex justify-between items-center mb-6">
               <span className={`text-[10px] font-black uppercase tracking-[0.5em] opacity-40 ${tm.textApp}`}>Total Amount</span>
-              <span className="text-3xl font-serif font-black text-[#F3E5AB]">{cartTotal.toFixed(0)} ETB</span>
+              <span className="text-3xl font-serif font-black text-[#C5A367]">{cartTotal.toFixed(0)} ETB</span>
             </div>
-            <button className="w-full bg-[#F3E5AB] text-[#08120F] py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-xs shadow-2xl hover:scale-[1.02] transition-all">
+            <button className="w-full bg-[#C5A367] text-[#0B2421] py-5 rounded-2xl font-black uppercase tracking-[0.3em] text-xs shadow-2xl hover:scale-[1.02] transition-all">
               Complete Checkout
             </button>
           </div>
@@ -1053,11 +1543,11 @@ export default function Home() {
 
       {/* Desktop Cart Modal */}
       {showModal === "cart" && (
-        <div className="hidden lg:flex fixed inset-0 z-[2000] items-center justify-center px-4">
-          <div className="absolute inset-0 bg-[#08120F]/60 backdrop-blur-xl" onClick={() => setShowModal(null)} />
+        <div className="hidden lg:flex fixed inset-0 z-2000 items-center justify-center px-4">
+          <div className="absolute inset-0 bg-[#0B2421]/60 backdrop-blur-xl" onClick={() => setShowModal(null)} />
           <div className={`${tm.modalBg} relative z-10 w-full max-w-2xl max-h-[85vh] rounded-3xl flex flex-col overflow-hidden animate-fade-in-up`}>
-            <div className="p-8 border-b border-[#F3E5AB]/10 flex items-center justify-between">
-              <h2 className="text-3xl font-serif font-black uppercase tracking-widest text-[#F3E5AB]">My Order</h2>
+            <div className="p-8 border-b border-[#C5A367]/10 flex items-center justify-between">
+              <h2 className="text-3xl font-serif font-black uppercase tracking-widest text-[#C5A367]">My Order</h2>
               <button onClick={() => setShowModal(null)} className="opacity-40 hover:opacity-100">
                 <X className="w-6 h-6" />
               </button>
@@ -1066,28 +1556,28 @@ export default function Home() {
             <div className="flex-1 overflow-y-auto p-8 space-y-8">
               {menuData.flatMap(c => c.items).filter(i => cart[i.id]).map(item => (
                 <div key={item.id} className="flex items-center gap-6">
-                  <div className="w-20 h-20 rounded-2xl overflow-hidden border border-[#F3E5AB]/10 flex-shrink-0">
+                  <div className="w-20 h-20 rounded-2xl overflow-hidden border border-[#C5A367]/10 shrink-0">
                     <img src={item.image} className="w-full h-full object-cover" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="text-xl font-serif font-black mb-1 truncate">{lang === 'en' ? item.name_en : item.name_am}</h4>
-                    <p className="font-black text-[#F3E5AB] opacity-60">{item.price} ETB</p>
+                    <p className="font-black text-[#C5A367] opacity-60">{item.price} ETB</p>
                   </div>
-                  <div className="flex items-center gap-4 bg-[#F3E5AB]/10 rounded-full px-4 py-2">
-                    <button onClick={() => removeFromCart(item.id)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#F3E5AB] hover:text-[#08120F] transition-all hover:scale-110">-</button>
+                  <div className="flex items-center gap-4 bg-[#C5A367]/10 rounded-full px-4 py-2">
+                    <button onClick={() => removeFromCart(item.id)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-[#C5A367] hover:text-[#0B2421] transition-all hover:scale-110">-</button>
                     <span className="font-black">{cart[item.id]}</span>
-                    <button onClick={() => addToCart(item.id)} className="w-8 h-8 rounded-full bg-[#F3E5AB] text-[#08120F] flex items-center justify-center font-black transition-all hover:scale-110">+</button>
+                    <button onClick={() => addToCart(item.id)} className="w-8 h-8 rounded-full bg-[#C5A367] text-[#0B2421] flex items-center justify-center font-black transition-all hover:scale-110">+</button>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="p-8 bg-[#08120F]/50 border-t border-[#F3E5AB]/10">
+            <div className="p-8 bg-[#0B2421]/50 border-t border-[#C5A367]/10">
               <div className="flex justify-between items-center mb-8">
                 <span className="text-[10px] font-black uppercase tracking-[0.5em] opacity-40">Total Amount</span>
-                <span className="text-4xl font-serif font-black text-[#F3E5AB]">{cartTotal.toFixed(0)} ETB</span>
+                <span className="text-4xl font-serif font-black text-[#C5A367]">{cartTotal.toFixed(0)} ETB</span>
               </div>
-              <button className="w-full bg-[#F3E5AB] text-[#08120F] py-6 rounded-3xl font-black uppercase tracking-[0.3em] text-sm shadow-2xl hover:scale-[1.02] transition-all">
+              <button className="w-full bg-[#C5A367] text-[#0B2421] py-6 rounded-3xl font-black uppercase tracking-[0.3em] text-sm shadow-2xl hover:scale-[1.02] transition-all">
                 Complete Checkout
               </button>
             </div>
@@ -1098,22 +1588,43 @@ export default function Home() {
       {/* Footer */}
       <footer className={`py-20 border-t ${tm.borderMain} relative overflow-hidden transition-colors duration-500`}>
         <div className="max-w-7xl mx-auto px-4 text-center relative z-10">
-          <h2 className="text-2xl md:text-3xl font-serif font-black mb-8 tracking-widest uppercase text-[#F3E5AB]">Mas Coffee</h2>
-          <div className="flex justify-center gap-8 md:gap-12 text-[8px] md:text-[10px] font-black uppercase tracking-[0.4em] opacity-40">
-            <button onClick={() => setActiveSection('story')} className="hover:opacity-100 hover:scale-110 transition-all">Our Story</button>
-            <button onClick={() => setActiveSection('contact')} className="hover:opacity-100 hover:scale-110 transition-all">Contact</button>
-            <button onClick={() => setActiveSection('menu')} className="hover:opacity-100 hover:scale-110 transition-all">Menu</button>
-          </div>
-          <p className="mt-12 text-[8px] md:text-[10px] opacity-20 tracking-widest uppercase">© 2026 MAS COFFEE - THE MIDNIGHT FOREST EXPERIENCE</p>
+          <h2 className="text-2xl md:text-3xl font-serif font-black mb-8 tracking-widest uppercase text-[#C5A367]">Mas Coffee</h2>
+          <nav className="flex flex-wrap justify-center gap-x-5 gap-y-3 max-w-4xl mx-auto text-[8px] md:text-[10px] font-black uppercase tracking-[0.25em] md:tracking-[0.35em] text-[#F5EFE0]/70">
+            {[
+              { id: "home" as const, label: t.home },
+              { id: "menu" as const, label: t.menu },
+              { id: "products" as const, label: t.products },
+              { id: "about" as const, label: t.aboutUs },
+              { id: "gallery" as const, label: t.gallery },
+              { id: "events" as const, label: t.events },
+              { id: "contact" as const, label: t.contactUs },
+            ].map((link) => (
+              <button
+                key={link.id}
+                type="button"
+                onClick={() => {
+                  setActiveSection(link.id);
+                  setActiveProductCategory(null);
+                  if (typeof window !== "undefined") {
+                    window.history.replaceState(null, "", `#${link.id}`);
+                  }
+                }}
+                className="hover:text-[#C5A367] hover:opacity-100 transition-all px-1 py-1"
+              >
+                {link.label}
+              </button>
+            ))}
+          </nav>
+          <p className="mt-12 text-[8px] md:text-[10px] opacity-20 tracking-widest uppercase">© 2026 MAS COFFEE - PREMIUM COFFEE EXPERIENCE</p>
         </div>
       </footer >
 
       {/* Fly-to-Cart Animation Layer */}
-      <div className="fixed inset-0 pointer-events-none z-[3000] overflow-hidden">
+      <div className="fixed inset-0 pointer-events-none z-3000 overflow-hidden">
         {flyingItems.map((f) => (
           <div
             key={f.id}
-            className="absolute rounded-full overflow-hidden border-2 border-[#F3E5AB] bg-[#08120F] shadow-2xl"
+            className="absolute rounded-full overflow-hidden border-2 border-[#C5A367] bg-[#0B2421] shadow-2xl"
             style={{
               width: '80px', height: '80px', left: 0, top: 0,
               willChange: 'transform, opacity',
